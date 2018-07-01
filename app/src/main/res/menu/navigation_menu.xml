@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single"
+        android:id="@+id/group2">
+    <item android:id="@+id/nav_account"
+        android:title="Account"
+        android:icon="@drawable/user_silhouette"/>
+    <item android:id="@+id/nav_parkinglistings"
+        android:title="Parking Listings"
+        android:icon="@drawable/listings"/>
+    <item android:id="@+id/nav_parkinghistory"
+        android:title="Parking History"
+        android:icon="@drawable/history"/>
+    <item android:id="@+id/nav_mycarlist"
+        android:title="My Car List"
+        android:icon="@drawable/baseline_view_list_black_18dp"/>
+    <item android:id="@+id/nav_logout"
+        android:title="Log Out"
+        android:icon="@drawable/logout"/>
+    </group>
+
+</menu>

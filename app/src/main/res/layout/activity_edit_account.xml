@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditAccount"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:elevation="15dp">
+
+
+        <ImageButton
+            android:id="@+id/EditAccount_btnBack"
+            android:layout_width="37dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            android:background="#0000"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/arrow_back_white" />
+
+        <TextView
+            android:id="@+id/EditAccount_txtActivityTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="62dp"
+            android:text="Edit Account"
+            android:textColor="@color/colorWhite"
+            android:textSize="23sp"
+            app:fontFamily="@font/righteous"></TextView>
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/EditAccount_imgUser"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginStart="12dp"
+                    android:src="@drawable/sign_up_picture" />
+
+                <TextView
+                    android:id="@+id/EditAccount_txtNameHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="20dp"
+                    android:text="Name"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:fontFamily="@font/open_sans" />
+
+                <TextView
+                    android:id="@+id/EditAccount_txtEmailHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/EditAccount_txtNameHeader"
+                    android:layout_below="@+id/EditAccount_txtNameHeader"
+                    android:text="Email"
+                    android:textSize="14sp"
+                    app:fontFamily="@font/open_sans"
+                    app:layout_constraintBottom_toBottomOf="@id/EditAccount_txtNameHeader" />
+
+                <ImageButton
+                    android:id="@+id/EditAccount_btnChangeImg"
+                    android:layout_width="34dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="90dp"
+                    android:background="@null"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/camera" />
+
+
+            </RelativeLayout>
+
+
+            <TextView
+                android:id="@+id/EditAccount_txtFirstName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="15dp"
+                android:text="First Name:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <EditText
+                android:id="@+id/EditAccount_edtFName"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:background="@drawable/input_border"
+                android:ems="10"
+                android:hint="First Name"
+                android:inputType="textPersonName"
+                android:padding="10dp"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+            <TextView
+                android:id="@+id/EditAccount_txtLastName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:text="Last Name:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <EditText
+                android:id="@+id/EditAccount_edtLName"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:background="@drawable/input_border"
+                android:ems="10"
+                android:hint="Last Name"
+                android:inputType="textPersonName"
+                android:padding="10dp"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+            <TextView
+                android:id="@+id/EditAccount_txtEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:text="Email Address:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <EditText
+                android:id="@+id/EditAccount_edtEmail"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:background="@drawable/input_border"
+                android:ems="10"
+                android:hint="Email Address"
+                android:inputType="textPersonName"
+                android:padding="10dp"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+            <TextView
+                android:id="@+id/EditAccount_txtCNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:text="Contact Number:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <EditText
+                android:id="@+id/EditAccount_edtCNumber"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:background="@drawable/input_border"
+                android:ems="10"
+                android:hint="Contact Number"
+                android:inputType="textPersonName"
+                android:padding="10dp"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+            <TextView
+                android:id="@+id/EditAccount_txtPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:text="Password:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <EditText
+                android:id="@+id/EditAccount_edtPassword"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:background="@drawable/input_border"
+                android:ems="10"
+                android:hint="Password"
+                android:inputType="textPersonName"
+                android:padding="10dp"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+            <TextView
+                android:id="@+id/EditAccount_txtSavedCars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:text="Saved Cars:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <TextView
+                android:id="@+id/EditAccount_NumSavedCars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:text="#"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <Button
+                android:id="@+id/EditAccount_btnApply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/sigin_btnborder"
+                android:text="Apply"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</LinearLayout>

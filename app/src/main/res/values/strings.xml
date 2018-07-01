@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Park King</string>
+    <string name="getBrandsURL">http://10.0.2.2/ParkKingRaw/api/getCarBrands.php</string>
+    <string name="getModelURL">http://10.0.2.2/ParkKingRaw/api/getCarModel.php</string>
+    <string name="signUpURL">http://10.0.2.2/ParkKingRaw/api/signUp.php</string>
+    <string name="signInURL">http://10.0.2.2/ParkKingRaw/api/signIn.php</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+</resources>
