@@ -1,0 +1,45 @@
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/strings.xml	(date 1530680713000)
++++ app/src/main/res/values/strings.xml	(date 1530680552000)
+@@ -1,6 +1,6 @@
+ <resources>
+     <string name="app_name">Park King</string>
+-    <string name="getBrandsURL">http://10.0.2.2/ParkKingRaw/api/getCarBrands.php</string>
++    <string name="getBrandsURL">http://10.0.2.2/Park-King-Initial/public/api/brands</string>
+     <string name="getModelURL">http://10.0.2.2/ParkKingRaw/api/getCarModel.php</string>
+     <string name="signUpURL">http://10.0.2.2/ParkKingRaw/api/signUp.php</string>
+     <string name="signInURL">http://10.0.2.2/ParkKingRaw/api/signIn.php</string>
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/misc.xml	(date 1530680713000)
++++ .idea/misc.xml	(date 1530658829000)
+@@ -25,7 +25,7 @@
+       </value>
+     </option>
+   </component>
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="1.8" project-jdk-type="JavaSDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/build/classes" />
+   </component>
+   <component name="ProjectType">
+diff --git .idea/caches/build_file_checksums.ser .idea/caches/build_file_checksums.ser
+index 9f0a117a4c48f7b6498988436852413e8736191b..6b59fdf37736524f5cc1aa2b5da2d6859ed55cde
+GIT binary patch
+literal 536
+zc${1FmVvdnh`~NNKUXg?FQq6yGexf?KR>5fFEb@IQ7^qHF(oHeub?PDD>b=9F91S2
+zm1gFoxMk*~I%lLNXBU^|7Q2L-Ts|(GuF1r}<i#MFTj`TnT;dMa8(f)}9Fm!vT3nKt
+zTj0aMpIeEdv4nx&Co8cmQNOe#Ge_SyvB0{bfPsNAB`N;>2B5nHL2`N^IX#cW;tZfX
+zEBmd3hs6>uGBYr_F>vMNC#JY1CYR(Fc`|U8WE7<qXXNLkR20}dFn|D0IR}sw0Ae<v
+zMa8KlC7F5Y#ZX_B7BMhIJFWRF{)3Gp<N*@{1IT6ufq6F*_SxKL&(lrNlL~h_ys(6U
+zCkf<Vn65&GItDh7!h-Te#nBd1UKM;zlxYeLH7#Kf$jMJm%mIZ~L26M+W@<4)@x~Pm
+zm(9*<BtBYawCL|P`Op#ub^Xxd)S_bj#Js%xq(ptF@%o4m$1vlHY|qVphD|Il8#rgY
+z`QcPo!XSu8_2*vZReKVa`fajJGk$hfAPMNa#DW5S?0#9I`YYbK&;RYEP_H+^(LLT3
+E0Mwkj;{X5v
+
