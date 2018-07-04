@@ -57,7 +57,7 @@ public class SignUp extends AppCompatActivity{
     private int BTN_CARIMG, BTN_USERIMG;
     private String FIlENAME;
 
-    private EditText FirstName, LastName, Email, CNumber, PlateNumber, Password;
+    private EditText FirstName, LastName, MiddleName, Email, CNumber, PlateNumber, Password;
     private AutoCompleteTextView CarBrandsSpinner, CarModelSpinner;
     private ArrayList <String> Brands, Models;
     private ArrayList <Integer> BrandID, ModelID;
@@ -91,12 +91,13 @@ public class SignUp extends AppCompatActivity{
         imgUser = (ImageView) findViewById(R.id.SignUp_imgUser);
         imgCar = (ImageView) findViewById(R.id.SignUp_imgVehicle);
         Password = (EditText) findViewById(R.id.SignUp_edtPassword);
+        MiddleName = (EditText) findViewById(R.id.SignUp_edtMName);
 
         getBrands();
     }
 
     private void getModels(final int brand_id){
-        StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.getModelURL), new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.getModelURL) + "brand/" + brand_id + "/models", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -132,7 +133,6 @@ public class SignUp extends AppCompatActivity{
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("brand_id", Integer.toString(brand_id));
                 return parameters;
             }
         };
@@ -255,19 +255,19 @@ public class SignUp extends AppCompatActivity{
             public void onResponse(String response) {
                 try {
                     JSONObject object = new JSONObject(response);
-                    JSONArray result = object.getJSONArray("data");
-                    String status = object.getString("status");
+                    String status = object.getString("message");
+                    Toast.makeText(getApplicationContext(), status, Toast.LENGTH_SHORT).show();
+                    /*String status = object.getString("status");
                     String VehiclOwnerID = object.getString("vehicle_owner_id");
                     String UserID = object.getString("user_id");
-
                     if(status.equals("success")){
                         String filename = "profile_picture_"+VehiclOwnerID;
                         /*Intent gotoHome = new Intent(getApplicationContext(), Home.class);
-                        startActivity(gotoHome);*/
+                        startActivity(gotoHome);
                     }else{
                         Toast.makeText(getApplicationContext(),
                                 "Sign Up failed.", Toast.LENGTH_SHORT).show();
-                    }
+                    }*/
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -286,6 +286,7 @@ public class SignUp extends AppCompatActivity{
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("last_name", FirstName.getText().toString());
                 parameters.put("first_name", LastName.getText().toString());
+                parameters.put("middle_name", MiddleName.getText().toString());
                 parameters.put("contact_number", CNumber.getText().toString());
                 parameters.put("email", Email.getText().toString());
                 parameters.put("password", Password.getText().toString());
