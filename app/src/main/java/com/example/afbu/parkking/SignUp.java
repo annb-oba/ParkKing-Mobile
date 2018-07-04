@@ -5,7 +5,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -13,6 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,6 +35,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +45,7 @@ import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +65,7 @@ public class SignUp extends AppCompatActivity{
     private ImageButton btnUserImg;
     private ImageView imgUser, imgCar;
     private Integer ChosenModelId;
+    private Bitmap bitmap;
 
 
     @Override
@@ -132,12 +140,12 @@ public class SignUp extends AppCompatActivity{
     }
 
     private void getBrands() {
-        StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.getBrandsURL), new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.getBrandsURL), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONObject object = new JSONObject(response);
-                    JSONArray result = object.getJSONArray("infos");
+                    JSONArray result = object.getJSONArray("data");
                     Brands = new ArrayList<>();
                     BrandID = new ArrayList<>();
                     for (int i = 0; i < result.length(); i++) {
@@ -240,22 +248,26 @@ public class SignUp extends AppCompatActivity{
     }
 
     private void signUp(){
+
+
         StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.signUpURL), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONObject object = new JSONObject(response);
+                    JSONArray result = object.getJSONArray("data");
                     String status = object.getString("status");
+                    String VehiclOwnerID = object.getString("vehicle_owner_id");
+                    String UserID = object.getString("user_id");
 
                     if(status.equals("success")){
-                        Intent gotoHome = new Intent(getApplicationContext(), Home.class);
-                        startActivity(gotoHome);
+                        String filename = "profile_picture_"+VehiclOwnerID;
+                        /*Intent gotoHome = new Intent(getApplicationContext(), Home.class);
+                        startActivity(gotoHome);*/
                     }else{
                         Toast.makeText(getApplicationContext(),
                                 "Sign Up failed.", Toast.LENGTH_SHORT).show();
                     }
-
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -279,12 +291,12 @@ public class SignUp extends AppCompatActivity{
                 parameters.put("password", Password.getText().toString());
                 parameters.put("model_id", Integer.toString(ChosenModelId));
                 parameters.put("plate_number", PlateNumber.getText().toString());
+                parameters.put("profile_picture", imageToString(bitmap));
 
                 return parameters;
             }
         };
         AppController.getInstance().addToRequestQueue(strRequest);
-
     }
 
     @Override
@@ -295,11 +307,20 @@ public class SignUp extends AppCompatActivity{
             if(requestCode == RESULT_LOAD_IMAGE){
                 if(BTN_CARIMG == 1){
                     Uri selectedImage = data.getData();
-                    imgCar.setImageURI(selectedImage);
+                    try{
+                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
+                        imgCar.setImageBitmap(bitmap);
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
                 }else if(BTN_USERIMG == 1){
                     Uri selectedImage = data.getData();
-                    imgUser.setImageURI(selectedImage);
-                }
+                    try{
+                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
+                        imgCar.setImageBitmap(bitmap);
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }                }
             }else if(requestCode == REQUEST_CAMERA){
                 if(BTN_CARIMG == 1){
                     Bundle bundle = data.getExtras();
@@ -312,5 +333,12 @@ public class SignUp extends AppCompatActivity{
                 }
             }
         }
+    }
+
+    private String imageToString(Bitmap bitmap){
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        byte[] imgByte = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(imgByte,  Base64.DEFAULT);
     }
 }
