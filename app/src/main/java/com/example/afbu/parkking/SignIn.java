@@ -71,10 +71,10 @@ public class SignIn extends AppCompatActivity {
                         String vehicleowner_id = object.getString("vehicle_owner_id");
                         editor = SharedPreference.edit();
                         editor.putString(PROFID_KEY, vehicleowner_id);
-                        if(editor.commit()){
+                        editor.commit();
                             Intent gotoHome = new Intent(getApplicationContext(), Home.class);
                             startActivity(gotoHome);
-                        }
+
                     }else if(status.equals("failed")){
                         String message = object.getString("message");
                         Toast.makeText(getApplicationContext(),

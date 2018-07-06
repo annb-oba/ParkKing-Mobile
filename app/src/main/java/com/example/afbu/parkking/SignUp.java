@@ -83,10 +83,6 @@ public class SignUp extends AppCompatActivity{
         setContentView(R.layout.activity_sign_up);
 
         SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-        if(SharedPreference.contains(PROFID_KEY)){
-            Intent myIntent = new Intent(SignUp.this, Home.class);
-            startActivity(myIntent);
-        }
 
         initResources();
         initEvents();

@@ -1,7 +1,9 @@
 package com.example.afbu.parkking;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -12,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -34,11 +37,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class EditAccount extends AppCompatActivity {
+
+    SharedPreferences SharedPreference;
+    SharedPreferences.Editor editor;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
 
     private static String TAG = EditAccount.class.getSimpleName();
 
@@ -48,12 +58,23 @@ public class EditAccount extends AppCompatActivity {
     private Button btnUpdateAccount;
     private ImageView imgUser;
     private EditText FirstName, MiddleName, LastName, Email, ContactNumber;
-    private String ProfilePicture;
+    private String ProfilePicture, ProfileID;
+    private String Firstname, Lastname, Middlename, Contactnumber, Emailtxt;
+    private Bitmap usrimg;
+    Uri selectedImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_account);
+
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(!SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(EditAccount.this, StartUp.class);
+            startActivity(myIntent);
+        }else{
+            ProfileID = SharedPreference.getString(PROFID_KEY, "");
+        }
 
         initResources();
         initEvents();
@@ -62,7 +83,6 @@ public class EditAccount extends AppCompatActivity {
 
     private void initEvents() {
         getVehicleOwnerInformation();
-        getProfilePicture();
 
         btnBackHome.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,19 +150,34 @@ public class EditAccount extends AppCompatActivity {
 
         if(resultCode == RESULT_OK && data != null){
             if(requestCode == RESULT_LOAD_IMAGE){
-                Uri selectedImage = data.getData();
+                selectedImage = data.getData();
+                try{
+                    usrimg = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
+                    imgUser.setImageBitmap(usrimg);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
                 imgUser.setImageURI(selectedImage);
+                ProfilePicture = imageToString(usrimg);
             }else if(requestCode == REQUEST_CAMERA){
                 Bundle bundle = data.getExtras();
-                final Bitmap bmp = (Bitmap) bundle.get("data");
-                imgUser.setImageBitmap(bmp);
+                usrimg = (Bitmap) bundle.get("data");
+                imgUser.setImageBitmap(usrimg);
+                ProfilePicture = imageToString(usrimg);
             }
         }
     }
 
+    private String imageToString(Bitmap bitmap){
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        byte[] imgByte = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(imgByte,  Base64.DEFAULT);
+    }
+
     private void getVehicleOwnerInformation(){
         StringRequest strRequest = new StringRequest(Request.Method.GET,
-                getString(R.string.apiURL) + "get_profile_details/" + "id",                     //change id
+                getString(R.string.apiURL) + "get_profile_details/" + ProfileID,                     //change id //done
                 new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -150,16 +185,20 @@ public class EditAccount extends AppCompatActivity {
                     JSONObject object = new JSONObject(response);
                     String status = object.getString("status");
                     if(status.equals("success")){
-                        JSONArray result = object.getJSONArray("data");
-                        for (int i = 0; i < result.length(); i++) {
-                            JSONObject c = result.getJSONObject(i);
-                            FirstName.setText(c.getString("first_name"));
-                            LastName.setText(c.getString("last_name"));
-                            MiddleName.setText(c.getString("middle_name"));
-                            ContactNumber.setText(c.getString("contact_number"));
-                            Email.setText(c.getString("email"));
-                            ProfilePicture = c.getString("profile_picture");
-                        }
+                        JSONObject userinfo = new JSONObject(object.getString("data"));
+                             Firstname = userinfo.getString("first_name");
+                            Lastname = userinfo.getString("last_name");
+                            Middlename = userinfo.getString("middle_name");
+                            Contactnumber = userinfo.getString("contact_number");
+                            Emailtxt = object.getString("email");
+                            ProfilePicture = userinfo.getString("profile_picture");
+                            FirstName.setText(Firstname);
+                            LastName.setText(Lastname);
+                            MiddleName.setText(Middlename);
+                            ContactNumber.setText(Contactnumber);
+                            Email.setText(Emailtxt);
+
+                        getProfilePicture();
                     }else if(status.equals("failed")){
                         String message = object.getString("message");
                         Toast.makeText(getApplicationContext(),
@@ -208,7 +247,7 @@ public class EditAccount extends AppCompatActivity {
     }
 
     private void updateAccount(){
-        StringRequest strRequest = new StringRequest(Request.Method.POST,
+        StringRequest strRequest = new StringRequest(Request.Method.PUT,
                 getString(R.string.apiURL) + "edit_account", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -240,12 +279,13 @@ public class EditAccount extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("vehicle_owner_id", "id");                                           //change ID
+                parameters.put("vehicle_owner_id", ProfileID);                                           //change ID //done
                 parameters.put("last_name", FirstName.getText().toString().trim());
                 parameters.put("first_name", LastName.getText().toString().trim());
                 parameters.put("middle_name", MiddleName.getText().toString().trim());
                 parameters.put("contact_number", ContactNumber.getText().toString().trim());
                 parameters.put("email", Email.getText().toString().trim());
+                parameters.put("profile_picture", ProfilePicture);
                 return parameters;
             }
         };

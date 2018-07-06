@@ -1,6 +1,8 @@
 package com.example.afbu.parkking;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -16,6 +18,12 @@ import android.widget.ImageButton;
 
 public class Home extends AppCompatActivity {
 
+    SharedPreferences SharedPreference;
+    SharedPreferences.Editor editor;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+    private String ProfileID;
+
     private DrawerLayout mDrawer;
     private ImageButton btnMenu, btnNotif;
     private NavigationView NavMenu;
@@ -24,6 +32,14 @@ public class Home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(!SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(Home.this, StartUp.class);
+            startActivity(myIntent);
+        }else{
+            ProfileID = SharedPreference.getString(PROFID_KEY, "");
+        }
 
         initResources();
         initEvents();
@@ -78,6 +94,11 @@ public class Home extends AppCompatActivity {
                         break;
 
                     case R.id.nav_logout:
+                        editor = SharedPreference.edit();
+                        editor.clear();
+                        editor.commit();
+                        Intent gotoStartUp = new Intent(getApplicationContext(), StartUp.class);
+                        startActivity(gotoStartUp);
                         break;
                     case R.id.nav_change_password:
                         Intent gotoChangPassword = new Intent(getApplicationContext(), ChangePassword.class);

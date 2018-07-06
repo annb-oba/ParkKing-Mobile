@@ -1,6 +1,8 @@
 package com.example.afbu.parkking;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -24,6 +26,12 @@ import java.util.Map;
 
 public class ChangePassword extends AppCompatActivity {
 
+    SharedPreferences SharedPreference;
+    SharedPreferences.Editor editor;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+    private String ProfileID;
+
     private static String TAG = ChangePassword.class.getSimpleName();
 
     private Button btnChangePassword;
@@ -34,6 +42,14 @@ public class ChangePassword extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
+
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(!SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(ChangePassword.this, StartUp.class);
+            startActivity(myIntent);
+        }else{
+            ProfileID = SharedPreference.getString(PROFID_KEY, "");
+        }
 
         initResources();
         initEvents();
@@ -67,7 +83,7 @@ public class ChangePassword extends AppCompatActivity {
     }
 
     private void changePassword(){
-        StringRequest strRequest = new StringRequest(Request.Method.PUT, getString(R.string.apiURL) + "changepassword", new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.PUT, getString(R.string.apiURL) + "change_password", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -77,6 +93,8 @@ public class ChangePassword extends AppCompatActivity {
                         String message = object.getString("message");
                         Toast.makeText(getApplicationContext(),
                                 message, Toast.LENGTH_SHORT).show();
+                        Intent gotoHome = new Intent(ChangePassword.this, Home.class);
+                        startActivity(gotoHome);
                     }else if(status.equals("failed")){
                         String message = object.getString("message");
                         Toast.makeText(getApplicationContext(),
@@ -98,7 +116,7 @@ public class ChangePassword extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("vehicle_owner_id", "vehicle owner id");                             //change this
+                parameters.put("vehicle_owner_id", ProfileID);                             //change this //done
                 parameters.put("current_password", CurrentPassword.getText().toString());
                 parameters.put("new_password", NewPassword.getText().toString());
                 parameters.put("confirm_new_password", ConfirmNewPassword.getText().toString());
