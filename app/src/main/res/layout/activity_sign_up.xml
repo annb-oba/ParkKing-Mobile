@@ -117,7 +117,7 @@
                 android:background="@drawable/input_border"
                 android:ems="10"
                 android:hint="Email Address"
-                android:inputType="textPersonName"
+                android:inputType="textEmailAddress"
                 android:padding="10dp"
                 android:textStyle="bold"
                 android:typeface="sans" />

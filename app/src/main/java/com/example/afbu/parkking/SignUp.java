@@ -1,13 +1,16 @@
 package com.example.afbu.parkking;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -52,6 +55,11 @@ import java.util.Map;
 
 public class SignUp extends AppCompatActivity{
 
+    SharedPreferences SharedPreference;
+    SharedPreferences.Editor editor;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+
     private static final int RESULT_LOAD_IMAGE = 0, REQUEST_CAMERA = 1;
     private static String TAG = SignUp.class.getSimpleName();
     private int BTN_CARIMG, BTN_USERIMG;
@@ -65,13 +73,20 @@ public class SignUp extends AppCompatActivity{
     private ImageButton btnUserImg;
     private ImageView imgUser, imgCar;
     private Integer ChosenModelId;
-    private Bitmap bitmap;
+    private Bitmap carimg, usrimg;
+    Uri selectedImage;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(SignUp.this, Home.class);
+            startActivity(myIntent);
+        }
 
         initResources();
         initEvents();
@@ -93,11 +108,13 @@ public class SignUp extends AppCompatActivity{
         Password = (EditText) findViewById(R.id.SignUp_edtPassword);
         MiddleName = (EditText) findViewById(R.id.SignUp_edtMName);
 
+        imgCar.setVisibility(View.GONE);
+
         getBrands();
     }
 
     private void getModels(final int brand_id){
-        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.getModelURL) + "brand/" + brand_id + "/models", new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.apiURL) + "brand/" + brand_id + "/models", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -140,7 +157,7 @@ public class SignUp extends AppCompatActivity{
     }
 
     private void getBrands() {
-        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.getBrandsURL), new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.apiURL) + "brands", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -184,7 +201,15 @@ public class SignUp extends AppCompatActivity{
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signUp();
+                if(FirstName.getText().toString() != null && LastName.getText().toString() != null
+                        &&MiddleName.getText().toString() != null &&CNumber.getText().toString() != null
+                        &&PlateNumber.getText().toString() != null &&Email.getText().toString() != null
+                        &&Password.getText().toString() != null && imageToString(usrimg) != null
+                        && imageToString(carimg) != null){
+                    signUp();
+                }else{
+                    Toast.makeText(getApplicationContext(), "Please complete all fields.",Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -248,15 +273,27 @@ public class SignUp extends AppCompatActivity{
     }
 
     private void signUp(){
-
-
-        StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.signUpURL), new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.apiURL) + "signupvehicleowner", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONObject object = new JSONObject(response);
-                    String status = object.getString("message");
-                    Toast.makeText(getApplicationContext(), status, Toast.LENGTH_SHORT).show();
+                    String status = object.getString("status");
+                    if(status.equals("success")){
+                        String vehicleowner_id = object.getString("vehicle_owner_id");
+                        editor = SharedPreference.edit();
+                        editor.putString(PROFID_KEY, vehicleowner_id);
+                        if(editor.commit()){
+                            Intent gotoHome = new Intent(getApplicationContext(), Home.class);
+                            startActivity(gotoHome);
+                        }
+                    }else if(status.equals("failed")){
+                        String message = object.getString("message");
+                        Toast.makeText(getApplicationContext(),
+                                message, Toast.LENGTH_SHORT).show();
+                    }
+
+                    //Toast.makeText(getApplicationContext(), status, Toast.LENGTH_SHORT).show();
                     /*String status = object.getString("status");
                     String VehiclOwnerID = object.getString("vehicle_owner_id");
                     String UserID = object.getString("user_id");
@@ -284,15 +321,16 @@ public class SignUp extends AppCompatActivity{
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("last_name", FirstName.getText().toString());
-                parameters.put("first_name", LastName.getText().toString());
-                parameters.put("middle_name", MiddleName.getText().toString());
-                parameters.put("contact_number", CNumber.getText().toString());
-                parameters.put("email", Email.getText().toString());
-                parameters.put("password", Password.getText().toString());
-                parameters.put("model_id", Integer.toString(ChosenModelId));
-                parameters.put("plate_number", PlateNumber.getText().toString());
-                parameters.put("profile_picture", imageToString(bitmap));
+                parameters.put("last_name", FirstName.getText().toString().trim());
+                parameters.put("first_name", LastName.getText().toString().trim());
+                parameters.put("middle_name", MiddleName.getText().toString().trim());
+                parameters.put("contact_number", CNumber.getText().toString().trim());
+                parameters.put("email", Email.getText().toString().trim());
+                parameters.put("password", Password.getText().toString().trim());
+                parameters.put("model_id", Integer.toString(ChosenModelId).trim());
+                parameters.put("plate_number", PlateNumber.getText().toString().trim());
+                parameters.put("profile_picture", imageToString(usrimg));
+                parameters.put("vehicle_picture", imageToString(carimg));
 
                 return parameters;
             }
@@ -307,30 +345,40 @@ public class SignUp extends AppCompatActivity{
         if(resultCode == RESULT_OK && data != null){
             if(requestCode == RESULT_LOAD_IMAGE){
                 if(BTN_CARIMG == 1){
-                    Uri selectedImage = data.getData();
+                    selectedImage = data.getData();
                     try{
-                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
-                        imgCar.setImageBitmap(bitmap);
+                        carimg = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
+                        imgCar.setVisibility(View.VISIBLE);
+                        imgCar.setImageBitmap(carimg);
                     }catch (IOException e){
                         e.printStackTrace();
                     }
                 }else if(BTN_USERIMG == 1){
-                    Uri selectedImage = data.getData();
+                    selectedImage = data.getData();
                     try{
-                        bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
-                        imgCar.setImageBitmap(bitmap);
+                        usrimg = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
+                        imgUser.setImageBitmap(usrimg);
                     }catch (IOException e){
                         e.printStackTrace();
                     }                }
             }else if(requestCode == REQUEST_CAMERA){
                 if(BTN_CARIMG == 1){
                     Bundle bundle = data.getExtras();
-                    final Bitmap bmp = (Bitmap) bundle.get("data");
-                    imgCar.setImageBitmap(bmp);
+                    carimg = (Bitmap) bundle.get("data");
+                    imgCar.setVisibility(View.VISIBLE);
+                    imgCar.setImageBitmap(carimg);
+
+                    /*Bundle bundle = data.getExtras();
+                    carimg = (Bitmap) bundle.get("data");
+                    String PATH = Environment.getExternalStorageDirectory().getPath()+ carimg;
+                    File f = new File(PATH);
+                    selectedImage= Uri.fromFile(f);
+                    cropImage();*/
+
                 }else if(BTN_USERIMG == 1){
                     Bundle bundle = data.getExtras();
-                    final Bitmap bmp = (Bitmap) bundle.get("data");
-                    imgUser.setImageBitmap(bmp);
+                    usrimg = (Bitmap) bundle.get("data");
+                    imgUser.setImageBitmap(usrimg);
                 }
             }
         }
@@ -342,4 +390,24 @@ public class SignUp extends AppCompatActivity{
         byte[] imgByte = byteArrayOutputStream.toByteArray();
         return Base64.encodeToString(imgByte,  Base64.DEFAULT);
     }
+
+   /* private void cropImage(){
+        try{
+            Intent CropImage = new Intent("com.android.camera.action.CROP");
+            CropImage.setDataAndType(selectedImage, "image/*");
+            CropImage.putExtra("crop", true);
+            CropImage.putExtra("OutputX",180);
+            CropImage.putExtra("OutputY",180);
+            CropImage.putExtra("AspectX",3);
+            CropImage.putExtra("AspectY",4);
+            CropImage.putExtra("ScaleUpIfneeded",true);
+            CropImage.putExtra("return-data",true );
+
+            startActivityForResult(CropImage, 1);
+
+        }catch(ActivityNotFoundException e){
+
+        }
+
+    }*/
 }

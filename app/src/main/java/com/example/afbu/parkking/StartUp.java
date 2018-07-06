@@ -1,6 +1,8 @@
 package com.example.afbu.parkking;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +11,11 @@ import android.widget.TextView;
 
 public class StartUp extends AppCompatActivity {
 
+    SharedPreferences SharedPreference;
+    SharedPreferences.Editor editor;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+
     Button signIn, signUp;
     TextView contAsGuest;
 
@@ -16,6 +23,12 @@ public class StartUp extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_up);
+
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(StartUp.this, Home.class);
+            startActivity(myIntent);
+        }
 
         initResources();
         initEvents();

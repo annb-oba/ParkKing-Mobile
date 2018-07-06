@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Park King</string>
-    <string name="getBrandsURL">http://10.0.2.2/ParkKing/public/api/brands</string>
-    <string name="getModelURL">http://10.0.2.2/ParkKing/public/api/</string>
-    <string name="signUpURL">http://10.0.2.2/ParkKing/public/api/signupvehicleowner</string>
-    <string name="signInURL">http://10.0.2.2/ParkKingRaw/api/signIn.php</string>
+    <string name="apiURL">http://10.0.2.2/ParkKing/public/api/</string>
+    <string name="profilepictureURL">http://10.0.2.2/ParkKing/public/uploads/vehicle_owners_profile_picture/</string>
+    <string name="vehiclepictureURL">http://10.0.2.2/ParkKing/public/uploads/vehicle_owners_cars/</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
 </resources>
