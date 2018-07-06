@@ -5,6 +5,9 @@
     <item android:id="@+id/nav_account"
         android:title="Account"
         android:icon="@drawable/user_silhouette"/>
+    <item android:id="@+id/nav_change_password"
+        android:title="Password"
+        android:icon="@drawable/password" />
     <item android:id="@+id/nav_parkinglistings"
         android:title="Parking Listings"
         android:icon="@drawable/listings"/>

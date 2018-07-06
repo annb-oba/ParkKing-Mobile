@@ -56,7 +56,8 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:gravity="center">
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/EditAccount_imgUser"
@@ -66,29 +67,6 @@
                     android:layout_alignParentTop="true"
                     android:layout_marginStart="12dp"
                     android:src="@drawable/sign_up_picture" />
-
-                <TextView
-                    android:id="@+id/EditAccount_txtNameHeader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="20dp"
-                    android:text="Name"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:fontFamily="@font/open_sans" />
-
-                <TextView
-                    android:id="@+id/EditAccount_txtEmailHeader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignStart="@+id/EditAccount_txtNameHeader"
-                    android:layout_below="@+id/EditAccount_txtNameHeader"
-                    android:text="Email"
-                    android:textSize="14sp"
-                    app:fontFamily="@font/open_sans"
-                    app:layout_constraintBottom_toBottomOf="@id/EditAccount_txtNameHeader" />
 
                 <ImageButton
                     android:id="@+id/EditAccount_btnChangeImg"
@@ -113,7 +91,7 @@
                 android:layout_marginLeft="25dp"
                 android:layout_marginTop="15dp"
                 android:text="First Name:"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 app:fontFamily="@font/open_sans" />
 
@@ -133,6 +111,33 @@
                 android:typeface="sans" />
 
             <TextView
+                android:id="@+id/EditAccount_txtMiddleName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="15dp"
+                android:text="Middle Name:"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <EditText
+                android:id="@+id/EditAccount_edtMName"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:background="@drawable/input_border"
+                android:ems="10"
+                android:hint="Middle Name"
+                android:inputType="textPersonName"
+                android:padding="10dp"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+            <TextView
                 android:id="@+id/EditAccount_txtLastName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -140,7 +145,7 @@
                 android:layout_marginLeft="25dp"
                 android:layout_marginTop="10dp"
                 android:text="Last Name:"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 app:fontFamily="@font/open_sans" />
 
@@ -167,7 +172,7 @@
                 android:layout_marginLeft="25dp"
                 android:layout_marginTop="10dp"
                 android:text="Email Address:"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 app:fontFamily="@font/open_sans" />
 
@@ -194,7 +199,7 @@
                 android:layout_marginLeft="25dp"
                 android:layout_marginTop="10dp"
                 android:text="Contact Number:"
-                android:textSize="16sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 app:fontFamily="@font/open_sans" />
 
@@ -211,55 +216,6 @@
                 android:padding="10dp"
                 android:textStyle="bold"
                 android:typeface="sans" />
-
-            <TextView
-                android:id="@+id/EditAccount_txtPassword"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="25dp"
-                android:layout_marginTop="10dp"
-                android:text="Password:"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:fontFamily="@font/open_sans" />
-
-            <EditText
-                android:id="@+id/EditAccount_edtPassword"
-                android:layout_width="match_parent"
-                android:layout_height="49dp"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center"
-                android:background="@drawable/input_border"
-                android:ems="10"
-                android:hint="Password"
-                android:inputType="textPersonName"
-                android:padding="10dp"
-                android:textStyle="bold"
-                android:typeface="sans" />
-
-            <TextView
-                android:id="@+id/EditAccount_txtSavedCars"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="25dp"
-                android:layout_marginTop="10dp"
-                android:text="Saved Cars:"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:fontFamily="@font/open_sans" />
-
-            <TextView
-                android:id="@+id/EditAccount_NumSavedCars"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="25dp"
-                android:text="#"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:fontFamily="@font/open_sans" />
 
             <Button
                 android:id="@+id/EditAccount_btnApply"

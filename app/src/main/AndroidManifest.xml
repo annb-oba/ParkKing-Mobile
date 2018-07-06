@@ -38,7 +38,8 @@
         <activity android:name=".EditAccount" />
         <activity android:name=".Notifications" />
         <activity android:name=".CarList" />
-        <activity android:name=".AddCar"></activity>
+        <activity android:name=".AddCar" />
+        <activity android:name=".ChangePassword"></activity>
     </application>
 
 </manifest>

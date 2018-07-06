@@ -79,6 +79,10 @@ public class Home extends AppCompatActivity {
 
                     case R.id.nav_logout:
                         break;
+                    case R.id.nav_change_password:
+                        Intent gotoChangPassword = new Intent(getApplicationContext(), ChangePassword.class);
+                        startActivity(gotoChangPassword);
+                        break;
                 }
                 return false;
             }
