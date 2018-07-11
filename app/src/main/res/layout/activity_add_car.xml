@@ -1,37 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddCar">
+    tools:context=".EditAccount">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="58dp"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:background="@color/colorPrimary"
-        android:elevation="15dp">
+        android:background="@color/colorPrimary">
 
 
         <ImageButton
-            android:id="@+id/AddCar_btnBack"
+            android:id="@+id/EditAccount_btnBack"
             android:layout_width="37dp"
             android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:layout_marginLeft="11dp"
             android:layout_marginStart="11dp"
             android:background="#0000"
+
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/arrow_back_white" />
 
         <TextView
-            android:id="@+id/AddCar_txtActivityTitle"
+            android:id="@+id/EditAccount_txtActivityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="62dp"
             android:layout_marginStart="62dp"
             android:text="Add Car"
             android:textColor="@color/colorWhite"
@@ -40,4 +45,191 @@
 
     </RelativeLayout>
 
-</LinearLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:paddingTop="58dp">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/AddCar_txtPlateNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="15dp"
+                android:text="Plate Number:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="49dp"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/AddCar_edtPlateNumber1"
+                    android:layout_width="157dp"
+                    android:layout_height="49dp"
+                    android:background="@drawable/input_border"
+                    android:ems="10"
+                    android:hint="ABC"
+                    android:inputType="textCapCharacters"
+                    android:maxLength="4"
+                    android:padding="10dp"
+                    android:textStyle="bold"
+                    android:typeface="sans" />
+
+                <TextView
+                    android:id="@+id/AddCar_txtDash"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginHorizontal="5dp"
+                    android:gravity="center_vertical|right"
+                    android:text="-"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    app:fontFamily="@font/open_sans" />
+
+                <EditText
+                    android:id="@+id/AddCar_edtPlateNumber2"
+                    android:layout_width="157dp"
+                    android:layout_height="49dp"
+                    android:background="@drawable/input_border"
+                    android:ems="10"
+                    android:hint="1234"
+                    android:inputType="number"
+                    android:maxLength="4"
+                    android:padding="10dp"
+                    android:textStyle="bold"
+                    android:typeface="sans" />
+
+            </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/AddCar_txtVehicleBrand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:text="Vehicle Brand:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+            <AutoCompleteTextView
+                android:id="@+id/AddCar_spinnerVBrand"
+                android:layout_width="335dp"
+                android:layout_height="49dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:background="@drawable/input_border"
+                android:ems="10"
+                android:hint="Vehicle Brand"
+                android:inputType="textPersonName"
+                android:padding="10dp"
+                android:text="1"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+
+            <TextView
+                android:id="@+id/AddCar_txtVehicleModel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:text="Vehicle Model:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+            <AutoCompleteTextView
+                android:id="@+id/AddCar_spinnerVModel"
+                android:layout_width="335dp"
+                android:layout_height="49dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:background="@drawable/input_border"
+                android:ems="10"
+                android:hint="Vehicle Model"
+                android:inputType="textPersonName"
+                android:padding="10dp"
+                android:text="1"
+                android:textStyle="bold"
+                android:typeface="sans" />
+
+
+
+            <TextView
+                android:id="@+id/AddCar_txtVehiclePicture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"
+                android:text="Vehicle Picture:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
+
+
+            <Button
+                android:id="@+id/AddCar_btnAddImage"
+                android:layout_width="335dp"
+                android:layout_height="49dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/signup_btnborder"
+                android:text="Upload Vehicle Image"
+                android:textColor="@color/colorBlack" />
+            <ImageView
+                android:id="@+id/AddCar_imgVehicle"
+                android:layout_width="335dp"
+                android:layout_height="335dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/sign_up_picture" />
+
+            <Button
+                android:id="@+id/AddCar_btnAddCar"
+                android:layout_width="335dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:layout_marginBottom="38dp"
+                android:layout_marginTop="25dp"
+                android:background="@drawable/sigin_btnborder"
+                android:text="Add Car"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+
+
+                />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</RelativeLayout>

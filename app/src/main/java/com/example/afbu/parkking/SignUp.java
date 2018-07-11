@@ -124,7 +124,7 @@ public class SignUp extends AppCompatActivity{
                         ModelID.add(c.getInt("id"));
                     }
 
-                    ArrayAdapter<String> dataAdapter1 = new ArrayAdapter<String>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, Models);
+                    ArrayAdapter<String> dataAdapter1 = new ArrayAdapter<String>(getApplicationContext(), R.layout.spinner_layout, Models);
                     dataAdapter1.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                     CarModelSpinner.setThreshold(1);
                     CarModelSpinner.setAdapter(dataAdapter1);
@@ -166,7 +166,7 @@ public class SignUp extends AppCompatActivity{
                         Brands.add(c.getString("brand"));
                         BrandID.add(c.getInt("id"));
                     }
-                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, Brands);
+                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.spinner_layout, Brands);
                     dataAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                     CarBrandsSpinner.setThreshold(1);
                     CarBrandsSpinner.setAdapter(dataAdapter);
@@ -230,14 +230,24 @@ public class SignUp extends AppCompatActivity{
         CarBrandsSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                getModels(BrandID.get(position));
+                for(int i=0; i<Brands.size(); i++){
+                    if(CarBrandsSpinner.getText().toString().equals(Brands.get(i))){
+                        getModels(BrandID.get(i));
+                        break;
+                    }
+                }
             }
         });
 
         CarModelSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ChosenModelId = ModelID.get(position);
+                for(int i=0; i<Models.size(); i++){
+                    if(CarModelSpinner.getText().toString().equals(Models.get(i))){
+                        ChosenModelId = ModelID.get(i);
+                        break;
+                    }
+                }
             }
         });
 

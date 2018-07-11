@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Park King</string>
-    <string name="apiURL">http://10.0.2.2/ParkKing/public/api/</string>
+    <string name="apiURL">http://192.168.1.9/ParkKingWeb/public/api/</string>
     <string name="profilepictureURL">http://10.0.2.2/ParkKing/public/uploads/vehicle_owners_profile_picture/</string>
     <string name="vehiclepictureURL">http://10.0.2.2/ParkKing/public/uploads/vehicle_owners_cars/</string>
+    <string name="addCarURL">http://192.168.1.9/ParkKingWeb/public/api/cars</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
 </resources>
