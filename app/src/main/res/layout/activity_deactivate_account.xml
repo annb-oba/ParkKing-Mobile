@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DeactivateAccount"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:elevation="15dp">
+
+
+        <ImageButton
+            android:id="@+id/DeactivateAccount_btnBack"
+            android:layout_width="37dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            android:background="#0000"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/arrow_back_white" />
+
+        <TextView
+            android:id="@+id/DeactivateAccount_txtActivityTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="62dp"
+            android:text="Deactivate Account"
+            android:textColor="@color/colorWhite"
+            android:textSize="23sp"
+            app:fontFamily="@font/righteous" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="170dp"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <EditText
+            android:id="@+id/DeactivateAccount_Password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Password"
+            android:background="@drawable/input_border"
+            android:inputType="textPassword"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:typeface="sans"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:id="@+id/DeactivateAccount_btnDeactAcc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/sigin_btnborder"
+            android:text="Deactivate Account"
+            android:layout_marginTop="15dp"
+            android:textColor="@color/colorWhite"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

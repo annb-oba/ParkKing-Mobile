@@ -58,6 +58,7 @@ public class EditAccount extends AppCompatActivity {
     private Button btnUpdateAccount;
     private ImageView imgUser;
     private EditText FirstName, MiddleName, LastName, Email, ContactNumber;
+    private TextView DeactivateAccount;
     private String ProfilePicture, ProfileID;
     private String Firstname, Lastname, Middlename, Contactnumber, Emailtxt;
     private Bitmap usrimg;
@@ -106,6 +107,14 @@ public class EditAccount extends AppCompatActivity {
                 updateAccount();
             }
         });
+
+        DeactivateAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent gotoDeact = new Intent(EditAccount.this, DeactivateAccount.class);
+                startActivity(gotoDeact);
+            }
+        });
     }
 
     private void uploadOptions(){
@@ -142,6 +151,7 @@ public class EditAccount extends AppCompatActivity {
         ContactNumber = (EditText) findViewById(R.id.EditAccount_edtCNumber);
         Email = (EditText) findViewById(R.id.EditAccount_edtEmail);
         btnUpdateAccount = (Button) findViewById(R.id.EditAccount_btnApply);
+        DeactivateAccount = (TextView) findViewById(R.id.EditAccount_txtDeactivate);
     }
 
     @Override

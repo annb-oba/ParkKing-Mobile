@@ -231,6 +231,14 @@
                 android:textColor="@color/colorWhite"
                 android:textSize="18sp" />
 
+            <TextView
+                android:id="@+id/EditAccount_txtDeactivate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Deactivate my account"
+                android:textColor="@color/colorRed"
+                android:layout_marginTop="10dp"/>
+
         </LinearLayout>
 
     </ScrollView>
