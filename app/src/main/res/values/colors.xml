@@ -5,6 +5,7 @@
     <color name="colorBlack">#000000</color>
     <color name="colorLink">#6480C8</color>
     <color name="colorGrayBG">#EEEFF0</color>
+    <color name="colorRed">#ad0808</color>
 
 
 </resources>

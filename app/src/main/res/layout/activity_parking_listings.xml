@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ParkingListings"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:elevation="15dp">
+
+
+        <ImageButton
+            android:id="@+id/ParkingListings_btnBack"
+            android:layout_width="37dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            android:background="#0000"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/arrow_back_white" />
+
+        <TextView
+            android:id="@+id/ParkingListings_txtActivityTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="62dp"
+            android:text="Parking Listings"
+            android:textColor="@color/colorWhite"
+            android:textSize="23sp"
+            app:fontFamily="@font/righteous"></TextView>
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="460dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <EditText
+                android:id="@+id/ParkingListings_edtSearch"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:hint="Search"
+                android:padding="10dp"
+                android:textStyle="bold"
+                android:typeface="sans"
+                android:background="@drawable/signup_btnborder"
+                />
+
+
+            <ListView
+                android:id="@+id/ParkingListings_lstListings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:divider="@color/colorBlack"
+                android:dividerHeight="2px" />
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+    <android.support.design.widget.BottomNavigationView
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:gravity="center">
+
+        <RelativeLayout
+            android:layout_width="127dp"
+            android:layout_height="56dp"
+            android:padding="3dp">
+
+            <TextView
+                android:id="@+id/ParkingListings_lblNoOfFloors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:text="Number of floor/s"
+                android:textSize="12sp"
+                app:fontFamily="@font/open_sans" />
+
+            <TextView
+                android:id="@+id/ParkingListings_txtNoOfFloors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:paddingTop="5dp"
+                android:text="#"
+                android:textSize="18sp" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="127dp"
+            android:layout_height="56dp"
+            android:layout_marginLeft="130dp"
+            android:padding="3dp">
+
+            <TextView
+                android:id="@+id/ParkingListings_lblNoOfAvlSlots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center"
+                android:text="Available Parking Slot/s"
+                android:textSize="11sp"
+                app:fontFamily="@font/open_sans" />
+
+            <TextView
+                android:id="@+id/ParkingListings_txtNoOfAvlSlots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:paddingTop="5dp"
+                android:text="#"
+                android:textSize="18sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="127dp"
+            android:layout_height="56dp"
+            android:layout_marginLeft="250dp"
+            android:padding="3dp">
+
+            <TextView
+                android:id="@+id/ParkingListings_lblDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:text="Distance (meters)"
+                android:textSize="11sp"
+                app:fontFamily="@font/open_sans" />
+
+            <TextView
+                android:id="@+id/ParkingListings_txtDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:paddingTop="5dp"
+                android:text="#"
+                android:textSize="18sp" />
+
+
+        </RelativeLayout>
+    </android.support.design.widget.BottomNavigationView>
+
+
+</LinearLayout>

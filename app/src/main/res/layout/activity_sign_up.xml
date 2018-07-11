@@ -223,14 +223,6 @@
                     android:text="By proceeding, you also agree to Park King’s"
                     app:fontFamily="@font/open_sans" />
 
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentTop="true"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
                     <TextView
                         android:id="@+id/SignUp_txtEula2"
                         android:layout_width="wrap_content"
@@ -238,33 +230,10 @@
                         android:layout_alignParentTop="true"
                         android:layout_marginBottom="10dp"
                         android:layout_marginTop="18dp"
-                        android:text="Terms of Service"
+                        android:text="Terms of Service and Privacy Policy"
                         android:textColor="@color/colorLink"
-                        app:fontFamily="@font/open_sans" />
-
-                    <TextView
-                        android:id="@+id/SignUp_txtEula3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginBottom="10dp"
-                        android:layout_marginTop="18dp"
-                        android:text=" and "
-                        app:fontFamily="@font/open_sans" />
-
-                    <TextView
-                        android:id="@+id/SignUp_txtEula4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginBottom="10dp"
-                        android:layout_marginTop="18dp"
-                        android:text="Privacy Policy"
-                        android:textColor="@color/colorLink"
-                        app:fontFamily="@font/open_sans" />
-
-
-                </LinearLayout>
+                        app:fontFamily="@font/open_sans"
+                        android:layout_centerHorizontal="true"/>
 
             </RelativeLayout>
 

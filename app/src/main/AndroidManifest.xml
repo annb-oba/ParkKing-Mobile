@@ -39,7 +39,9 @@
         <activity android:name=".Notifications" />
         <activity android:name=".CarList" />
         <activity android:name=".AddCar" />
-        <activity android:name=".ChangePassword"></activity>
+        <activity android:name=".ChangePassword" />
+        <activity android:name=".ParkingListings" />
+        <activity android:name=".DeactivateAccount"></activity>
     </application>
 
 </manifest>
