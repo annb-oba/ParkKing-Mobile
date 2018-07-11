@@ -108,6 +108,9 @@ public class Home extends AppCompatActivity {
                         break;
 
                     case R.id.nav_parkinglistings:
+                        Intent  gotoParkList= new Intent(getApplicationContext(), ParkingListings.class);
+                        startActivity(gotoParkList);
+                        mDrawer.closeDrawer(NavMenu);
                         break;
 
                     case R.id.nav_parkinghistory:
@@ -152,9 +155,10 @@ public class Home extends AppCompatActivity {
                                 Middlename = userinfo.getString("middle_name");
                                 Emailtxt = object.getString("email");
                                 ProfilePicture = userinfo.getString("profile_picture");
-                                Name.setText(Lastname + ", " + Firstname + " " + Middlename);
-                                Email.setText(Emailtxt);
-                                getProfilePicture();
+                                Toast.makeText(getApplicationContext(), Lastname, Toast.LENGTH_SHORT).show();
+                                //Name.setText(Lastname);
+                                //Email.setText(Emailtxt);
+                                //getProfilePicture();
                             }else if(status.equals("failed")){
                                 String message = object.getString("message");
                                 Toast.makeText(getApplicationContext(),

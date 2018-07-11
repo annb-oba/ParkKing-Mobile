@@ -108,11 +108,13 @@ public class ParkingListings extends AppCompatActivity {
             }
         });
 
-        ParkingList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        ParkingList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                ChosenBuilding = BuildingIDs.get(position).toString();
+                ChosenBuilding = BuildingIDs.get(i).toString();
+
+                Toast.makeText(getApplicationContext(),ChosenBuilding, Toast.LENGTH_SHORT).show();
 
                 StringRequest strRequest = new StringRequest(Request.Method.GET,
                         getString(R.string.apiURL) + "get_building_infos/" + ChosenBuilding,
@@ -153,40 +155,31 @@ public class ParkingListings extends AppCompatActivity {
                 };
                 AppController.getInstance().addToRequestQueue(strRequest);
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
         });
+
+
 
     }
 
     private void getParkingList() {
-        StringRequest strRequest = new StringRequest(Request.Method.POST,
+        StringRequest strRequest = new StringRequest(Request.Method.GET,
                 getString(R.string.apiURL) + "get_parking_list/",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
                             JSONObject object = new JSONObject(response);
-                            String status = object.getString("status");
-                            if(status.equals("success")){
                                 JSONArray result = object.getJSONArray("data");
-                                BuildingNames = new ArrayList<>();
+                                BuildingNames = new ArrayList<String>();
                                 BuildingIDs = new ArrayList<>();
                                 for (int i = 0; i < result.length(); i++) {
                                     JSONObject c = result.getJSONObject(i);
                                     BuildingNames.add(c.getString("name"));
                                     BuildingIDs.add(c.getInt("id"));
                                 }
-                                dataAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.row_layout, BuildingNames);
+
+                                dataAdapter = new CostumArrayAdapter(getApplicationContext(), BuildingNames);
                                 ParkingList.setAdapter(dataAdapter);
-                            }else if(status.equals("failed")){
-                                String message = object.getString("message");
-                                Toast.makeText(getApplicationContext(),
-                                        message, Toast.LENGTH_SHORT).show();
-                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
