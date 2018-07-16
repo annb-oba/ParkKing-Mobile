@@ -1,3 +1,4 @@
+
 apply plugin: 'com.android.application'
 
 android {
@@ -30,8 +31,7 @@ dependencies {
     implementation files('libs/CircleImageView-master/gradle/wrapper/gradle-wrapper.jar')
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
-    implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-places:15.0.1'
     implementation 'com.google.android.gms:play-services-location:15.0.1'
-
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
 }

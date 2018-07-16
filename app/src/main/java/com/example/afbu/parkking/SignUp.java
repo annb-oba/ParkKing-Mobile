@@ -19,6 +19,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -284,6 +285,7 @@ public class SignUp extends AppCompatActivity{
             public void onResponse(String response) {
                 try {
                     JSONObject object = new JSONObject(response);
+                    Log.d("Response", response);
                     String status = object.getString("status");
                     if(status.equals("success")){
                         String vehicleowner_id = object.getString("vehicle_owner_id");

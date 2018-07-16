@@ -73,8 +73,8 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="65dp"
-            android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
             android:background="@color/colorWhite"
             android:padding="3dp">
 
@@ -118,7 +118,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="60dp"
-                    android:layout_marginRight="60dp">
+                    android:layout_marginRight="60dp"
+                    android:onClick="gotoCarList">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -144,7 +145,8 @@
                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_marginRight="5dp">
+                    android:layout_marginRight="5dp"
+                    android:onClick="gotoParkList">
 
                     <TextView
                         android:layout_width="wrap_content"

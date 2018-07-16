@@ -79,8 +79,8 @@ public class DeactivateAccount extends AppCompatActivity {
     }
 
     private void deactivateAccount(){
-        StringRequest strRequest = new StringRequest(Request.Method.GET,
-                getString(R.string.apiURL) + "deactivate_account/",
+        StringRequest strRequest = new StringRequest(Request.Method.POST,
+                getString(R.string.apiURL) + "deactivate_account",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -88,7 +88,13 @@ public class DeactivateAccount extends AppCompatActivity {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status");
                             if(status.equals("success")){
-                                //
+                                editor = SharedPreference.edit();
+                                editor.clear();
+                                editor.commit();
+                                Intent gotoStartUp = new Intent(getApplicationContext(), StartUp.class);
+                                startActivity(gotoStartUp);
+                                Toast.makeText(getApplicationContext(),
+                                        "Deactivation successful.", Toast.LENGTH_SHORT).show();
                             }else if(status.equals("failed")){
                                 String message = object.getString("message");
                                 Toast.makeText(getApplicationContext(),

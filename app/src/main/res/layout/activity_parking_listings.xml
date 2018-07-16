@@ -41,13 +41,9 @@
 
     </RelativeLayout>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="460dp">
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="20dp">
 
@@ -63,12 +59,10 @@
                 android:typeface="sans"
                 android:background="@drawable/signup_btnborder"
                 />
-
-
             <ListView
                 android:id="@+id/ParkingListings_lstListings"
                 android:layout_width="match_parent"
-                android:layout_height="350dp"
+                android:layout_height="485dp"
                 android:layout_marginTop="15dp"
                 android:divider="@color/colorBlack"
                 android:dividerHeight="2px" />
@@ -76,17 +70,14 @@
         </LinearLayout>
 
 
-    </ScrollView>
-
-    <android.support.design.widget.BottomNavigationView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="62dp"
-        android:gravity="center">
+        android:padding="5dp">
 
         <RelativeLayout
             android:layout_width="127dp"
-            android:layout_height="56dp"
-            android:padding="3dp">
+            android:layout_height="56dp">
 
             <TextView
                 android:id="@+id/ParkingListings_lblNoOfFloors"
@@ -115,8 +106,9 @@
         <RelativeLayout
             android:layout_width="138dp"
             android:layout_height="56dp"
-            android:layout_marginLeft="130dp"
-            android:padding="3dp">
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="5dp">
 
             <TextView
                 android:id="@+id/ParkingListings_lblNoOfAvlSlots"
@@ -143,9 +135,7 @@
 
         <RelativeLayout
             android:layout_width="119dp"
-            android:layout_height="56dp"
-            android:layout_marginLeft="265dp"
-            android:padding="3dp">
+            android:layout_height="56dp">
 
             <TextView
                 android:id="@+id/ParkingListings_lblDistance"
@@ -171,7 +161,7 @@
 
 
         </RelativeLayout>
-    </android.support.design.widget.BottomNavigationView>
+    </LinearLayout>
 
 
 </LinearLayout>

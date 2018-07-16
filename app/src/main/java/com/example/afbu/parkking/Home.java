@@ -105,8 +105,8 @@ public class Home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        /*SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-        if(!SharedPreference.contains(PROFID_KEY)){
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        /*if(!SharedPreference.contains(PROFID_KEY)){
             Intent myIntent = new Intent(Home.this, StartUp.class);
             startActivity(myIntent);
         }else{
@@ -389,7 +389,7 @@ public class Home extends AppCompatActivity {
         //initMap();
 
 
-        getVehicleOwnerInformation();
+        //getVehicleOwnerInformation();
 
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -624,5 +624,15 @@ public class Home extends AppCompatActivity {
 
         }
 
+    }
+
+    public void gotoCarList(View view) {
+        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+        startActivity(gotoCarList);
+    }
+
+    public void gotoParkList(View view) {
+        Intent  gotoParkList= new Intent(getApplicationContext(), ParkingListings.class);
+        startActivity(gotoParkList);
     }
 }
