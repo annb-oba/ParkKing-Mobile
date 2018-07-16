@@ -6,4 +6,5 @@
     <string name="addCarURL">http://192.168.1.9/ParkKingWeb/public/api/cars</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+    <string name="GOOGLE_MAPS_API_KEY">AIzaSyCtQjxcnoBE30CzU6Mu-koQYh5snMsykkY</string>
 </resources>

@@ -7,15 +7,27 @@
     android:layout_height="match_parent"
     tools:context=".Home">
 
-    <LinearLayout
+
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/map"
+        tools:context=".MapsActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
             android:background="@color/colorPrimary"
             android:elevation="15dp">
 
@@ -30,17 +42,19 @@
                 android:background="@null"
                 app:srcCompat="@drawable/menu" />
 
-            <TextView
+            <EditText
                 android:id="@+id/Home_txtActivityTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="62dp"
-                android:text="Home"
                 android:textColor="@color/colorWhite"
-                android:textSize="23sp"
-                app:fontFamily="@font/righteous" />
+                android:textSize="17sp"
+                android:hint="Search Park King"
+                android:textColorHint="@color/colorWhite"
+                app:fontFamily="@font/righteous"
+                android:background="@color/colorPrimary"/>
 
             <ImageButton
                 android:id="@+id/Home_btnNotif"
@@ -55,7 +69,128 @@
 
         </RelativeLayout>
 
-    </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:background="@color/colorWhite"
+            android:padding="3dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp">
+
+                    <TextView
+                        android:id="@+id/Home_txtParkingNearYou"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center"
+                        android:text="Near Park King:"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+
+                    <TextView
+                        android:id="@+id/Home_txtNoOfParking"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="60dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center"
+                        android:text="Car List"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+
+                    <ImageView
+                        android:id="@+id/imageView2"
+                        android:layout_width="40dp"
+                        android:layout_height="37dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_weight="1"
+                        app:srcCompat="@drawable/baseline_view_list_black_18dp" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="5dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center"
+                        android:text="Parking History"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_centerHorizontal="true"
+                        android:src="@drawable/history" />
+
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <ImageButton
+            android:id="@+id/imageButton2"
+            android:layout_width="23dp"
+            android:layout_height="22dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="19dp"
+            android:layout_marginTop="71dp"
+            android:background="@color/colorWhite"
+            android:onClick="gotoMyLocation"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/my_location_black" />
+
+
+    </RelativeLayout>
+
+
+
+
+
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_menu"
@@ -64,7 +199,10 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/navigation_menu"></android.support.design.widget.NavigationView>
+        app:menu="@menu/navigation_menu">
+
+    </android.support.design.widget.NavigationView>
+
 
 
 

@@ -96,6 +96,7 @@
                 android:layout_centerHorizontal="true"
                 android:text="Number of floor/s"
                 android:textSize="12sp"
+                android:textStyle="bold"
                 app:fontFamily="@font/open_sans" />
 
             <TextView
@@ -105,14 +106,14 @@
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:paddingTop="5dp"
-                android:text="#"
+                android:text="0"
                 android:textSize="18sp" />
 
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="127dp"
+            android:layout_width="138dp"
             android:layout_height="56dp"
             android:layout_marginLeft="130dp"
             android:padding="3dp">
@@ -126,6 +127,7 @@
                 android:gravity="center"
                 android:text="Available Parking Slot/s"
                 android:textSize="11sp"
+                android:textStyle="bold"
                 app:fontFamily="@font/open_sans" />
 
             <TextView
@@ -135,14 +137,14 @@
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:paddingTop="5dp"
-                android:text="#"
+                android:text="0"
                 android:textSize="18sp" />
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="127dp"
+            android:layout_width="119dp"
             android:layout_height="56dp"
-            android:layout_marginLeft="250dp"
+            android:layout_marginLeft="265dp"
             android:padding="3dp">
 
             <TextView
@@ -154,6 +156,7 @@
                 android:gravity="center"
                 android:text="Distance (meters)"
                 android:textSize="11sp"
+                android:textStyle="bold"
                 app:fontFamily="@font/open_sans" />
 
             <TextView
@@ -163,7 +166,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
                 android:paddingTop="5dp"
-                android:text="#"
+                android:text="0"
                 android:textSize="18sp" />
 
 
