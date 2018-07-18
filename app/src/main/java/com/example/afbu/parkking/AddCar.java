@@ -1,7 +1,9 @@
 package com.example.afbu.parkking;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -40,7 +42,11 @@ import java.util.Map;
 
 public class AddCar extends AppCompatActivity {
 
-
+    SharedPreferences SharedPreference;
+    SharedPreferences.Editor editor;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+    private String ProfileID;
     private EditText edtPlateNumber1,edtPlateNumber2, edtVehicleBrand, edtVehicleModel, edtVehicleColor;
     private Button addCar, addImage;
     private Bitmap bitmap;
@@ -57,6 +63,13 @@ public class AddCar extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_car);
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(!SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(AddCar.this, StartUp.class);
+            startActivity(myIntent);
+        }else{
+            ProfileID = SharedPreference.getString(PROFID_KEY, "");
+        }
         CarBrandsSpinner = (AutoCompleteTextView) findViewById(R.id.AddCar_spinnerVBrand);
         CarModelSpinner = (AutoCompleteTextView) findViewById(R.id.AddCar_spinnerVModel);
         edtPlateNumber1 = (EditText) findViewById(R.id.AddCar_edtPlateNumber1);
@@ -278,7 +291,7 @@ public class AddCar extends AppCompatActivity {
                     Map<String, String> parameters = new HashMap<String, String>();
 
                     parameters.put("plate_number", plate);
-                    parameters.put("vehicle_owner_id", "1");
+                    parameters.put("vehicle_owner_id", ProfileID);
                     parameters.put("model_id", model);
                     parameters.put("car_picture", picture );
 

@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Park King</string>
-    <string name="apiURL">http://10.23.248.44/ParkKingWeb/public/api/</string>
-    <string name="profilepictureURL">http://10.23.248.44/ParkKing/public/uploads/vehicle_owners_profile_picture/</string>
-    <string name="vehiclepictureURL">http://10.23.248.44/ParkKing/public/uploads/vehicle_owners_cars/</string>
-    <string name="addCarURL">http://10.23.248.44/ParkKingWeb/public/api/cars</string>
-    <string name="addCoOwnerURL">http://10.23.248.44/ParkKingWeb/public/api/relationships</string>
-    <string name="changeCarURL">http://10.23.248.44/ParkKingWeb/public/api/cars/changecar</string>
-    <string name="getCarInfoURL">http://10.23.248.44/ParkKingWeb/public/api/cars/profile/</string>
+    <string name="apiURL">http://10.23.248.40/ParkKing/public/api/</string>
+    <string name="profilepictureURL">http://10.23.248.40/ParkKing/public/uploads/vehicle_owners_profile_picture/</string>
+    <string name="vehiclepictureURL">http://10.23.248.40/ParkKing/public/uploads/vehicle_owners_cars/</string>
+    <string name="addCarURL">http://10.23.248.40/ParkKing/public/api/cars</string>
+    <string name="addCoOwnerURL">http://10.23.248.40/ParkKing/public/api/relationships</string>
+    <string name="changeCarURL">http://10.23.248.40/ParkKing/public/api/cars/changecar</string>
+    <string name="getCarInfoURL">http://10.23.248.40/ParkKing/public/api/cars/profile/</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
     <string name="GOOGLE_MAPS_API_KEY">AIzaSyCtQjxcnoBE30CzU6Mu-koQYh5snMsykkY</string>

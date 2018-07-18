@@ -1,8 +1,10 @@
 package com.example.afbu.parkking;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,7 +32,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CarProfile extends AppCompatActivity {
-
+    SharedPreferences SharedPreference;
+    SharedPreferences.Editor editor;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+    private String ProfileID;
     private String carID,message;
     private TextView txtPlateNumber,txtCarBrand,txtCarModel,txtCarOwner,txtSharedTo;
     private Button btnEditInfo,btnSwitchCar,btnCoOwners;
@@ -40,6 +46,13 @@ public class CarProfile extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_car_profile);
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(!SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(CarProfile.this, StartUp.class);
+            startActivity(myIntent);
+        }else{
+            ProfileID = SharedPreference.getString(PROFID_KEY, "");
+        }
         txtPlateNumber =(TextView) findViewById(R.id.CarProfile_plateNumber);
         txtCarBrand =(TextView) findViewById(R.id.CarProfile_carBrand);
         txtCarModel =(TextView) findViewById(R.id.CarProfile_carModel);
@@ -111,7 +124,7 @@ public class CarProfile extends AppCompatActivity {
                     Map<String, String> parameters = new HashMap<String, String>();
 
 
-                    parameters.put("vehicle_owner_id", "2");
+                    parameters.put("vehicle_owner_id", ProfileID);
                     parameters.put("id", carID);
 
 

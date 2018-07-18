@@ -1,9 +1,11 @@
 package com.example.afbu.parkking;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CarList extends AppCompatActivity {
-
+    SharedPreferences SharedPreference;
+    SharedPreferences.Editor editor;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+    private String ProfileID;
     private ImageButton btnBackHome, btnAddCar;
     private ListView carListView;
     private ArrayList<CarObject> carObjects;
@@ -40,6 +46,13 @@ public class CarList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_car_list);
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(!SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(CarList.this, StartUp.class);
+            startActivity(myIntent);
+        }else{
+            ProfileID = SharedPreference.getString(PROFID_KEY, "");
+        }
         initResources();
         initEvents();
     }
@@ -80,7 +93,7 @@ public class CarList extends AppCompatActivity {
     }
 
     public void getCarList(){
-        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.apiURL) + "cars/2", new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.apiURL) + "cars/"+ProfileID, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
