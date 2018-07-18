@@ -23,11 +23,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+<!--
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
+-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCtQjxcnoBE30CzU6Mu-koQYh5snMsykkY"/>
@@ -55,7 +55,10 @@
         <activity android:name=".AddCar" />
         <activity android:name=".ChangePassword" />
         <activity android:name=".ParkingListings" />
-        <activity android:name=".DeactivateAccount"></activity>
+        <activity android:name=".DeactivateAccount"/>
+        <activity android:name=".CarProfile" />
+        <activity android:name=".CarCoOwners" />
+        <activity android:name=".AddCoOwner"></activity>
     </application>
 
 </manifest>

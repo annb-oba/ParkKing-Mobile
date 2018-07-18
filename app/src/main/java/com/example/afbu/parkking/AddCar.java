@@ -257,7 +257,8 @@ public class AddCar extends AppCompatActivity {
                         Log.d(TAG, message);
                         Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
                         if(jsonObject.getString("status").equals("success")){
-
+                            Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+                            startActivity(gotoCarList);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

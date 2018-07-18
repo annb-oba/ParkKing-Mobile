@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CarProfile"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:elevation="15dp">
+
+
+        <ImageButton
+            android:id="@+id/CarList_btnBack"
+            android:layout_width="37dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            android:layout_marginLeft="11dp"
+            android:background="#0000"
+
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/arrow_back_white" />
+
+        <TextView
+            android:id="@+id/CarList_txtActivityTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="62dp"
+            android:layout_marginLeft="62dp"
+            android:text="Car Profile"
+            android:textColor="@color/colorWhite"
+            android:textSize="23sp"
+            app:fontFamily="@font/righteous"></TextView>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:weightSum="100">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/drop_shadow"
+                android:orientation="vertical"
+                android:padding="15dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:text="Plate Number:"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+                    <TextView
+                        android:id="@+id/CarProfile_plateNumber"
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="XYZ-123"
+                        android:textSize="18sp"
+                        android:textStyle="normal"
+                        app:fontFamily="@font/open_sans" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:text="Car Brand:"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+                    <TextView
+                        android:id="@+id/CarProfile_carBrand"
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="Volkswagen"
+                        android:textSize="18sp"
+                        android:textStyle="normal"
+                        app:fontFamily="@font/open_sans" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:text="Car Model:"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+                    <TextView
+                        android:id="@+id/CarProfile_carModel"
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="1964 Beetle"
+                        android:textSize="18sp"
+                        android:textStyle="normal"
+                        app:fontFamily="@font/open_sans" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:text="Car Owner:"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+                    <TextView
+                        android:id="@+id/CarProfile_carOwner"
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="Vince Salamin"
+                        android:textSize="18sp"
+                        android:textStyle="normal"
+                        app:fontFamily="@font/open_sans" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="10dp">
+                    <TextView
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:text="Shared To:"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:fontFamily="@font/open_sans" />
+                    <TextView
+                        android:id="@+id/CarProfile_sharedTo"
+                        android:textColor="@color/colorBlack"
+                        android:layout_width="match_parent"
+                        android:layout_weight="50"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:text="5"
+                        android:textSize="18sp"
+                        android:textStyle="normal"
+                        app:fontFamily="@font/open_sans" />
+                </LinearLayout>
+                <ImageView
+                    android:id="@+id/CarProfile_imgVehicle"
+                    android:layout_width="335dp"
+                    android:layout_height="335dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/sign_up_picture" />
+
+                <Button
+                    android:id="@+id/CarProfile_btnEditInfo"
+                    android:layout_width="335dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/sigin_btnborder"
+                    android:text="Edit Information"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp" />
+                <Button
+                    android:id="@+id/CarProfile_btnSwitchCar"
+                    android:layout_width="335dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/sigin_btnborder"
+                    android:text="Switch to Car"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp" />
+                <Button
+                    android:id="@+id/CarProfile_btnCoOwners"
+                    android:layout_width="335dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="38dp"
+                    android:background="@drawable/sigin_btnborder"
+                    android:text="Co-Owners"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </ScrollView>
+
+
+    </LinearLayout>
+</LinearLayout>

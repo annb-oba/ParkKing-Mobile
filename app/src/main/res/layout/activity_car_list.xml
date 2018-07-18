@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:background="@color/colorPrimary"
         android:elevation="15dp">
@@ -21,10 +22,12 @@
             android:layout_width="37dp"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginStart="11dp"
+            android:layout_marginLeft="11dp"
             android:background="#0000"
-            android:onClick="onBack"
+
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/arrow_back_white" />
 
@@ -33,70 +36,62 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginStart="62dp"
+            android:layout_marginLeft="62dp"
             android:text="Car List"
             android:textColor="@color/colorWhite"
             android:textSize="23sp"
             app:fontFamily="@font/righteous"></TextView>
 
     </RelativeLayout>
-
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:weightSum="100">
 
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:background="@drawable/drop_shadow"
+            android:padding="8dp">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:background="@color/colorGrayBG"
-                android:padding="8dp">
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:textColor="@color/colorBlack"
+                android:text="Add Car"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:fontFamily="@font/open_sans" />
 
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="Add Car"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:fontFamily="@font/open_sans" />
-
-                <ImageButton
-                    android:id="@+id/CarList_btnAddCar"
-                    android:layout_width="47dp"
-                    android:layout_height="41dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:background="@null"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/add_button_inside_black_circle" />
-
-
-            </RelativeLayout>
-
-            <ListView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="15dp"
-                android:background="@color/colorGrayBG">
-
+            <ImageButton
+                android:id="@+id/CarList_btnAddCar"
+                android:layout_width="47dp"
+                android:layout_height="41dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/add_button_inside_black_circle" />
+        </RelativeLayout>
+        <ListView
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:id="@+id/CarList_carListView"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/drop_shadow">
             </ListView>
-
-
-        </LinearLayout>
-
-
-    </ScrollView>
+    </LinearLayout>
 
 </LinearLayout>
