@@ -43,11 +43,9 @@ public class SignIn extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-        if(!SharedPreference.contains(PROFID_KEY)){
-            Intent myIntent = new Intent(SignIn.this, StartUp.class);
+        if(SharedPreference.contains(PROFID_KEY)){
+            Intent myIntent = new Intent(SignIn.this, Home.class);
             startActivity(myIntent);
-        }else{
-            ProfileID = SharedPreference.getString(PROFID_KEY, "");
         }
         initResources();
         initEvents();
