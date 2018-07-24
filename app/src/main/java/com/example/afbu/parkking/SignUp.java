@@ -329,8 +329,8 @@ public class SignUp extends AppCompatActivity{
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("last_name", FirstName.getText().toString().trim());
-                parameters.put("first_name", LastName.getText().toString().trim());
+                parameters.put("last_name", LastName.getText().toString().trim());
+                parameters.put("first_name", FirstName.getText().toString().trim());
                 parameters.put("middle_name", MiddleName.getText().toString().trim());
                 parameters.put("contact_number", CNumber.getText().toString().trim());
                 parameters.put("email", Email.getText().toString().trim());

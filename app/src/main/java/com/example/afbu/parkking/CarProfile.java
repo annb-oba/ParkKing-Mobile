@@ -22,7 +22,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
-
+import com.bumptech.glide.Glide;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +38,7 @@ public class CarProfile extends AppCompatActivity {
     private static final String PROFID_KEY = "ProfileIDKey";
     private String ProfileID;
     private String carID,message;
+    private ImageButton btnBackHome;
     private TextView txtPlateNumber,txtCarBrand,txtCarModel,txtCarOwner,txtSharedTo;
     private Button btnEditInfo,btnSwitchCar,btnCoOwners;
     private ImageView carImage;
@@ -53,6 +54,7 @@ public class CarProfile extends AppCompatActivity {
         }else{
             ProfileID = SharedPreference.getString(PROFID_KEY, "");
         }
+        btnBackHome = (ImageButton) findViewById(R.id.CarProfile_btnBack);
         txtPlateNumber =(TextView) findViewById(R.id.CarProfile_plateNumber);
         txtCarBrand =(TextView) findViewById(R.id.CarProfile_carBrand);
         txtCarModel =(TextView) findViewById(R.id.CarProfile_carModel);
@@ -84,10 +86,26 @@ public class CarProfile extends AppCompatActivity {
                 Intent goToCarCoOwners = new Intent(getApplicationContext(), CarCoOwners.class);
                 goToCarCoOwners.putExtra("car_id", carID);
                 startActivity(goToCarCoOwners);
+               
+            }
+        });
+        btnBackHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+                //startActivity(gotoCarList);
                 finish();
             }
         });
     }
+
+   /*Override
+    public void finish() {
+        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+        startActivity(gotoCarList);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }*/
+
     public void changeCar(){
 
         if(!carID.equals("")){
@@ -145,7 +163,7 @@ public class CarProfile extends AppCompatActivity {
                 try {
                         JSONObject object = new JSONObject(response);
                         message = object.getString("status");
-                    Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
+
                     if(message.equals("success")) {
                         JSONObject c = new JSONObject(object.getString("data"));
                         txtPlateNumber.setText(c.getString("plate_number").toString());
@@ -153,7 +171,7 @@ public class CarProfile extends AppCompatActivity {
                         txtCarModel.setText(c.getString("model"));
                         txtCarOwner.setText(c.getString("first_name") + " " + c.getString("last_name"));
                         txtSharedTo.setText(c.getString("shared_to"));
-                      //  Glide.with(getApplicationContext()).asBitmap().load(mContext.getString(R.string.siteURL)+images.get(position)).into(carImage);
+                        Glide.with(getApplicationContext()).asBitmap().load(getString(R.string.carImagesURL)+c.getString("car_picture")).into(carImage);
                     }
 
 

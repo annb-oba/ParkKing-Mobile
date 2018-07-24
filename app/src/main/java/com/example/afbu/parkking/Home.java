@@ -443,6 +443,7 @@ public class Home extends AppCompatActivity {
                     case R.id.nav_change_password:
                         Intent gotoChangPassword = new Intent(getApplicationContext(), ChangePassword.class);
                         startActivity(gotoChangPassword);
+                        mDrawer.closeDrawer(NavMenu);
                         break;
                 }
                 return false;

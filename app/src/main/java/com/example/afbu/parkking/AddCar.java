@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -49,6 +50,7 @@ public class AddCar extends AppCompatActivity {
     private String ProfileID;
     private EditText edtPlateNumber1,edtPlateNumber2, edtVehicleBrand, edtVehicleModel, edtVehicleColor;
     private Button addCar, addImage;
+    private ImageButton btnBackHome;
     private Bitmap bitmap;
     private final int IMG_REQUEST = 1;
     private static final int RESULT_LOAD_IMAGE = 0, REQUEST_CAMERA = 1;
@@ -79,12 +81,20 @@ public class AddCar extends AppCompatActivity {
         carImage.setVisibility(View.GONE);
         addCar = (Button) findViewById(R.id.AddCar_btnAddCar);
         addImage = (Button) findViewById(R.id.AddCar_btnAddImage);
+        btnBackHome = (ImageButton) findViewById(R.id.AddCar_btnBackButton);
+        btnBackHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         addImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                // selectImage();
                 uploadOptions();
+
             }
         });
 
@@ -94,6 +104,7 @@ public class AddCar extends AppCompatActivity {
                 addCar();
             }
         });
+
         CarBrandsSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -233,30 +244,20 @@ public class AddCar extends AppCompatActivity {
     private void addCar(){
         final String plate;
         final String model;
-
-
         final String picture;
-
         if(!edtPlateNumber1.getText().toString().equals("") && !edtPlateNumber2.getText().toString().equals("")){
             plate = edtPlateNumber1.getText().toString() + "-" + edtPlateNumber2.getText().toString();
         }
         else{
             plate="";
         }
-
-
         model = Integer.toString(ChosenModelId);
-
-
-
         if(bitmap!=null){
             picture = imageToString(bitmap);
-
         }
         else{
             picture=null;
         }
-
         if(picture!=null && !plate.isEmpty() && !model.isEmpty()){
             StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.addCarURL), new Response.Listener<String>() {
                 @Override
@@ -336,5 +337,12 @@ public class AddCar extends AppCompatActivity {
             }
         }
     }
+
+    /*@Override
+    public void finish() {
+        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+        startActivity(gotoCarList);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }*/
 }
 

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EditAccount">
+    tools:context=".EditAccount"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -16,21 +17,21 @@
 
 
         <ImageButton
-            android:id="@+id/EditAccount_btnBack"
+            android:id="@+id/AddCar_btnBackButton"
             android:layout_width="37dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_marginLeft="11dp"
             android:layout_marginStart="11dp"
+            android:layout_marginLeft="11dp"
             android:background="#0000"
 
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/arrow_back_white" />
 
         <TextView
-            android:id="@+id/EditAccount_txtActivityTitle"
+            android:id="@+id/AddCar_txtActivityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -142,7 +143,7 @@
                 android:hint="Vehicle Brand"
                 android:inputType="textPersonName"
                 android:padding="10dp"
-                android:text="1"
+                android:text=""
                 android:textStyle="bold"
                 android:typeface="sans" />
 
@@ -170,7 +171,7 @@
                 android:hint="Vehicle Model"
                 android:inputType="textPersonName"
                 android:padding="10dp"
-                android:text="1"
+                android:text=""
                 android:textStyle="bold"
                 android:typeface="sans" />
 
@@ -232,4 +233,4 @@
     </ScrollView>
 
 
-</RelativeLayout>
+</LinearLayout>

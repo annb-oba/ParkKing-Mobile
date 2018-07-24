@@ -26,6 +26,7 @@ import java.util.Map;
 public class AddCoOwner extends AppCompatActivity {
     private static String TAG = AddCoOwner.class.getSimpleName();
     private Button addCoOwner;
+    private ImageButton btnBack;
     private EditText edtEmail;
     private String carID,email,message;
     @Override
@@ -34,10 +35,15 @@ public class AddCoOwner extends AppCompatActivity {
         setContentView(R.layout.activity_add_co_owner);
         Intent intent = getIntent();
         carID = intent.getStringExtra("car_id");
-
+        btnBack = (ImageButton) findViewById(R.id.AddCoOwner_btnBack);
         addCoOwner = (Button)findViewById(R.id.AddCoOwner_btnAdd);
         edtEmail = (EditText)findViewById(R.id.AddCoOwner_edtEmail);
-
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
         addCoOwner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

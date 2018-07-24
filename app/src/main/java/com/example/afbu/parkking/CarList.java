@@ -80,15 +80,16 @@ public class CarList extends AppCompatActivity {
                 Intent goToCarProfile = new Intent(getApplicationContext(), CarProfile.class);
                 goToCarProfile.putExtra("car_id", carObjects.get(i).getId());
                 startActivity(goToCarProfile);
-                 finish();
+
             }
         });
     }
 
     private void initResources() {
-        btnBackHome = (ImageButton) findViewById(R.id.CarList_btnBack);
+
         btnAddCar = (ImageButton) findViewById(R.id.CarList_btnAddCar);
         carListView = (ListView) findViewById(R.id.CarList_carListView);
+        btnBackHome = (ImageButton) findViewById(R.id.CarList_btnBack);
         getCarList();
     }
 
