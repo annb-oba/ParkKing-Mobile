@@ -23,7 +23,7 @@
         android:orientation="vertical">
 
         <RelativeLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
@@ -42,19 +42,19 @@
                 android:background="@null"
                 app:srcCompat="@drawable/menu" />
 
-            <EditText
-                android:id="@+id/Home_txtActivityTitle"
-                android:layout_width="wrap_content"
+            <AutoCompleteTextView
+                android:id="@+id/Home_txtPlaces"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="62dp"
-                android:textColor="@color/colorWhite"
-                android:textSize="17sp"
+                android:background="@color/colorPrimary"
                 android:hint="Search Park King"
+                android:textColor="@color/colorWhite"
                 android:textColorHint="@color/colorWhite"
-                app:fontFamily="@font/righteous"
-                android:background="@color/colorPrimary"/>
+                android:textSize="17sp"
+                app:fontFamily="@font/righteous" />
 
             <ImageButton
                 android:id="@+id/Home_btnNotif"
@@ -174,17 +174,16 @@
         </RelativeLayout>
 
         <ImageButton
-            android:id="@+id/imageButton2"
-            android:layout_width="23dp"
-            android:layout_height="22dp"
+            android:id="@+id/Home_btnDirect"
+            android:layout_width="41dp"
+            android:layout_height="39dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:layout_marginEnd="19dp"
-            android:layout_marginTop="71dp"
-            android:background="@color/colorWhite"
-            android:onClick="gotoMyLocation"
+            android:layout_marginTop="121dp"
+            android:background="@null"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/my_location_black" />
+            app:srcCompat="@drawable/img_466910" />
 
 
     </RelativeLayout>

@@ -29,6 +29,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -43,6 +45,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.directions.route.AbstractRouting;
+import com.directions.route.Route;
+import com.directions.route.RouteException;
+import com.directions.route.Routing;
+import com.directions.route.RoutingListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiActivity;
@@ -54,7 +61,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -69,7 +79,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Home extends AppCompatActivity {
+public class Home extends AppCompatActivity implements  OnMapReadyCallback, RoutingListener {
 
     SharedPreferences SharedPreference;
     SharedPreferences.Editor editor;
@@ -77,7 +87,7 @@ public class Home extends AppCompatActivity {
     private static final String PROFID_KEY = "ProfileIDKey";
     private String ProfileID;
 
-    private static String TAG = EditAccount.class.getSimpleName();
+    private static String TAG = Home.class.getSimpleName();
 
     private static final int ERROR_DIALOG_REQUEST = 9001;
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -94,11 +104,24 @@ public class Home extends AppCompatActivity {
 
 
     private DrawerLayout mDrawer;
-    private ImageButton btnMenu, btnNotif;
+    private ImageButton btnMenu, btnNotif, btnDirect;
     private NavigationView NavMenu;
     private ImageView NavImgUser;
     private TextView Name, Email;
     private String Firstname, Lastname, Middlename, Emailtxt, ProfilePicture;
+
+    private String BuildingID, name;
+    private double tolat, tolng, fromlat, fromlng;
+    private AutoCompleteTextView searchPlace;
+    private LatLng toPlace, fromPlace;
+    private List<Polyline> polylines;
+    private static final int[] COLORS = new int[]{R.color.primary_dark_material_light, R.color.colorRed, R.color.colorBlack};
+
+
+    private FusedLocationProviderClient mFusedLocationClient;
+
+    private List<Integer> Distances;
+    private int smallestDistance = 0, secondSmallestDistance = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,28 +147,16 @@ public class Home extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this.getApplicationContext(), COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermissionGranted = true;
                 initMap();
-                //putParkKingMarker();
             } else {
                 ActivityCompat.requestPermissions(this, permission, LOCATION_PERMISSION_REQUEST_CODE);
-                initMap();
-                //putParkKingMarker();
             }
         } else {
             ActivityCompat.requestPermissions(this, permission, LOCATION_PERMISSION_REQUEST_CODE);
-            initMap();
-            //putParkKingMarker();
         }
 
     }
 
     private void putParkKingMarker(){
-        markerOptions = new MarkerOptions();
-
-        /*markerOptions.title("De La Salle Lipa");
-        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo",80,110)));
-        markerOptions.position(new LatLng(13.9418, 121.1471));
-        gMap.addMarker(markerOptions);*/
-
         StringRequest strRequest = new StringRequest(Request.Method.GET,
                 getString(R.string.apiURL) + "get_parking_markers/",
                 new Response.Listener<String>() {
@@ -156,13 +167,63 @@ public class Home extends AppCompatActivity {
                             JSONArray result = object.getJSONArray("data");
                             for (int i = 0; i < result.length(); i++) {
                                 JSONObject c = result.getJSONObject(i);
-                                String name = c.getString("name");
-                                double latitude = Double.parseDouble(c.getString("latitude"));
-                                double longitude = Double.parseDouble(c.getString("longitude"));
-                                markerOptions.title(name);
-                                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo",80,110)));
-                                markerOptions.position(new LatLng(latitude, longitude));
-                                gMap.addMarker(markerOptions);
+                                BuildingID = c.getString("id");
+                                name = c.getString("name");
+                                latitude = Double.parseDouble(c.getString("latitude"));
+                                longitude = Double.parseDouble(c.getString("longitude"));
+
+                                StringRequest strRequest1 = new StringRequest(Request.Method.GET,
+                                        getString(R.string.apiURL) + "get_building_infos/" + BuildingID,
+                                        new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                try {
+                                                    JSONObject object = new JSONObject(response);
+                                                    String status = object.getString("status");
+                                                    if (status.equals("success")) {
+                                                        String num_of_avail_slots = object.getString("number_of_available_slots");
+                                                        markerOptions = new MarkerOptions();
+                                                        markerOptions.title(name);
+                                                        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo", 80, 110)));
+                                                        markerOptions.position(new LatLng(latitude, longitude));
+                                                        markerOptions.snippet(num_of_avail_slots);
+                                                        gMap.addMarker(markerOptions);
+                                                    } else if (status.equals("failed")) {
+                                                        String message = object.getString("message");
+                                                        Toast.makeText(getApplicationContext(),
+                                                                message, Toast.LENGTH_SHORT).show();
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }, new Response.ErrorListener() {
+
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        VolleyLog.d(TAG, "Error: " + error.getMessage());
+                                        Toast.makeText(getApplicationContext(),
+                                                error.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                }) {
+                                    @Override
+                                    protected Map<String, String> getParams() throws AuthFailureError {
+                                        Map<String, String> parameters = new HashMap<String, String>();
+                                        return parameters;
+                                    }
+                                };
+                                AppController.getInstance().addToRequestQueue(strRequest1);
+
+                                ArrayList<String> ParkKingPlaces = new ArrayList<String>();
+                                ArrayList<Double> ParkKingLat = new ArrayList<Double>();
+                                ArrayList<Double> ParkKingLong = new ArrayList<Double>();
+
+                                ParkKingPlaces.add(name);
+                                ParkKingLat.add(latitude);
+                                ParkKingLong.add(longitude);
+                                ArrayAdapter<String> dataAdapter = new CostumArrayAdapter(getApplicationContext(), ParkKingPlaces);
+                                searchPlace.setThreshold(1);
+                                searchPlace.setAdapter(dataAdapter);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -235,15 +296,23 @@ public class Home extends AppCompatActivity {
                 @Override
                 public void onLocationChanged(Location location) {
                     Toast.makeText(Home.this, "Heres10.", Toast.LENGTH_SHORT).show();
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    LatLng latLng = new LatLng(latitude, longitude);
+                    fromlat = location.getLatitude();
+                    fromlng = location.getLongitude();
+                    fromPlace = new LatLng(fromlat, fromlng);
                     Geocoder geocoder = new Geocoder(getApplicationContext());
                     try {
                         List<Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
-                        gMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                     } catch (IOException e) {
                         e.printStackTrace();
+                    }
+                    if(polylines.size() > 0) {
+                        Routing routing = new Routing.Builder()
+                                .travelMode(AbstractRouting.TravelMode.DRIVING)
+                                .withListener(Home.this)
+                                .waypoints(fromPlace, toPlace)
+                                .alternativeRoutes(true)
+                                .build();
+                        routing.execute();
                     }
 
                 }
@@ -269,15 +338,23 @@ public class Home extends AppCompatActivity {
                 @Override
                 public void onLocationChanged(Location location) {
                     Toast.makeText(Home.this, "Heres8.", Toast.LENGTH_SHORT).show();
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    LatLng latLng = new LatLng(latitude, longitude);
+                    fromlat = location.getLatitude();
+                    fromlng = location.getLongitude();
+                    fromPlace = new LatLng(fromlat, fromlng);
                     Geocoder geocoder = new Geocoder(getApplicationContext());
                     try {
                         List<Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
-                        gMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                     } catch (IOException e) {
                         e.printStackTrace();
+                    }
+                    if(polylines.size() > 0) {
+                        Routing routing = new Routing.Builder()
+                                .travelMode(AbstractRouting.TravelMode.DRIVING)
+                                .withListener(Home.this)
+                                .waypoints(fromPlace, toPlace)
+                                .alternativeRoutes(true)
+                                .build();
+                        routing.execute();
                     }
                 }
                 @Override
@@ -315,10 +392,6 @@ public class Home extends AppCompatActivity {
 
     }
 
-    /*private void moveCamera(LatLng latLng, float zoom) {
-        gMap.addMarker(new MarkerOptions().position(latLng).title("Your position"));
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
-    }*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -342,23 +415,8 @@ public class Home extends AppCompatActivity {
 
     private void initMap() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                gMap = googleMap;
-
-                if (mLocationPermissionGranted) {
-                    putParkKingMarker();
-                    getDeviceLocation();
-
-                    if (ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-                    gMap.setMyLocationEnabled(true);
-                }
-            }
-        });
+        mapFragment.getMapAsync(this);
+        putParkKingMarker();
     }
 
     public boolean isServicesOk(){
@@ -374,22 +432,21 @@ public class Home extends AppCompatActivity {
          }
          return false;
     }
-/*
-    @Override
-    public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-    }*/
+
 
     private void initEvents() {
-
-
-        getLocationPermission();
-
-        //initMap();
-
+        if(isServicesOk()){
+            getLocationPermission();
+        }
 
         //getVehicleOwnerInformation();
+
+        btnDirect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                makeDirections(toPlace);
+            }
+        });
 
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -526,106 +583,12 @@ public class Home extends AppCompatActivity {
         NavImgUser = (ImageView) findViewById(R.id.NavHeader_imgUser);
         Name = (TextView) findViewById(R.id.NavHeader_Name);
         Email = (TextView) findViewById(R.id.NavHeader_Email);
+        searchPlace = (AutoCompleteTextView) findViewById(R.id.Home_txtPlaces);
+        btnDirect = (ImageButton) findViewById(R.id.Home_btnDirect);
+        btnDirect.setVisibility(View.GONE);
+        polylines = new ArrayList<>();
     }
 
-    public void gotoMyLocation(View view) {
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    Toast.makeText(Home.this, "Heres10.", Toast.LENGTH_SHORT).show();
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    Geocoder geocoder = new Geocoder(getApplicationContext());
-                    try {
-                        List<Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
-                        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-
-                }
-            });
-
-        }else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    Toast.makeText(Home.this, "Here2.", Toast.LENGTH_SHORT).show();
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    Geocoder geocoder = new Geocoder(getApplicationContext());
-                    try {
-                        List<Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
-                        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                }
-                @Override
-                public void onProviderEnabled(String provider) {
-
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-
-                }
-            });
-        }else{
-            final CharSequence[] items  = {"Turn Location On", "Ignore"};
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
-            builder.setTitle("Turn Location Options");
-            builder.setItems(items, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if(items[which].equals("Turn Location On")){
-                        Toast.makeText(Home.this, "Here.", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(intent);
-
-                    }
-                }
-            });
-            builder.show();
-
-        }
-
-    }
 
     public void gotoCarList(View view) {
         Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
@@ -635,5 +598,173 @@ public class Home extends AppCompatActivity {
     public void gotoParkList(View view) {
         Intent  gotoParkList= new Intent(getApplicationContext(), ParkingListings.class);
         startActivity(gotoParkList);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        gMap = googleMap;
+            getDeviceLocation();
+            if (ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            gMap.setPadding(0, 150, 0, 170);
+            if (ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request   the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            gMap.setMyLocationEnabled(true);
+
+        gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                tolat = marker.getPosition().latitude;
+                tolng = marker.getPosition().longitude;
+                toPlace = new LatLng(tolat, tolng);
+                btnDirect.setVisibility(View.VISIBLE);
+                return false;
+            }
+        });
+
+        gMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                View v = getLayoutInflater().inflate(R.layout.info_window, null);
+
+                TextView bldgName = (TextView) v.findViewById(R.id.info_window_buildingname);
+                TextView noOfSlots = (TextView) v.findViewById(R.id.info_window_txtslotsavail);
+
+                bldgName.setText(marker.getTitle());
+                noOfSlots.setText("Available Slots: " + marker.getSnippet());
+
+                return v;
+            }
+        });
+    }
+
+    private void makeDirections(LatLng toPlace) {
+
+
+        LatLng fromPlace = new LatLng(fromlat, fromlng);
+
+        Toast.makeText(this, "Error: " +fromlng, Toast.LENGTH_LONG).show();
+
+        Routing routing = new Routing.Builder()
+                .travelMode(AbstractRouting.TravelMode.DRIVING)
+                .withListener(this)
+                .waypoints(fromPlace, toPlace)
+                .alternativeRoutes(true)
+                .build();
+        routing.execute();
+    }
+
+    @Override
+    public void onRoutingFailure(RouteException e) {
+        if(e != null) {
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }else {
+            Toast.makeText(this, "Something went wrong, Try again", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRoutingStart() {
+
+    }
+
+    @Override
+    public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
+
+        if(polylines.size() > 0) {
+            for (Polyline poly : polylines) {
+                poly.remove();
+            }
+        }
+
+        polylines = new ArrayList<>();
+
+        Distances = new ArrayList<>();
+        //add route(s) to the map.
+        for (int i = 0; i <route.size(); i++) {
+
+            //Distances.add(route.get(i).getDistanceValue());
+
+            if(smallestDistance == 0){
+                smallestDistance = i;
+            }
+            if(route.get(i).getDistanceValue() < secondSmallestDistance){
+                if(route.get(i).getDistanceValue() < smallestDistance){
+                    secondSmallestDistance = smallestDistance;
+                    smallestDistance = i;
+                }else{
+                    secondSmallestDistance = i;
+                }
+            }
+
+            if(route.get(i).getDistanceValue() <= 3){
+                Toast.makeText(this, "You have reached your destination.", Toast.LENGTH_LONG).show();
+            }
+            //In case of more than 5 alternative routes
+            /*int colorIndex = i % COLORS.length;
+
+            PolylineOptions polyOptions = new PolylineOptions();
+            polyOptions.color(getResources().getColor(COLORS[colorIndex]));
+            polyOptions.width(10 + i * 3);
+            polyOptions.addAll(route.get(i).getPoints());
+            Polyline polyline = gMap.addPolyline(polyOptions);
+            polylines.add(polyline);*/
+
+            //Toast.makeText(getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
+        }
+        for(int x = 0; x != 2; x++){
+            int colorIndex = x % COLORS.length;
+
+            if(x == 1){
+                PolylineOptions polyOptions = new PolylineOptions();
+                polyOptions.color(getResources().getColor(COLORS[colorIndex]));
+                polyOptions.width(10 + smallestDistance * 3);
+                polyOptions.addAll(route.get(smallestDistance).getPoints());
+                Polyline polyline = gMap.addPolyline(polyOptions);
+                polylines.add(polyline);
+            }else{
+                PolylineOptions polyOptions = new PolylineOptions();
+                polyOptions.color(getResources().getColor(COLORS[colorIndex]));
+                polyOptions.width(10 + secondSmallestDistance * 3);
+                polyOptions.addAll(route.get(secondSmallestDistance).getPoints());
+                Polyline polyline = gMap.addPolyline(polyOptions);
+                polylines.add(polyline);
+            }
+
+        }
+
+        /*for(int x = 0; x < Distances.size(); x++){
+            if(smallestDistance == 0){
+                smallestDistance = Distances.get(x);
+            }
+            if(Distances.get(x) < secondSmallestDistance){
+                if(Distances.get(x) < smallestDistance){
+                    smallestDistance = Distances.get(x);
+                }else{
+                    secondSmallestDistance = Distances.get(x);
+                }
+            }
+        }*/
+
+    }
+
+    @Override
+    public void onRoutingCancelled() {
+
     }
 }
