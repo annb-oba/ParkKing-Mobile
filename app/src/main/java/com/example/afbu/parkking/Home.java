@@ -122,6 +122,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
     private List<Integer> Distances;
     private int smallestDistance = 0, secondSmallestDistance = 0;
+    private boolean haveArrived = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -699,7 +700,6 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         for (int i = 0; i <route.size(); i++) {
 
             //Distances.add(route.get(i).getDistanceValue());
-
             if(smallestDistance == 0){
                 smallestDistance = i;
             }
@@ -711,9 +711,10 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                     secondSmallestDistance = i;
                 }
             }
-
-            if(route.get(i).getDistanceValue() <= 3){
+            Toast.makeText(getApplicationContext(), "Distance: "+ route.get(i).getDistanceValue(), Toast.LENGTH_LONG).show();
+            if(haveArrived == false && route.get(i).getDistanceValue() <= 10){
                 Toast.makeText(this, "You have reached your destination.", Toast.LENGTH_LONG).show();
+                haveArrived = true;
             }
             //In case of more than 5 alternative routes
             /*int colorIndex = i % COLORS.length;
