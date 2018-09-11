@@ -1,14 +1,17 @@
 <resources>
     <string name="app_name">Park King</string>
-    <string name="apiURL">http://10.23.249.3/Park-King-Initial/public/api/</string>
-    <string name="profilepictureURL">http://10.23.249.3/Park-King-Initial/public/uploads/vehicle_owners_profile_picture/</string>
-    <string name="vehiclepictureURL">http://10.23.249.3/Park-King-Initial/public/uploads/vehicle_owners_cars/</string>
-    <string name="addCarURL">http://192.168.100.9/Park-King-Initial/public/api/cars</string>
-    <string name="addCoOwnerURL">http://192.168.100.9/Park-King-Initial/public/api/relationships</string>
-    <string name="changeCarURL">http://192.168.100.9/Park-King-Initial/public/api/cars/changecar</string>
-    <string name="getCarInfoURL">http://192.168.100.9/Park-King-Initial/public/api/cars/profile/</string>
+    <string name="apiURL">http://10.23.249.106/ParkKingWeb/public/api/</string>
+    <string name="profilepictureURL">http://10.23.249.106/ParkKingWeb/public/uploads/vehicle_owners_profile_picture/</string>
+    <string name="vehiclepictureURL">http://10.23.249.106/ParkKingWeb/public/uploads/vehicle_owners_cars/</string>
+    <string name="addCarURL">http://10.23.249.106/ParkKingWeb/public/api/cars</string>
+    <string name="addCoOwnerURL">http://10.23.249.106/ParkKingWeb/public/api/relationships</string>
+    <string name="changeCarURL">http://10.23.249.106/ParkKingWeb/public/api/cars/changecar</string>
+    <string name="getCarInfoURL">http://10.23.249.106/ParkKingWeb/public/api/cars/profile/</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
     <string name="GOOGLE_MAPS_API_KEY">AIzaSyCtQjxcnoBE30CzU6Mu-koQYh5snMsykkY</string>
-    <string name="carImagesURL">http://10.23.32.206/ParkKingWeb/public/uploads/vehicle_owners_cars/</string>
+    <string name="carImagesURL">http://10.23.249.106/ParkKingWeb/public/uploads/vehicle_owners_cars/</string>
+    <string name="get_floor_url">http://10.23.249.106/ParkKingWeb/public/api/getFloorInfo/</string>
+    <string name="floor_map_folder">http://10.23.249.106/ParkKingWeb/public/uploads/floor_maps/</string>
+    <string name="system_files">http://10.23.249.106/ParkKingWeb/public/system/</string>
 </resources>

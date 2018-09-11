@@ -119,16 +119,18 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
 
     private FusedLocationProviderClient mFusedLocationClient;
-
+    private WifiScanner wifiScanner;
     private List<Integer> Distances;
     private int smallestDistance = 0, secondSmallestDistance = 0;
-    private boolean haveArrived = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        Intent myIntent = new Intent(Home.this, FloorMap.class);
+        startActivity(myIntent);
+        finish();
+        //wifiScanner = new WifiScanner(getApplicationContext());
         SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
         /*if(!SharedPreference.contains(PROFID_KEY)){
             Intent myIntent = new Intent(Home.this, StartUp.class);
@@ -139,6 +141,12 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
         initResources();
         initEvents();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //delete wifiScanner
     }
 
     private void getLocationPermission() {
@@ -700,6 +708,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         for (int i = 0; i <route.size(); i++) {
 
             //Distances.add(route.get(i).getDistanceValue());
+
             if(smallestDistance == 0){
                 smallestDistance = i;
             }
@@ -711,10 +720,13 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                     secondSmallestDistance = i;
                 }
             }
-            Toast.makeText(getApplicationContext(), "Distance: "+ route.get(i).getDistanceValue(), Toast.LENGTH_LONG).show();
-            if(haveArrived == false && route.get(i).getDistanceValue() <= 10){
+
+            if(route.get(i).getDistanceValue() <= 3){
                 Toast.makeText(this, "You have reached your destination.", Toast.LENGTH_LONG).show();
-                haveArrived = true;
+//                WifiScanner wifiScanner = new WifiScanner(getApplicationContext());
+//                if(wifiScanner.isInParkingLotRange(45d,16d)){
+//
+//                }
             }
             //In case of more than 5 alternative routes
             /*int colorIndex = i % COLORS.length;

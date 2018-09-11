@@ -86,7 +86,7 @@ public class CarProfile extends AppCompatActivity {
                 Intent goToCarCoOwners = new Intent(getApplicationContext(), CarCoOwners.class);
                 goToCarCoOwners.putExtra("car_id", carID);
                 startActivity(goToCarCoOwners);
-               
+
             }
         });
         btnBackHome.setOnClickListener(new View.OnClickListener() {
