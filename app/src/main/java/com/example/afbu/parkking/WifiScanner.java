@@ -40,12 +40,12 @@ public class WifiScanner {
         public void run () {
 
             if(Looper.myLooper() == Looper.getMainLooper()){
-                Log.w("LOG", "RUN UI THREAD");
+                // Log.w("LOG", "RUN UI THREAD");
             }
             else{
-                Log.w("LOG", "RUN BACKGROUND THREAD");
+                // Log.w("LOG", "RUN BACKGROUND THREAD");
             }
-            Log.w("LOG", "Batch Scan Starting");
+            // Log.w("LOG", "Batch Scan Starting");
             router1Signals = new ArrayList<Double>();
             router2Signals = new ArrayList<Double>();
             router3Signals = new ArrayList<Double>();
@@ -54,45 +54,45 @@ public class WifiScanner {
                 synchronized (pauseLock) {
                     if (!running) { // may have changed while waiting to
                         // synchronize on pauseLock
-                        Log.w("LOG", "Not Running");
+                        // Log.w("LOG", "Not Running");
                         break;
                     }
                     if (paused) {
                         try {
-                            Log.w("LOG", "Pause Wait");
+                            // Log.w("LOG", "Pause Wait");
                             pauseLock.wait();
 
                         } catch (InterruptedException ex) {
-                            Log.w("LOG", "Error");
+                            // Log.w("LOG", "Error");
                             break;
                         }
                         if (!running) { // running might have changed since we paused
-                            Log.w("LOG", "Not running while paused");
+                            // Log.w("LOG", "Not running while paused");
                             break;
                         }
                     }
 
                 }
                 if(Looper.myLooper() == Looper.getMainLooper()){
-                    Log.w("LOG", "WHILE UI THREAD");
+                    // Log.w("LOG", "WHILE UI THREAD");
                 }
                 else{
-                    Log.w("LOG", "WHILE BACKGROUND THREAD");
+                    // Log.w("LOG", "WHILE BACKGROUND THREAD");
                 }
                 if(scanCount>9){
-                    Log.w("LOG", "Ending Batch Scan");
+                    // Log.w("LOG", "Ending Batch Scan");
                     stop();
                     break;
                 }
                 else{
                     wifi.startScan();
-                    Log.w("LOG", "Starting Scan "+ Integer.toString(scanCount));
+                    // Log.w("LOG", "Starting Scan "+ Integer.toString(scanCount));
                     pause();
-                    Log.w("LOG", "Thread Running: "+ Boolean.toString(running));
-                    Log.w("LOG", "Paused: "+ Boolean.toString(paused));
+                    // Log.w("LOG", "Thread Running: "+ Boolean.toString(running));
+                    // Log.w("LOG", "Paused: "+ Boolean.toString(paused));
                     scanCount++;
                 }
-                Log.w("LOG", "Loop End");
+                // Log.w("LOG", "Loop End");
 
                 try {
                     sleep(0);
@@ -100,21 +100,21 @@ public class WifiScanner {
                     e.printStackTrace();
                 }
             }
-            Log.w("LOG", "Batch Scan Finished");
+            // Log.w("LOG", "Batch Scan Finished");
             for(int i=0; i<router1Signals.size();i++){
-                Log.w("LOG", "Scan "+Integer.toString(i+1)+": "+Double.toString(router1Signals.get(i)));
+                // Log.w("LOG", "Scan "+Integer.toString(i+1)+": "+Double.toString(router1Signals.get(i)));
             }
             routerDistance1=averageSignals(router1Signals);
             routerDistance2=averageSignals(router2Signals);
             routerDistance3=averageSignals(router3Signals);
-            Log.w("LOG", "Router 1 Average: "+Double.toString(routerDistance1));
-            Log.w("LOG", "Router 2 Average: "+Double.toString(routerDistance2));
-            Log.w("LOG", "Router 3 Average: "+Double.toString(routerDistance3));
+            // Log.w("LOG", "Router 1 Average: "+Double.toString(routerDistance1));
+            // Log.w("LOG", "Router 2 Average: "+Double.toString(routerDistance2));
+            // Log.w("LOG", "Router 3 Average: "+Double.toString(routerDistance3));
 
             setUserPosition(routerDistance1,routerDistance2,routerDistance3);
 
-            Log.w("LOG", "X: "+Double.toString(userPositionX));
-            Log.w("LOG", "Y: "+Double.toString(userPositionY));
+            // Log.w("LOG", "X: "+Double.toString(userPositionX));
+            // Log.w("LOG", "Y: "+Double.toString(userPositionY));
             scannerHandler.postDelayed(this,5000);
         }
         public void stop() {
@@ -132,7 +132,7 @@ public class WifiScanner {
 
         public void resume() {
             synchronized (pauseLock) {
-                Log.w("LOG", "Resuming...");
+                // Log.w("LOG", "Resuming...");
                 paused = false;
                 pauseLock.notifyAll(); // Unblocks thread
             }
@@ -144,9 +144,9 @@ public class WifiScanner {
         }
     }
     public WifiScanner(Context mContext, FloorMapView floorMapView){
-        router1 = new Router(0d,0d,45d);
-        router2 = new Router(45d,0d,45d);
-        router3 = new Router(22.5d,16d);
+        router1 = new Router(0d,0d,13.8d);
+        router2 = new Router(13.8d,0d,13.8d);
+        router3 = new Router(13.8d,13.8d);
         this.mContext = mContext;
         this.floorMapView = floorMapView;
         wifi = (WifiManager) this.mContext.getSystemService(Context.WIFI_SERVICE);
@@ -179,15 +179,15 @@ public class WifiScanner {
             public void onReceive(Context c, Intent intent)
             {
                 if(Looper.myLooper() == Looper.getMainLooper()){
-                    Log.w("LOG", "BROADCAST UI THREAD");
+                    // Log.w("LOG", "BROADCAST UI THREAD");
                 }
                 else{
-                    Log.w("LOG", "BROADCAST BACKGROUND THREAD");
+                    // Log.w("LOG", "BROADCAST BACKGROUND THREAD");
                 }
-                Log.w("LOG", "Broadcast Received");
+                // Log.w("LOG", "Broadcast Received");
                 List<ScanResult> results = finalWifi.getScanResults();
                 int size = results.size();
-                Log.w("LOG", "Results: "+ Integer.toString(results.size()));
+                // Log.w("LOG", "Results: "+ Integer.toString(results.size()));
                 getSignals(size,results);
                 wifiScannerRunnable.resume();
             }
@@ -229,14 +229,14 @@ public class WifiScanner {
 
     }
     public void getSignals(int size, List<ScanResult> results){
-        Log.w("LOG", "Getting Signals");
-        Log.w("LOG", "Size: "+Integer.toString(size));
+        // Log.w("LOG", "Getting Signals");
+        // Log.w("LOG", "Size: "+Integer.toString(size));
         for(int i=0; i<size; i++){
 
             if(results.get(i).SSID.equals("TP-LINK_POCKET_3020_79B902")){
                 routerDistance1 = calculateDistance(results.get(i).frequency,results.get(i).level);
                 router1Signals.add(routerDistance1);
-                Log.w("LOG", "Router 1: "+Double.toString(routerDistance1));
+                // Log.w("LOG", "Router 1: "+Double.toString(routerDistance1));
             }
             else if(results.get(i).SSID.equals("TP-LINK_POCKET_3020_79BABA")){
                 routerDistance2 = calculateDistance(results.get(i).frequency,results.get(i).level);
@@ -249,7 +249,7 @@ public class WifiScanner {
         }
     }
     public static List<Double> getOutliers(List<Double> input) {
-        Log.w("LOG", "GETTING OUTLIERS");
+        // Log.w("LOG", "GETTING OUTLIERS");
         List<Double> output = new ArrayList<Double>();
         List<Double> data1 = new ArrayList<Double>();
         List<Double> data2 = new ArrayList<Double>();

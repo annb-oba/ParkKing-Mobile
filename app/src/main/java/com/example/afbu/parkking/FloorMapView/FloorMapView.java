@@ -5,7 +5,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.CornerPathEffect;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
@@ -16,7 +20,15 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
+import com.example.afbu.parkking.AppController;
 import com.example.afbu.parkking.CarObject;
+import com.example.afbu.parkking.FloorMap;
 import com.example.afbu.parkking.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,20 +45,32 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FloorMapView extends View {
+    private static final String TAG = FloorMapView.class.getSimpleName();
+    private Context mContext;
+
     private Bitmap floorImage;
     private List<Bitmap> floorIndicators;
     private List<JSONObject> floorIndicatorCoords;
-    private Context mContext;
+
     private float userPositionX, userPositionY;
     private float floor_map_width,floor_map_height;
+    private int x_line_count, y_line_count;
+
+    private Paint routePaint;
+    private Path routePath;
 
     private List<Bitmap> floorSlots;
     private List<JSONObject> floorSlotsInformation;
     private static final String[] slotStatusFile = {"open.png", "occupied.png", "closed.png"};
+    private int[][] grid_coords;
+
     private Bitmap userBitmap;
+
     private float floorImagePosX, floorImagePosY;
     private float floorImageWidth, floorImageHeight;
     private float mLastTouchX, mLastTouchY;
@@ -57,6 +81,7 @@ public class FloorMapView extends View {
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private  DatabaseReference slotRef;
+    private String floorID;
 
     public FloorMapView(Context context) {
         super(context);
@@ -95,7 +120,7 @@ public class FloorMapView extends View {
         mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
 
         userBitmap = null;
-
+        grid_coords = null;
     }
 
     @Override
@@ -135,22 +160,29 @@ public class FloorMapView extends View {
                 try {
                     float floorSlotX = ((float) floorSlotsInformation.get(i).getDouble("x") * floorImageWidth - 50) + floorImagePosX;
                     float floorSlotY = ((float) floorSlotsInformation.get(i).getDouble("y") * floorImageHeight - 150) + floorImagePosY;
-                    Log.w("LOG", "Slot X: "+ Double.toString(floorSlotsInformation.get(i).getDouble("x")));
-                    Log.w("LOG", "Image Width: "+ Double.toString(floorImageWidth));
-                    Log.w("LOG", "Floor Image Pos X: "+ Double.toString(floorImagePosX));
-                    Log.w("LOG", "Floor Slot X: "+ Float.toString(floorSlotX));
                     canvas.drawBitmap(floorSlots.get(i), floorSlotX, floorSlotY, null);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
 
-            canvas.drawBitmap(userBitmap,(userPositionX-(getWidth()/10f)/2)+floorImagePosX,(userPositionY-(getWidth()/10f)/2)+floorImagePosY,null);
+            if(grid_coords != null) {
+                routePath = new Path();
 
+                routePath.moveTo((((grid_coords[0][0] / (float) x_line_count) * floorImageWidth) + floorImagePosX) + (routePaint.getStrokeWidth() / 2), (((grid_coords[0][1] / (float) y_line_count) * floorImageHeight) + floorImagePosY) + (routePaint.getStrokeWidth() / 2));
+                for(int i = 1; i < grid_coords.length; i++) {
+                    routePath.lineTo((((grid_coords[i][0] / (float) x_line_count) * floorImageWidth) + floorImagePosX) + (routePaint.getStrokeWidth() / 2), (((grid_coords[i][1] / (float) y_line_count) * floorImageHeight) + floorImagePosY) + (routePaint.getStrokeWidth() / 2));
+                }
+                canvas.drawPath(routePath, routePaint);
+
+                routePath.reset();
+           }
+
+            canvas.drawBitmap(userBitmap,(userPositionX-(getWidth()/10f)/2)+floorImagePosX,(userPositionY-(getWidth()/10f)/2)+floorImagePosY,null);
         }
     }
 
-    public void setFloorMapInformation(String floorMapURL, JSONArray floorIndicatorsJSONArray, JSONArray floorSlotsJSONArray,Double floor_width, Double floor_height) {
+    public void setFloorMapInformation(String floorMapURL, JSONArray floorIndicatorsJSONArray, JSONArray floorSlotsJSONArray,Double floor_width, Double floor_height, String floorID) {
         floorImagePosX = 0f;
         floorImagePosY = 0f;
         floorIndicators = new ArrayList<>();
@@ -161,11 +193,9 @@ public class FloorMapView extends View {
 
         floorSlots = new ArrayList<>();
         floorSlotsInformation = new ArrayList<>();
+        this.floorID = floorID;
 
-        if (floorIndicatorsJSONArray.length() == 0) {
-            Toast.makeText(getContext(), "None", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getContext(), "Has!", Toast.LENGTH_SHORT).show();
+        if (floorIndicatorsJSONArray.length() > 0) {
             for (int i = 0; i < floorIndicatorsJSONArray.length(); i++) {
                 try {
                     floorIndicatorCoords.add(floorIndicatorsJSONArray.getJSONObject(i));
@@ -179,7 +209,6 @@ public class FloorMapView extends View {
         if (floorSlotsJSONArray.length() == 0) {
             Toast.makeText(getContext(), "No Slots", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getContext(), "Has Slots", Toast.LENGTH_SHORT).show();
             for (int i = 0; i < floorSlotsJSONArray.length(); i++) {
                 try {
                     floorSlotsInformation.add(floorSlotsJSONArray.getJSONObject(i));
@@ -192,12 +221,14 @@ public class FloorMapView extends View {
 
         new RetrieveFloorImageTask().execute(floorMapURL);
         setSlotStatusListeners();
+
         userBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.user_position);
         Matrix matrix = new Matrix();
         RectF src = new RectF(0, 0, userBitmap.getWidth(), userBitmap.getHeight());
         RectF dest = new RectF(0, 0, getWidth()/10f, getWidth()/10f);
         matrix.setRectToRect(src, dest, Matrix.ScaleToFit.CENTER);
-        userBitmap=Bitmap.createBitmap(userBitmap, 0, 0, userBitmap.getWidth(), userBitmap.getHeight(), matrix, true);
+        userBitmap = Bitmap.createBitmap(userBitmap, 0, 0, userBitmap.getWidth(), userBitmap.getHeight(), matrix, true);
+
         postInvalidate();
     }
 
@@ -214,8 +245,9 @@ public class FloorMapView extends View {
                 slotRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        changeSlotBitmapStatus(slotStatusFile[Integer.valueOf(String.valueOf(dataSnapshot.child("status").getValue()))], finalI);
-                        Toast.makeText(getContext(), String.valueOf(slot_id), Toast.LENGTH_SHORT).show();
+                        if(dataSnapshot.exists()) {
+                            changeSlotBitmapStatus(slotStatusFile[Integer.valueOf(String.valueOf(dataSnapshot.child("status").getValue()))], finalI);
+                        }
                     }
 
                     @Override
@@ -354,6 +386,19 @@ public class FloorMapView extends View {
                 mLastTouchX = x;
                 mLastTouchY = y;
 
+                for (int i = 0; i < floorSlotsInformation.size(); i ++) {
+                    try {
+                        float bitmapXPosition = ((float) floorSlotsInformation.get(i).getDouble("x") * floorImageWidth - 50) + floorImagePosX;
+                        float bitmapYPosition = ((float) floorSlotsInformation.get(i).getDouble("y") * floorImageHeight - 150) + floorImagePosY;
+
+                        if(x > (bitmapXPosition) * mScaleFactor && x < (bitmapXPosition + floorSlots.get(i).getWidth()) * mScaleFactor && y > (bitmapYPosition) * mScaleFactor && y < (bitmapYPosition + floorSlots.get(i).getHeight()) * mScaleFactor) {
+                            getSlotInformation(i);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
@@ -378,11 +423,79 @@ public class FloorMapView extends View {
 
         return true;
     }
+
+    private void getSlotInformation(int i) {
+        try {
+            StringRequest strRequest = new StringRequest(Request.Method.GET, mContext.getString(R.string.getFloorRouteURL) + floorID + "/entrance/slot," + floorSlotsInformation.get(i).getString("slot_id"), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Log.d(TAG, response.toString());
+                    try {
+                        JSONObject requestObj = new JSONObject(response);
+                        if(requestObj.getBoolean("success")) {
+                            JSONArray routeJSONArray = new JSONArray(requestObj.getString("route"));
+                            grid_coords = new int[routeJSONArray.length()][2];
+                            for(int i = 0; i < routeJSONArray.length(); i++) {
+                                JSONArray coordJSONArray = new JSONArray(routeJSONArray.getString(i));
+                                grid_coords[i][0] = Integer.parseInt(coordJSONArray.get(0).toString());
+                                grid_coords[i][1] = Integer.parseInt(coordJSONArray.get(1).toString());
+                            }
+
+                            x_line_count = requestObj.getInt("x_line_count");
+                            y_line_count = requestObj.getInt("y_line_count");
+
+                            routePaint = new Paint();
+                            routePaint.setAntiAlias(true); // enable anti aliasing
+                            routePaint.setColor(Color.WHITE); // set default color to white
+                            routePaint.setDither(true); // enable dithering
+                            routePaint.setStyle(Paint.Style.STROKE); // set to STOKE
+                            routePaint.setStrokeJoin(Paint.Join.ROUND); // set the join to round you want
+                            routePaint.setStrokeCap(Paint.Cap.ROUND);  // set the paint cap to round too
+                            routePaint.setStrokeWidth(getHeight() / y_line_count);
+                            routePaint.setPathEffect(new CornerPathEffect(getHeight() / 20)); // set the path effect when they join.
+
+                            postInvalidate();
+                        } else {
+                            Toast.makeText(mContext, requestObj.getString("message"), Toast.LENGTH_SHORT).show();
+                            routePaint = null;
+                            routePath = null;
+                            grid_coords = null;
+                            x_line_count = 0;
+                            y_line_count = 0;
+
+                            postInvalidate();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+                    Toast.makeText(mContext,
+                            error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> parameters = new HashMap<String, String>();
+                    return parameters;
+                }
+            };
+            AppController.getInstance().addToRequestQueue(strRequest);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void repositionUserBitmap(Double userPercentageX,Double userPercentageY){
         userPositionX = (userPercentageX.floatValue()/floor_map_width)*floorImageWidth;
         userPositionY = (userPercentageY.floatValue()/floor_map_height)*floorImageHeight;
-        Log.w("LOG", "CANVAS X: "+ Float.toString(userPositionX));
-        Log.w("LOG", "CANVAS Y: "+ Float.toString(userPositionY));
+        // // Log.w("LOG", "CANVAS X: "+ Float.toString(userPositionX));
+        // // Log.w("LOG", "CANVAS Y: "+ Float.toString(userPositionY));
 
         postInvalidate();
     }

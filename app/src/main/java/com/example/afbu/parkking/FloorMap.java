@@ -24,6 +24,7 @@ public class FloorMap extends AppCompatActivity {
 
     private FloorMapView floorMapView;
     private WifiScanner wifiScanner;
+    private String floorID = "3";
     private static final String TAG = FloorMap.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +36,7 @@ public class FloorMap extends AppCompatActivity {
         wifiScanner = new WifiScanner (getApplicationContext(),floorMapView);
     }
     public void initFloorMap(){
-        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.get_floor_url) + "2", new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.get_floor_url) + floorID, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, response.toString());
@@ -48,8 +49,6 @@ public class FloorMap extends AppCompatActivity {
                         JSONArray floorIndicatorsArray = new JSONArray();
                         if (floorIndicatorsObj.getBoolean("has_indicators")) {
                             floorIndicatorsArray = new JSONArray(floorIndicatorsObj.getString("indicators"));
-                        } else {
-                            Toast.makeText(FloorMap.this, "No Indicators", Toast.LENGTH_SHORT).show();
                         }
 
                         JSONObject floorSlotsObj = new JSONObject(floorObj.getString("floor_slots"));
@@ -62,7 +61,8 @@ public class FloorMap extends AppCompatActivity {
 
                         floorMapView.setFloorMapInformation(
                                 getString(R.string.floor_map_folder) + floorObj.getString("image"),
-                                floorIndicatorsArray, floorSlotsArray,floorObj.getDouble("map_width"),floorObj.getDouble("map_height"));
+                                floorIndicatorsArray, floorSlotsArray, floorObj.getDouble("map_width"),floorObj.getDouble("map_height"),
+                                floorID);
                     } else {
                         Toast.makeText(getApplicationContext(), responseObj.getString("message"), Toast.LENGTH_SHORT).show();
                     }
