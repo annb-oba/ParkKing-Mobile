@@ -90,19 +90,19 @@
                     android:layout_marginLeft="5dp">
 
                     <TextView
-                        android:id="@+id/Home_txtParkingNearYou"
+                        android:id="@+id/Home_txtAvailSlot"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
                         android:layout_centerHorizontal="true"
                         android:gravity="center"
-                        android:text="Near Park King:"
+                        android:text="Available Slot:"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         app:fontFamily="@font/open_sans" />
 
                     <TextView
-                        android:id="@+id/Home_txtNoOfParking"
+                        android:id="@+id/Home_txtNoOfAvailSlot"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"

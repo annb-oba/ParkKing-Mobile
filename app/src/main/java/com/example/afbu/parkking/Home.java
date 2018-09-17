@@ -107,7 +107,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     private ImageButton btnMenu, btnNotif, btnDirect;
     private NavigationView NavMenu;
     private ImageView NavImgUser;
-    private TextView Name, Email;
+    private TextView Name, Email, AvailSlot;
     private String Firstname, Lastname, Middlename, Emailtxt, ProfilePicture;
 
     private String BuildingID, name;
@@ -122,6 +122,9 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     private WifiScanner wifiScanner;
     private List<Integer> Distances;
     private int smallestDistance = 0, secondSmallestDistance = 0;
+
+    private ArrayList<String> ParkKingPlaces;
+    private ArrayList<Double> ParkKingLat,ParkKingLong;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,68 +175,34 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                     @Override
                     public void onResponse(String response) {
                         try {
+                            ParkKingPlaces = new ArrayList<String>();
+                            ParkKingLat = new ArrayList<Double>();
+                            ParkKingLong = new ArrayList<Double>();
                             JSONObject object = new JSONObject(response);
                             JSONArray result = object.getJSONArray("data");
-                            for (int i = 0; i < result.length(); i++) {
+                            for (int i = 0; i <= result.length(); i++) {
                                 JSONObject c = result.getJSONObject(i);
                                 BuildingID = c.getString("id");
                                 name = c.getString("name");
                                 latitude = Double.parseDouble(c.getString("latitude"));
                                 longitude = Double.parseDouble(c.getString("longitude"));
 
-                                StringRequest strRequest1 = new StringRequest(Request.Method.GET,
-                                        getString(R.string.apiURL) + "get_building_infos/" + BuildingID,
-                                        new Response.Listener<String>() {
-                                            @Override
-                                            public void onResponse(String response) {
-                                                try {
-                                                    JSONObject object = new JSONObject(response);
-                                                    String status = object.getString("status");
-                                                    if (status.equals("success")) {
-                                                        String num_of_avail_slots = object.getString("number_of_available_slots");
-                                                        markerOptions = new MarkerOptions();
-                                                        markerOptions.title(name);
-                                                        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo", 80, 110)));
-                                                        markerOptions.position(new LatLng(latitude, longitude));
-                                                        markerOptions.snippet(num_of_avail_slots);
-                                                        gMap.addMarker(markerOptions);
-                                                    } else if (status.equals("failed")) {
-                                                        String message = object.getString("message");
-                                                        Toast.makeText(getApplicationContext(),
-                                                                message, Toast.LENGTH_SHORT).show();
-                                                    }
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        }, new Response.ErrorListener() {
-
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        VolleyLog.d(TAG, "Error: " + error.getMessage());
-                                        Toast.makeText(getApplicationContext(),
-                                                error.getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                }) {
-                                    @Override
-                                    protected Map<String, String> getParams() throws AuthFailureError {
-                                        Map<String, String> parameters = new HashMap<String, String>();
-                                        return parameters;
-                                    }
-                                };
-                                AppController.getInstance().addToRequestQueue(strRequest1);
-
-                                ArrayList<String> ParkKingPlaces = new ArrayList<String>();
-                                ArrayList<Double> ParkKingLat = new ArrayList<Double>();
-                                ArrayList<Double> ParkKingLong = new ArrayList<Double>();
+                                markerOptions = new MarkerOptions();
+                                markerOptions.title(name);
+                                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo", 80, 110)));
+                                markerOptions.position(new LatLng(latitude, longitude));
+                                markerOptions.snippet(BuildingID);
+                                gMap.addMarker(markerOptions);
 
                                 ParkKingPlaces.add(name);
                                 ParkKingLat.add(latitude);
                                 ParkKingLong.add(longitude);
+
                                 ArrayAdapter<String> dataAdapter = new CostumArrayAdapter(getApplicationContext(), ParkKingPlaces);
                                 searchPlace.setThreshold(1);
                                 searchPlace.setAdapter(dataAdapter);
                             }
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -596,6 +565,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         btnDirect = (ImageButton) findViewById(R.id.Home_btnDirect);
         btnDirect.setVisibility(View.GONE);
         polylines = new ArrayList<>();
+        AvailSlot = (TextView) findViewById(R.id.Home_txtNoOfAvailSlot);
     }
 
 
@@ -632,6 +602,44 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                String title = marker.getSnippet();
+
+                StringRequest strRequest1 = new StringRequest(Request.Method.GET,
+                        getString(R.string.apiURL) + "get_building_infos/" + title,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    JSONObject object = new JSONObject(response);
+                                    String status = object.getString("status");
+                                    if (status.equals("success")) {
+                                        String num_of_avail_slots = object.getString("number_of_available_slots");
+                                        AvailSlot.setText(num_of_avail_slots);
+                                    } else if (status.equals("failed")) {
+                                        String message = object.getString("message");
+                                        Toast.makeText(getApplicationContext(),
+                                                message, Toast.LENGTH_SHORT).show();
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        VolleyLog.d(TAG, "Error: " + error.getMessage());
+                        Toast.makeText(getApplicationContext(),
+                                error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> parameters = new HashMap<String, String>();
+                        return parameters;
+                    }
+                };
+                AppController.getInstance().addToRequestQueue(strRequest1);
 
                 tolat = marker.getPosition().latitude;
                 tolng = marker.getPosition().longitude;
@@ -652,10 +660,9 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                 View v = getLayoutInflater().inflate(R.layout.info_window, null);
 
                 TextView bldgName = (TextView) v.findViewById(R.id.info_window_buildingname);
-                TextView noOfSlots = (TextView) v.findViewById(R.id.info_window_txtslotsavail);
 
                 bldgName.setText(marker.getTitle());
-                noOfSlots.setText("Available Slots: " + marker.getSnippet());
+                //noOfSlots.setText("Available Slots: " + marker.getSnippet());
 
                 return v;
             }

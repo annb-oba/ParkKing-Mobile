@@ -19,13 +19,4 @@
         android:textStyle="bold"
         app:fontFamily="@font/open_sans" />
 
-    <TextView
-        android:id="@+id/info_window_txtslotsavail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/info_window_buildingname"
-        android:layout_below="@+id/info_window_buildingname"
-        android:text="Available Slots: 0"
-        app:fontFamily="@font/open_sans" />
-
 </LinearLayout>
