@@ -8,14 +8,13 @@
     tools:context=".Home">
 
 
-
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/map"
-        tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
+        tools:context=".MapsActivity" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -23,6 +22,7 @@
         android:orientation="vertical">
 
         <RelativeLayout
+            android:id="@+id/Home_searchBarRelativeLayout"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_marginLeft="10dp"
@@ -37,8 +37,9 @@
                 android:layout_width="25dp"
                 android:layout_height="22dp"
                 android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
                 android:background="@null"
                 app:srcCompat="@drawable/menu" />
 
@@ -47,8 +48,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="62dp"
+                android:layout_marginLeft="62dp"
                 android:background="@color/colorPrimary"
                 android:hint="Search Park King"
                 android:textColor="@color/colorWhite"
@@ -60,9 +62,9 @@
                 android:id="@+id/Home_btnNotif"
                 android:layout_width="27dp"
                 android:layout_height="26dp"
-                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="14dp"
+                android:layout_marginRight="14dp"
                 android:background="@null"
                 android:scaleType="fitCenter"
                 app:srcCompat="@drawable/bell2" />
@@ -71,126 +73,139 @@
 
 
         <RelativeLayout
+
             android:layout_width="match_parent"
             android:layout_height="65dp"
-            android:layout_alignParentStart="true"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
             android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
             android:background="@color/colorWhite"
-            android:padding="3dp">
+            android:elevation="5dp"
+            >
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp">
+                android:layout_height="match_parent">
 
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp">
-
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
                     <TextView
                         android:id="@+id/Home_txtAvailSlot"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_centerHorizontal="true"
-                        android:gravity="center"
-                        android:text="Available Slot:"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:fontFamily="@font/open_sans" />
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:paddingVertical="2dp"
+                        android:text="Available Slots"
+                        android:textAlignment="center"
+                        android:textColor="#000"
+                         />
 
                     <TextView
                         android:id="@+id/Home_txtNoOfAvailSlot"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
-                        android:gravity="center"
-                        android:text="0"
-                        android:textSize="32sp"
-                        android:textStyle="bold"
-                        app:fontFamily="@font/open_sans" />
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="60dp"
-                    android:layout_marginRight="60dp"
-                    android:onClick="gotoCarList">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_centerHorizontal="true"
-                        android:gravity="center"
-                        android:text="Car List"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:fontFamily="@font/open_sans" />
-
-                    <ImageView
-                        android:id="@+id/imageView2"
-                        android:layout_width="40dp"
-                        android:layout_height="37dp"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
-                        app:srcCompat="@drawable/baseline_view_list_black_18dp" />
-                </RelativeLayout>
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textColor="#000"
+                        android:textSize="32dp"
+                        android:textStyle="bold"
+                        />
+                </LinearLayout>
 
-                <RelativeLayout
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginRight="5dp"
-                    android:onClick="gotoParkList">
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/Home_txtCarList"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:paddingVertical="2dp"
+                        android:text="Floors"
+                        android:textAlignment="center"
+                        android:textColor="#000"
+                         />
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_centerHorizontal="true"
-                        android:gravity="center"
-                        android:text="Parking History"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:fontFamily="@font/open_sans" />
+                        android:id="@+id/Home_txtNoOfFloors"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textColor="#000"
+                        android:textSize="32sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
-                        android:src="@drawable/history" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
 
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:paddingVertical="2dp"
+                        android:text="Distance"
+                        android:textAlignment="center"
+                        android:textColor="#000"
 
-                </RelativeLayout>
+                         />
+
+                    <TextView
+                        android:id="@+id/Home_txtDistance"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0km"
+                        android:textAlignment="center"
+                        android:textColor="#000"
+                        android:textSize="32sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
 
             </LinearLayout>
 
         </RelativeLayout>
 
+
+
+        <ImageButton
+            android:id="@+id/Home_btnPosition"
+            android:layout_width="41dp"
+            android:layout_marginRight="10dp"
+            android:layout_height="39dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/Home_searchBarRelativeLayout"
+            android:layout_marginTop="50dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/position" />
+
         <ImageButton
             android:id="@+id/Home_btnDirect"
             android:layout_width="41dp"
             android:layout_height="39dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="19dp"
-            android:layout_marginTop="121dp"
+            android:layout_below="@+id/Home_btnPosition"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="10dp"
             android:background="@null"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/img_466910" />
 
-
     </RelativeLayout>
-
-
-
-
 
 
     <android.support.design.widget.NavigationView
@@ -203,8 +218,6 @@
         app:menu="@menu/navigation_menu">
 
     </android.support.design.widget.NavigationView>
-
-
 
 
 </android.support.v4.widget.DrawerLayout>

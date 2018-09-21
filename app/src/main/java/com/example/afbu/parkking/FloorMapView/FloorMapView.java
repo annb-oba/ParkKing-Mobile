@@ -207,7 +207,7 @@ public class FloorMapView extends View {
         }
 
         if (floorSlotsJSONArray.length() == 0) {
-            Toast.makeText(getContext(), "No Slots", Toast.LENGTH_SHORT).show();
+           // Toast.makeText(getContext(), "No Slots", Toast.LENGTH_SHORT).show();
         } else {
             for (int i = 0; i < floorSlotsJSONArray.length(); i++) {
                 try {
@@ -319,6 +319,7 @@ public class FloorMapView extends View {
 
                 floorImage = myBitmap;
                 floorImage = resizeBitmap(floorImage);
+                postInvalidate();
             } catch (IOException e) {
                 // Log exception
                 return null;
@@ -356,9 +357,18 @@ public class FloorMapView extends View {
     }
 
     private Bitmap resizeBitmap(Bitmap floorImage) {
-        float proportion = getHeight() / floorImage.getHeight();
-        floorImageWidth = proportion * floorImage.getWidth();
-        floorImageHeight = getHeight();
+        float proportion = 0f;
+        if(floorImage.getWidth() > floorImage.getHeight()) {
+            proportion = getHeight() / floorImage.getHeight();
+            floorImageWidth = proportion * floorImage.getWidth();
+            floorImageHeight = getHeight();
+        } else {
+            proportion = getWidth() / floorImage.getWidth();
+            floorImageHeight = proportion * floorImage.getHeight();
+            floorImageWidth = getWidth();
+
+            mScaleFactor = getHeight() / floorImageHeight;
+        }
 
         Matrix matrix = new Matrix();
 

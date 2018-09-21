@@ -61,6 +61,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/relativeLayout2"
         app:layout_constraintVertical_bias="0.0">
+        
+        <LinearLayout
+            android:id="@+id/FloorMap_loadingLayout"
+            android:padding="50dp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:layout_weight="30"
+            >
+            <ProgressBar
+                android:layout_width="150dp"
+                android:layout_gravity="center"
+                android:layout_height="0dp"
+                android:indeterminate="true"
+                android:layout_weight="4"
+                android:indeterminateTintMode="src_atop"
+                android:indeterminateTint="@color/colorPrimary"/>
+            <TextView
+                android:id="@+id/FloorMap_txtProgressBarTxt"
+                android:textSize="25dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Searching for Floors . . ."
+                android:textAlignment="center"/>
+        </LinearLayout>
 
         <com.example.afbu.parkking.FloorMapView.FloorMapView
             android:id="@+id/FloorMap_floorMapView"

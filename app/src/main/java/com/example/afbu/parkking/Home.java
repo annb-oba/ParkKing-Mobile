@@ -85,6 +85,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     SharedPreferences.Editor editor;
     private static final String PreferenceName = "UserPreference";
     private static final String PROFID_KEY = "ProfileIDKey";
+    private static final String ON_FLOOR_KEY = "OnFloorKey";
     private String ProfileID;
 
     private static String TAG = Home.class.getSimpleName();
@@ -102,9 +103,9 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     private double latitude, longitude;
     private MarkerOptions markerOptions;
 
-
+    private Object mLastKnownLocation;
     private DrawerLayout mDrawer;
-    private ImageButton btnMenu, btnNotif, btnDirect;
+    private ImageButton btnMenu, btnNotif, btnDirect,btnPosition;
     private NavigationView NavMenu;
     private ImageView NavImgUser;
     private TextView Name, Email, AvailSlot;
@@ -117,6 +118,11 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     private List<Polyline> polylines;
     private static final int[] COLORS = new int[]{R.color.primary_dark_material_light, R.color.colorRed, R.color.colorBlack};
 
+    private ArrayList<LatLng> positionList;
+    private ArrayList<Integer> buildingIdList;
+    private ArrayList<String> routersJSONArray;
+    private ArrayList<String> floorIdList;
+    private ArrayList<String> floorInfoTitle;
 
     private FusedLocationProviderClient mFusedLocationClient;
     private WifiScanner wifiScanner;
@@ -125,22 +131,14 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
     private ArrayList<String> ParkKingPlaces;
     private ArrayList<Double> ParkKingLat,ParkKingLong;
+    private boolean haveArrived = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Intent myIntent = new Intent(Home.this, FloorMap.class);
-        startActivity(myIntent);
-        finish();
-        //wifiScanner = new WifiScanner(getApplicationContext());
-        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-        /*if(!SharedPreference.contains(PROFID_KEY)){
-            Intent myIntent = new Intent(Home.this, StartUp.class);
-            startActivity(myIntent);
-        }else{
-            ProfileID = SharedPreference.getString(PROFID_KEY, "");
-        }*/
+
+        //getBuildingFloorRouters("4");
 
         initResources();
         initEvents();
@@ -151,7 +149,33 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         super.onPause();
         //delete wifiScanner
     }
+    public void getBuildingFloorRouters(String building_id){
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.apiURL) + "get_building_floor_routers/"+building_id, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                    Intent myIntent = new Intent(Home.this, FloorMap.class);
+                    myIntent.putExtra("floor_info",response);
+                    startActivity(myIntent);
+                    finish();
+            }
+        }, new Response.ErrorListener() {
 
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<String, String>();
+                return parameters;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(strRequest);
+
+    }
     private void getLocationPermission() {
         String[] permission = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
@@ -180,7 +204,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                             ParkKingLong = new ArrayList<Double>();
                             JSONObject object = new JSONObject(response);
                             JSONArray result = object.getJSONArray("data");
-                            for (int i = 0; i <= result.length(); i++) {
+                            for (int i = 0; i < result.length(); i++) {
                                 JSONObject c = result.getJSONObject(i);
                                 BuildingID = c.getString("id");
                                 name = c.getString("name");
@@ -234,7 +258,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
     private void getDeviceLocation() {
 
-        /*mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         try {
             if (mLocationPermissionGranted) {
                 Task location = mFusedLocationProviderClient.getLastLocation();
@@ -256,7 +280,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         } catch (SecurityException e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Get Device Location: Security Exception:" + e.getMessage());
-        }*/
+        }
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -273,7 +297,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    Toast.makeText(Home.this, "Heres10.", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Home.this, "Heres10.", Toast.LENGTH_SHORT).show();
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
@@ -315,7 +339,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    Toast.makeText(Home.this, "Heres8.", Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(Home.this, "Heres8.", Toast.LENGTH_SHORT).show();
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
@@ -395,6 +419,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         putParkKingMarker();
+
     }
 
     public boolean isServicesOk(){
@@ -418,7 +443,13 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         }
 
         //getVehicleOwnerInformation();
-
+        btnPosition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getDeviceLocation();
+                Log.w("LOG","BTN POSITION CLICKED");
+            }
+        });
         btnDirect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -564,6 +595,8 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         searchPlace = (AutoCompleteTextView) findViewById(R.id.Home_txtPlaces);
         btnDirect = (ImageButton) findViewById(R.id.Home_btnDirect);
         btnDirect.setVisibility(View.GONE);
+        btnPosition = (ImageButton) findViewById(R.id.Home_btnPosition);
+        btnPosition.setVisibility(View.GONE);
         polylines = new ArrayList<>();
         AvailSlot = (TextView) findViewById(R.id.Home_txtNoOfAvailSlot);
     }
@@ -597,13 +630,16 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
-            gMap.setMyLocationEnabled(true);
+            //gMap.setMyLocationEnabled(true);
 
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 String title = marker.getSnippet();
-
+                positionList = new ArrayList<LatLng>();
+                buildingIdList = new ArrayList<Integer>();
+                positionList.add(new LatLng(latitude,longitude));
+                buildingIdList.add(Integer.valueOf(title));
                 StringRequest strRequest1 = new StringRequest(Request.Method.GET,
                         getString(R.string.apiURL) + "get_building_infos/" + title,
                         new Response.Listener<String>() {
@@ -628,7 +664,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        VolleyLog.d(TAG, "Error: " + error.getMessage());
+                        VolleyLog.d(TAG, "GMAP ONCLICK Error: " + error.getMessage());
                         Toast.makeText(getApplicationContext(),
                                 error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -667,6 +703,8 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                 return v;
             }
         });
+
+        btnPosition.setVisibility(View.VISIBLE);
     }
 
     private void makeDirections(LatLng toPlace) {
@@ -674,13 +712,14 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
         LatLng fromPlace = new LatLng(fromlat, fromlng);
 
-        Toast.makeText(this, "Error: " +fromlng, Toast.LENGTH_LONG).show();
+       // Toast.makeText(this, "Error: " +fromlng, Toast.LENGTH_LONG).show();
 
         Routing routing = new Routing.Builder()
                 .travelMode(AbstractRouting.TravelMode.DRIVING)
                 .withListener(this)
                 .waypoints(fromPlace, toPlace)
                 .alternativeRoutes(true)
+                .key(getString(R.string.GOOGLE_MAPS_API_KEY))
                 .build();
         routing.execute();
     }
@@ -688,7 +727,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     @Override
     public void onRoutingFailure(RouteException e) {
         if(e != null) {
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+           // Toast.makeText(this, "Route Failed Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }else {
             Toast.makeText(this, "Something went wrong, Try again", Toast.LENGTH_SHORT).show();
         }
@@ -728,9 +767,17 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                 }
             }
 
-            if(route.get(i).getDistanceValue() <= 3){
+            if(route.get(i).getDistanceValue() <= 3 && haveArrived == false){
+                haveArrived = true;
+                if(polylines.size() > 0) {
+                    for (Polyline poly : polylines) {
+                        poly.remove();
+                    }
+                }
                 Toast.makeText(this, "You have reached your destination.", Toast.LENGTH_LONG).show();
-//                WifiScanner wifiScanner = new WifiScanner(getApplicationContext());
+                getBuildingFloorRouters(Integer.toString(buildingIdList.get(0)));
+                Log.w("HOME", "ARRIVED AT DESTINATION TRIGGERED");
+
 //                if(wifiScanner.isInParkingLotRange(45d,16d)){
 //
 //                }

@@ -4,6 +4,7 @@ public class Router{
     private Double yPosition;
     private Double parallelRouterDistance;
     private Double distanceFromUser;
+    private String SSID,id,macAddress;
     public Router(Double xPos, Double yPos, Double parallel){
         xPosition=xPos;
         yPosition=yPos;
@@ -13,6 +14,34 @@ public class Router{
         xPosition=xPos;
         yPosition=yPos;
         parallelRouterDistance=null;
+    }
+    public Router(String SSID,String id){
+        this.SSID=SSID;
+        this.id=id;
+    }
+
+    public String getSSID() {
+        return SSID;
+    }
+
+    public void setSSID(String SSID) {
+        this.SSID = SSID;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getMacAddress() {
+        return macAddress;
+    }
+
+    public void setMacAddress(String macAddress) {
+        this.macAddress = macAddress;
     }
 
     public Double getParallelRouterDistance() {
