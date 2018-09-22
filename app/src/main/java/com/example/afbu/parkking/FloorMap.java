@@ -29,11 +29,17 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FloorMap extends AppCompatActivity {
 
     private FloorMapView floorMapView;
+    private TextView parkingFeeTextView;
+    private TextView floorTitleTextView;
+    private TextView availableSlotsTextView;
+    private TextView selectedSlotTextView;
+
     private WifiScanner wifiScanner;
     private String floorID = "5";
     private ImageButton backButton;
@@ -47,8 +53,6 @@ public class FloorMap extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_floor_map);
-
-
 
         floorMapView = (FloorMapView) findViewById(R.id.FloorMap_floorMapView);
         FloorMap_txtProgressBarTxt = (TextView) findViewById(R.id.FloorMap_txtProgressBarTxt);
@@ -67,10 +71,40 @@ public class FloorMap extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(resultReceiver, new IntentFilter("com.parkking.floor.id.broadcast"));
 
         initFloorScanner();
+
+        initResources();
+        initEvents();
         // Log.w("FLOOR MAP",intent.getStringExtra("floor_info"));
         // WifiScanner wifiScanner = new WifiScanner(getApplicationContext(),floorMapView);
         //initFloorMap();
     }
+
+    private void initResources() {
+        floorMapView = (FloorMapView) findViewById(R.id.FloorMap_floorMapView);
+        parkingFeeTextView = (TextView) findViewById(R.id.parkingFeeTextView);
+        floorTitleTextView = (TextView) findViewById(R.id.floorTitleTextView);
+        availableSlotsTextView = (TextView) findViewById(R.id.availableSlotsTextView);
+        selectedSlotTextView = (TextView) findViewById(R.id.selectedSlotTextView);
+    }
+
+    public void initEvents() {
+        parkingFeeTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<String> parkingFeeInformationArray = floorMapView.getParkingFeeInformation();
+
+                if(parkingFeeInformationArray.size() > 0) {
+                    ParkingInformationDialog parkingInformationDialog = new ParkingInformationDialog();
+                    parkingInformationDialog.setParkingRate(parkingFeeInformationArray.get(0));
+                    parkingInformationDialog.setOvernightFee(parkingFeeInformationArray.get(1));
+                    parkingInformationDialog.setSlotTitle(parkingFeeInformationArray.get(2));
+
+                    parkingInformationDialog.show(getSupportFragmentManager(), "Parking Information Dialog");
+                }
+            }
+        });
+    }
+
     private BroadcastReceiver createBroadcastReceiver() {
         return new BroadcastReceiver() {
             @Override
@@ -112,19 +146,19 @@ public class FloorMap extends AppCompatActivity {
 
                         JSONObject floorSlotsObj = new JSONObject(floorObj.getString("floor_slots"));
                         JSONArray floorSlotsArray = new JSONArray();
-//                        if(floorSlotsObj.getBoolean("has_slots")) {
-//                            floorSlotsArray = new JSONArray(floorSlotsObj.getString("slots"));
-//                        } else {
-//                            Toast.makeText(FloorMap.this, "No Slots", Toast.LENGTH_SHORT).show();
-//                        }
+                        if(floorSlotsObj.getBoolean("has_slots")) {
+                            floorSlotsArray = new JSONArray(floorSlotsObj.getString("slots"));
+                        } else {
+                            Toast.makeText(FloorMap.this, "No Slots", Toast.LENGTH_SHORT).show();
+                        }
 
+                        floorTitleTextView.setText(floorObj.getString("title"));
+                        availableSlotsTextView.setText(floorObj.getString("open_slots"));
                         floorMapView.setFloorMapInformation(
                                 getString(R.string.floor_map_folder) + floorObj.getString("image"),
                                 floorIndicatorsArray, floorSlotsArray, floorObj.getDouble("map_width"),floorObj.getDouble("map_height"),
-                                floorID);
-
-
-
+                                floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView,
+                                floorObj.getDouble("grid_size"));
                     } else {
                         Toast.makeText(getApplicationContext(), responseObj.getString("message"), Toast.LENGTH_SHORT).show();
                     }
