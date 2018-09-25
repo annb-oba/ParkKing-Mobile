@@ -88,7 +88,13 @@
                 android:textAlignment="center"
                 android:textSize="25dp" />
         </LinearLayout>
-
+        <Spinner
+            android:id="@+id/FloorMap_floorSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"/>
         <com.example.afbu.parkking.FloorMapView.FloorMapView
             android:id="@+id/FloorMap_floorMapView"
             android:layout_width="match_parent"

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -36,44 +37,60 @@ public class WifiScanner {
     private Double userPositionX, userPositionY;
     private Router router1, router2, router3;
     private FloorMapView floorMapView;
-
+    private Boolean floorFound;
 
     private WifiRangeScannerRunnable wifiRangeScannerRunnable;
+    private BroadcastReceiver wifiScanReceiver;
+    private IntentFilter broadcastReceiverIntentFilter;
+
+    private SharedPreferences.Editor editor;
+    private SharedPreferences sharedPreferences;
+    public static final String CURRENT_FLOOR_ID = "currentFloorId";
+
 
     private ArrayList<String> floorIdArray;
     private ArrayList<String> floorTitleArray;
 
-    private ArrayList<Router> router1Array,router2Array,router3Array;
-    class WifiRangeScannerRunnable implements  Runnable{
+    private ArrayList<Router> router1Array, router2Array, router3Array;
+
+    class WifiRangeScannerRunnable implements Runnable {
         private volatile boolean running = true;
         private volatile boolean paused = false;
         private final Object pauseLock = new Object();
+
         @Override
         public void run() {
-            start();
             while (running) {
                 synchronized (pauseLock) {
                     if (!running) {
-                        // try terminate here
-                        break;
+                        Log.w("LOG", "STOPPING SCAN THREAD");
+                        return;
                     }
                     if (paused) {
                         try {
+                            Log.w("LOG", "PAUSING SCAN THREAD");
                             pauseLock.wait();
 
                         } catch (InterruptedException ex) {
                             break;
                         }
                         if (!running) {
+                            Log.w("LOG", "STOPPING SCAN THREAD");
                             break;
                         }
                     }
                 }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 wifi.startScan();
                 pause();
             }
-             Log.w("LOG", "Batch Scan Finished");
-            scannerHandler.postDelayed(this, 5000);
+            Log.w("LOG", "Outside of while loop");
+            return;
+            //scannerHandler.postDelayed(this, 5000);
         }
 
         public void stop() {
@@ -91,7 +108,8 @@ public class WifiScanner {
 
         public void resume() {
             synchronized (pauseLock) {
-                // Log.w("LOG", "Resuming...");
+
+                Log.w("LOG", "Resuming...");
                 paused = false;
                 pauseLock.notifyAll(); // Unblocks thread
             }
@@ -103,6 +121,7 @@ public class WifiScanner {
         }
 
     }
+
     class WifiScannerRunnable implements Runnable {
         private volatile boolean running = true;
         private volatile boolean paused = false;
@@ -219,6 +238,10 @@ public class WifiScanner {
         }
     }
 
+    public WifiRangeScannerRunnable getWifiRangeScannerRunnable() {
+        return this.wifiRangeScannerRunnable;
+    }
+
     public WifiScanner(Context mContext, FloorMapView floorMapView) {
         router1 = new Router(0d, 3.5d, 5d);
         router2 = new Router(5d, 3.5d, 5d);
@@ -235,9 +258,14 @@ public class WifiScanner {
         wifiScanStart();
     }
 
-    public WifiScanner(Context mContext, ArrayList<Router> router1Array,ArrayList<Router> router2Array,ArrayList<Router> router3Array,ArrayList<String> floorIdArray, ArrayList<String> floorTitleArray) {
-        this.mContext = mContext;
+    public WifiScanner(Context mContext, ArrayList<Router> router1Array, ArrayList<Router> router2Array, ArrayList<Router> router3Array, ArrayList<String> floorIdArray, ArrayList<String> floorTitleArray) {
 
+        editor = mContext.getSharedPreferences(this.CURRENT_FLOOR_ID, mContext.MODE_PRIVATE).edit();
+        editor.putString("currentFloorID","");
+        editor.commit();
+
+        this.mContext = mContext;
+        this.floorFound = false;
         this.router1Array = router1Array;
         this.router2Array = router2Array;
         this.router3Array = router3Array;
@@ -261,68 +289,84 @@ public class WifiScanner {
         receiverHandlerThread.start();
         receiverLooper = receiverHandlerThread.getLooper();
         receiverHandler = new Handler(receiverLooper);
-
         scannerHandlerThread = new HandlerThread("scannerHandler");
         scannerHandlerThread.start();
-
-
         scannerLooper = scannerHandlerThread.getLooper();
         scannerHandler = new Handler(scannerLooper);
-
-
-
         final WifiManager finalWifi = wifi;
-        mContext.registerReceiver(new BroadcastReceiver() {
+
+
+        wifiScanReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context c, Intent intent) {
-                if (Looper.myLooper() == Looper.getMainLooper()) {
-                     Log.w("LOG", "BROADCAST UI THREAD");
-                } else {
-                    Log.w("LOG", "BROADCAST BACKGROUND THREAD");
-                }
-                   Log.w("LOG", "Broadcast Received");
+                Log.w("LOG", "Broadcast Received");
                 List<ScanResult> results = finalWifi.getScanResults();
                 int size = results.size();
-                // Log.w("LOG", "Results: "+ Integer.toString(results.size()));
                 getRouterRangeSignal(size, results);
                 wifiRangeScannerRunnable.resume();
             }
-        }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION), null, receiverHandler);
+        };
+
+        broadcastReceiverIntentFilter = new IntentFilter();
+        broadcastReceiverIntentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        mContext.registerReceiver(wifiScanReceiver, broadcastReceiverIntentFilter, null, receiverHandler);
+
+//        mContext.registerReceiver(new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context c, Intent intent) {
+//                Log.w("LOG", "Broadcast Received");
+//                List<ScanResult> results = finalWifi.getScanResults();
+//                int size = results.size();
+//                if(!floorFound){
+//                    getRouterRangeSignal(size, results);
+//                }
+//                wifiRangeScannerRunnable.resume();
+//            }
+//        }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION), null, receiverHandler);
     }
 
     public void getRouterRangeSignal(int size, List<ScanResult> results) {
-        Log.w("LOG", "getRouterRangeSignal: ");
+        Log.w("LOG", "CHECKING IF IN RANGE OF FLOOR: ");
         String tempSSID;
         ArrayList<String> ssidResultsArray = new ArrayList<String>();
-        for(int i=0; i<results.size();i++){
+        for (int i = 0; i < results.size(); i++) {
             ssidResultsArray.add(results.get(i).SSID);
 
         }
-        for(int i=0; i<floorIdArray.size();i++){
-            Log.w("LOG", "floorIdArray : "+Integer.toString(i));
-            if(ssidResultsArray.contains(router1Array.get(i).getSSID()) && ssidResultsArray.contains(router2Array.get(i).getSSID()) && ssidResultsArray.contains(router3Array.get(i).getSSID())){
-                Log.w("LOG", "ROUTERS DETECTED : ");
-                for(int j=0; j<results.size();j++){
-                    if(router1Array.get(i).getSSID().equals(results.get(j).SSID)){
+        for (int i = 0; i < floorIdArray.size(); i++) {
+            Log.w("LOG", "FloorID Array Size : " + Integer.toString(i + 1));
+            if (ssidResultsArray.contains(router1Array.get(i).getSSID()) && ssidResultsArray.contains(router2Array.get(i).getSSID()) && ssidResultsArray.contains(router3Array.get(i).getSSID())) {
+                Log.w("LOG", "A FLOOR'S ROUTERS WERE DETECTED : ");
+                for (int j = 0; j < results.size(); j++) {
+                    if (router1Array.get(i).getSSID().equals(results.get(j).SSID)) {
                         Double distance = calculateDistance(results.get(j).frequency, results.get(j).level);
-                        Log.w("LOG", "DISTANCE FROM "+router1Array.get(i).getSSID()+": "+Double.toString(distance));
-                        if(distance<5d){
+                        Log.w("LOG", "DISTANCE FROM " + router1Array.get(i).getSSID() + ": " + Double.toString(distance));
+                        if (distance < 5d) {
                             Log.w("LOG", "FLOOR FOUND: ");
+                            sharedPreferences = mContext.getSharedPreferences(CURRENT_FLOOR_ID, mContext.MODE_PRIVATE);
+                            String currentFloorID = sharedPreferences.getString("currentFloorID", "");
+                            if (currentFloorID == "" || currentFloorID != floorIdArray.get(i)) {
+                                Log.w("LOG","NEW FLOOR");
+                                editor.putString("currentFloorID", floorIdArray.get(i));
+                                editor.commit();
+                                Intent intent = new Intent("com.parkking.floor.id.broadcast");
+                                intent.putExtra("floor_id", floorIdArray.get(i));
+                                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                            }
+                            else{
+                                Log.w("LOG","SAME FLOOR");
+                            }
 
-                            wifiRangeScannerRunnable.stop();
-                            scannerHandlerThread.quit();
-                            scannerLooper.quit();
-                            receiverHandlerThread.quit();
-                            receiverLooper.quit();
-                            scannerHandler.removeCallbacks(wifiRangeScannerRunnable);
-                            Intent intent = new Intent("com.parkking.floor.id.broadcast");
-                            intent.putExtra("floor_id", floorIdArray.get(i));
-                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
                         }
                     }
                 }
             }
         }
+    }
+
+    public void onDestroy() {
+        mContext.unregisterReceiver(wifiScanReceiver);
     }
 
     public void wifiScanStart() {
@@ -401,15 +445,15 @@ public class WifiScanner {
             if (results.get(i).SSID.equals("TP-LINK_POCKET_3020_79B902")) {
                 routerDistance1 = calculateDistance(results.get(i).frequency, results.get(i).level);
                 router1Signals.add(routerDistance1);
-                Log.w("JKLASD", "Router 1: "+Double.toString(routerDistance1));
+                Log.w("JKLASD", "Router 1: " + Double.toString(routerDistance1));
             } else if (results.get(i).SSID.equals("TP-LINK_POCKET_3020_79BABA")) {
                 routerDistance2 = calculateDistance(results.get(i).frequency, results.get(i).level);
                 router2Signals.add(routerDistance2);
-                Log.w("JKLASD", "Router 2: "+Double.toString(routerDistance2));
+                Log.w("JKLASD", "Router 2: " + Double.toString(routerDistance2));
             } else if (results.get(i).SSID.equals("TP-LINK_43C122")) {
                 routerDistance3 = calculateDistance(results.get(i).frequency, results.get(i).level);
                 router3Signals.add(routerDistance3);
-                Log.w("JKLASD", "Router 3: "+Double.toString(routerDistance3));
+                Log.w("JKLASD", "Router 3: " + Double.toString(routerDistance3));
             }
         }
     }

@@ -2,37 +2,33 @@ package com.example.afbu.parkking;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -52,9 +48,7 @@ import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -65,21 +59,20 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Home extends AppCompatActivity implements  OnMapReadyCallback, RoutingListener {
+public class Home extends AppCompatActivity implements OnMapReadyCallback , DirectionFinderListener {
+
 
     SharedPreferences SharedPreference;
     SharedPreferences.Editor editor;
@@ -105,7 +98,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
     private Object mLastKnownLocation;
     private DrawerLayout mDrawer;
-    private ImageButton btnMenu, btnNotif, btnDirect,btnPosition;
+    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition;
     private NavigationView NavMenu;
     private ImageView NavImgUser;
     private TextView Name, Email, AvailSlot;
@@ -118,8 +111,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     private List<Polyline> polylines;
     private static final int[] COLORS = new int[]{R.color.primary_dark_material_light, R.color.colorRed, R.color.colorBlack};
 
-    private ArrayList<LatLng> positionList;
-    private ArrayList<Integer> buildingIdList;
+    private String onClickBuilding;
     private ArrayList<String> routersJSONArray;
     private ArrayList<String> floorIdList;
     private ArrayList<String> floorInfoTitle;
@@ -130,18 +122,27 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     private int smallestDistance = 0, secondSmallestDistance = 0;
 
     private ArrayList<String> ParkKingPlaces;
-    private ArrayList<Double> ParkKingLat,ParkKingLong;
+    private ArrayList<Double> ParkKingLat, ParkKingLong;
     private boolean haveArrived = false;
+    private TextView txtdistanceFromChosenBldg;
+    private List<Polyline> polylinePaths = new ArrayList<>();
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        //getBuildingFloorRouters("4");
+        //getBuildingFloorRouters("2");
 
         initResources();
         initEvents();
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+//        initResources();
+//        initEvents();
     }
 
     @Override
@@ -149,14 +150,23 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         super.onPause();
         //delete wifiScanner
     }
-    public void getBuildingFloorRouters(String building_id){
-        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.apiURL) + "get_building_floor_routers/"+building_id, new Response.Listener<String>() {
+
+    public void getBuildingFloorRouters(final String building_id) {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.apiURL) + "get_building_floor_routers/" + building_id, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                    Intent myIntent = new Intent(Home.this, FloorMap.class);
-                    myIntent.putExtra("floor_info",response);
-                    startActivity(myIntent);
-                    finish();
+                final String tempResponse = response;
+                new android.app.AlertDialog.Builder(Home.this)
+                        .setTitle("You have arrived at your destination")
+                        .setMessage("Enter building view?")
+                        .setPositiveButton("Go", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                Intent myIntent = new Intent(Home.this, FloorMap.class);
+                                myIntent.putExtra("floor_info", tempResponse);
+                                myIntent.putExtra("building_id", building_id);
+                                startActivity(myIntent);
+                            }})
+                        .setNegativeButton("Cancel", null).show();
             }
         }, new Response.ErrorListener() {
 
@@ -176,6 +186,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         AppController.getInstance().addToRequestQueue(strRequest);
 
     }
+
     private void getLocationPermission() {
         String[] permission = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
@@ -192,7 +203,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
     }
 
-    private void putParkKingMarker(){
+    private void putParkKingMarker() {
         StringRequest strRequest = new StringRequest(Request.Method.GET,
                 getString(R.string.apiURL) + "get_parking_markers/",
                 new Response.Listener<String>() {
@@ -250,38 +261,13 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
     }
 
-    public Bitmap resizeMapIcons(String iconName,int width, int height){
-        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getPackageName()));
+    public Bitmap resizeMapIcons(String iconName, int width, int height) {
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
         return resizedBitmap;
     }
 
     private void getDeviceLocation() {
-
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        try {
-            if (mLocationPermissionGranted) {
-                Task location = mFusedLocationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            Location currentLocation = (Location) task.getResult();
-                            latitude = currentLocation.getLatitude();
-                            longitude = currentLocation.getLongitude();
-                            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), DEFAULT_ZOOM));
-                            //Toast.makeText(this,currentLocation.getLatitude(), To)
-                        } else {
-                            Toast.makeText(Home.this, "Unable to get location.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Get Device Location: Security Exception:" + e.getMessage());
-        }
-
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -293,7 +279,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
@@ -301,22 +287,15 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
-                    Geocoder geocoder = new Geocoder(getApplicationContext());
-                    try {
-                        List<Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (polylinePaths != null && toPlace != null) {
+                        String string_FromPlace = fromlat+","+fromlng;
+                        String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
+                        try {
+                            new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    if(polylines.size() > 0) {
-                        Routing routing = new Routing.Builder()
-                                .travelMode(AbstractRouting.TravelMode.DRIVING)
-                                .withListener(Home.this)
-                                .waypoints(fromPlace, toPlace)
-                                .alternativeRoutes(true)
-                                .build();
-                        routing.execute();
-                    }
-
                 }
 
                 @Override
@@ -335,34 +314,30 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                 }
             });
 
-        }else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+        } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                   // Toast.makeText(Home.this, "Heres8.", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(Home.this, "Heres8.", Toast.LENGTH_SHORT).show();
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
-                    Geocoder geocoder = new Geocoder(getApplicationContext());
-                    try {
-                        List<Address> addressList = geocoder.getFromLocation(latitude, longitude, 1);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if(polylines.size() > 0) {
-                        Routing routing = new Routing.Builder()
-                                .travelMode(AbstractRouting.TravelMode.DRIVING)
-                                .withListener(Home.this)
-                                .waypoints(fromPlace, toPlace)
-                                .alternativeRoutes(true)
-                                .build();
-                        routing.execute();
+                    if (polylinePaths != null && toPlace != null) {
+                        String string_FromPlace = fromlat+","+fromlng;
+                        String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
+                        try {
+                            new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
+
                 @Override
                 public void onStatusChanged(String provider, int status, Bundle extras) {
 
                 }
+
                 @Override
                 public void onProviderEnabled(String provider) {
 
@@ -373,15 +348,15 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
 
                 }
             });
-        }else{
-            final CharSequence[] items  = {"Turn Location On", "Ignore"};
+        } else {
+            final CharSequence[] items = {"Turn Location On", "Ignore"};
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
             builder.setTitle("Turn Location Options");
             builder.setItems(items, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    if(items[which].equals("Turn Location On")){
+                    if (items[which].equals("Turn Location On")) {
                         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivity(intent);
                         return;
@@ -419,26 +394,25 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         putParkKingMarker();
-
     }
 
-    public boolean isServicesOk(){
-         int avail = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(Home.this);
+    public boolean isServicesOk() {
+        int avail = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(Home.this);
 
-         if(avail == ConnectionResult.SUCCESS){
-             return true;
-         }else if (GoogleApiAvailability.getInstance().isUserResolvableError(avail)){
-             Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(Home.this, avail, ERROR_DIALOG_REQUEST);
-             dialog.show();
-         }else{
-             Toast.makeText(this, "You cant make a map request.", Toast.LENGTH_SHORT).show();
-         }
-         return false;
+        if (avail == ConnectionResult.SUCCESS) {
+            return true;
+        } else if (GoogleApiAvailability.getInstance().isUserResolvableError(avail)) {
+            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(Home.this, avail, ERROR_DIALOG_REQUEST);
+            dialog.show();
+        } else {
+            Toast.makeText(this, "You cant make a map request.", Toast.LENGTH_SHORT).show();
+        }
+        return false;
     }
 
 
     private void initEvents() {
-        if(isServicesOk()){
+        if (isServicesOk()) {
             getLocationPermission();
         }
 
@@ -446,13 +420,17 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         btnPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getDeviceLocation();
-                Log.w("LOG","BTN POSITION CLICKED");
+                if(fromPlace != null){
+                    gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fromPlace, 18));
+                }
+                Log.w("LOG", "BTN POSITION CLICKED");
             }
         });
         btnDirect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                haveArrived=false;
+                Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
                 makeDirections(toPlace);
             }
         });
@@ -476,7 +454,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
-                switch (id){
+                switch (id) {
                     case R.id.nav_account:
                         Intent gotoEditAcc = new Intent(getApplicationContext(), EditAccount.class);
                         startActivity(gotoEditAcc);
@@ -485,7 +463,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                         break;
 
                     case R.id.nav_parkinglistings:
-                        Intent  gotoParkList= new Intent(getApplicationContext(), ParkingListings.class);
+                        Intent gotoParkList = new Intent(getApplicationContext(), ParkingListings.class);
                         startActivity(gotoParkList);
                         mDrawer.closeDrawer(NavMenu);
                         break;
@@ -517,7 +495,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
         });
     }
 
-    private void getVehicleOwnerInformation(){
+    private void getVehicleOwnerInformation() {
         StringRequest strRequest = new StringRequest(Request.Method.GET,
                 getString(R.string.apiURL) + "get_profile_details/" + ProfileID,                     //change id //done
                 new Response.Listener<String>() {
@@ -526,7 +504,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                         try {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status");
-                            if(status.equals("success")){
+                            if (status.equals("success")) {
                                 JSONObject userinfo = new JSONObject(object.getString("data"));
                                 Firstname = userinfo.getString("first_name");
                                 Lastname = userinfo.getString("last_name");
@@ -537,7 +515,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                                 //Name.setText(Lastname);
                                 //Email.setText(Emailtxt);
                                 //getProfilePicture();
-                            }else if(status.equals("failed")){
+                            } else if (status.equals("failed")) {
                                 String message = object.getString("message");
                                 Toast.makeText(getApplicationContext(),
                                         message, Toast.LENGTH_SHORT).show();
@@ -572,7 +550,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                     public void onResponse(Bitmap response) {
                         NavImgUser.setImageBitmap(response);
                     }
-                }, 0,0, null,new Response.ErrorListener() {
+                }, 0, 0, null, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -585,6 +563,7 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     }
 
     private void initResources() {
+        txtdistanceFromChosenBldg = (TextView) findViewById(R.id.Home_txtDistance);
         mDrawer = (DrawerLayout) findViewById(R.id.drawerLayout);
         btnMenu = (ImageButton) findViewById(R.id.Home_btnMenu);
         NavMenu = (NavigationView) findViewById(R.id.nav_menu);
@@ -608,38 +587,38 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
     }
 
     public void gotoParkList(View view) {
-        Intent  gotoParkList= new Intent(getApplicationContext(), ParkingListings.class);
+        Intent gotoParkList = new Intent(getApplicationContext(), ParkingListings.class);
         startActivity(gotoParkList);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
-            getDeviceLocation();
-            if (ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            gMap.setPadding(0, 150, 0, 170);
-            if (ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request   the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            //gMap.setMyLocationEnabled(true);
+        getDeviceLocation();
+        if (ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        gMap.setPadding(0, 150, 0, 170);
+        if (ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Home.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request   the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        //gMap.setMyLocationEnabled(true);
+        gMap.setMyLocationEnabled(true);
+        gMap.getUiSettings().setMyLocationButtonEnabled(false);
+        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(13.954371, 121.163004), 10));
 
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 String title = marker.getSnippet();
-                positionList = new ArrayList<LatLng>();
-                buildingIdList = new ArrayList<Integer>();
-                positionList.add(new LatLng(latitude,longitude));
-                buildingIdList.add(Integer.valueOf(title));
+                onClickBuilding = title;
                 StringRequest strRequest1 = new StringRequest(Request.Method.GET,
                         getString(R.string.apiURL) + "get_building_infos/" + title,
                         new Response.Listener<String>() {
@@ -703,135 +682,69 @@ public class Home extends AppCompatActivity implements  OnMapReadyCallback, Rout
                 return v;
             }
         });
-
         btnPosition.setVisibility(View.VISIBLE);
     }
 
     private void makeDirections(LatLng toPlace) {
-
-
-        LatLng fromPlace = new LatLng(fromlat, fromlng);
-
-       // Toast.makeText(this, "Error: " +fromlng, Toast.LENGTH_LONG).show();
-
-        Routing routing = new Routing.Builder()
-                .travelMode(AbstractRouting.TravelMode.DRIVING)
-                .withListener(this)
-                .waypoints(fromPlace, toPlace)
-                .alternativeRoutes(true)
-                .key(getString(R.string.GOOGLE_MAPS_API_KEY))
-                .build();
-        routing.execute();
-    }
-
-    @Override
-    public void onRoutingFailure(RouteException e) {
-        if(e != null) {
-           // Toast.makeText(this, "Route Failed Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }else {
-            Toast.makeText(this, "Something went wrong, Try again", Toast.LENGTH_SHORT).show();
+        String string_FromPlace = fromlat+","+fromlng;
+        String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
+        try {
+            new DirectionFinder(this, string_FromPlace, string_ToPlace).execute();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
-    public void onRoutingStart() {
-
+    public void onDirectionFinderStart() {
+        if (polylinePaths != null) {
+            for (Polyline polyline:polylinePaths ) {
+                polyline.remove();
+            }
+        }
     }
 
     @Override
-    public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
+    public void onDirectionFinderSuccess(List<com.example.afbu.parkking.Route> routes) {
+        polylinePaths = new ArrayList<>();
 
-        if(polylines.size() > 0) {
-            for (Polyline poly : polylines) {
-                poly.remove();
-            }
-        }
+        for (com.example.afbu.parkking.Route route : routes) {
 
-        polylines = new ArrayList<>();
-
-        Distances = new ArrayList<>();
-        //add route(s) to the map.
-        for (int i = 0; i <route.size(); i++) {
-
-            //Distances.add(route.get(i).getDistanceValue());
-
-            if(smallestDistance == 0){
-                smallestDistance = i;
-            }
-            if(route.get(i).getDistanceValue() < secondSmallestDistance){
-                if(route.get(i).getDistanceValue() < smallestDistance){
-                    secondSmallestDistance = smallestDistance;
-                    smallestDistance = i;
-                }else{
-                    secondSmallestDistance = i;
-                }
-            }
-
-            if(route.get(i).getDistanceValue() <= 3 && haveArrived == false){
+            if(route.distance.value <= 15 && haveArrived == false){
+                //Toast.makeText(getApplicationContext(),"You have arrived at your destionation",Toast.LENGTH_SHORT).show();
                 haveArrived = true;
-                if(polylines.size() > 0) {
-                    for (Polyline poly : polylines) {
-                        poly.remove();
+                if (polylinePaths != null) {
+                    for (Polyline polyline : polylinePaths) {
+                        polyline.remove();
                     }
                 }
-                Toast.makeText(this, "You have reached your destination.", Toast.LENGTH_LONG).show();
-                getBuildingFloorRouters(Integer.toString(buildingIdList.get(0)));
-                Log.w("HOME", "ARRIVED AT DESTINATION TRIGGERED");
-
-//                if(wifiScanner.isInParkingLotRange(45d,16d)){
-//
-//                }
-            }
-            //In case of more than 5 alternative routes
-            /*int colorIndex = i % COLORS.length;
-
-            PolylineOptions polyOptions = new PolylineOptions();
-            polyOptions.color(getResources().getColor(COLORS[colorIndex]));
-            polyOptions.width(10 + i * 3);
-            polyOptions.addAll(route.get(i).getPoints());
-            Polyline polyline = gMap.addPolyline(polyOptions);
-            polylines.add(polyline);*/
-
-            //Toast.makeText(getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
-        }
-        for(int x = 0; x != 2; x++){
-            int colorIndex = x % COLORS.length;
-
-            if(x == 1){
-                PolylineOptions polyOptions = new PolylineOptions();
-                polyOptions.color(getResources().getColor(COLORS[colorIndex]));
-                polyOptions.width(10 + smallestDistance * 3);
-                polyOptions.addAll(route.get(smallestDistance).getPoints());
-                Polyline polyline = gMap.addPolyline(polyOptions);
-                polylines.add(polyline);
-            }else{
-                PolylineOptions polyOptions = new PolylineOptions();
-                polyOptions.color(getResources().getColor(COLORS[colorIndex]));
-                polyOptions.width(10 + secondSmallestDistance * 3);
-                polyOptions.addAll(route.get(secondSmallestDistance).getPoints());
-                Polyline polyline = gMap.addPolyline(polyOptions);
-                polylines.add(polyline);
-            }
-
-        }
-
-        /*for(int x = 0; x < Distances.size(); x++){
-            if(smallestDistance == 0){
-                smallestDistance = Distances.get(x);
-            }
-            if(Distances.get(x) < secondSmallestDistance){
-                if(Distances.get(x) < smallestDistance){
-                    smallestDistance = Distances.get(x);
-                }else{
-                    secondSmallestDistance = Distances.get(x);
+                if(onClickBuilding!=null){
+                    getBuildingFloorRouters(onClickBuilding);
                 }
+            }else if(haveArrived == false){
+                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fromPlace, 16));
+
+                if (polylinePaths != null) {
+                    for (Polyline polyline:polylinePaths ) {
+                        polyline.remove();
+                    }
+                }
+
+                PolylineOptions polylineOptions = new PolylineOptions().
+                        geodesic(true).
+                        color(Color.BLUE).
+                        width(20);
+
+                for (int i = 0; i < route.points.size(); i++)
+                    polylineOptions.add(route.points.get(i));
+
+                polylinePaths.add(gMap.addPolyline(polylineOptions));
+                txtdistanceFromChosenBldg.setText(route.distance.text);
             }
-        }*/
 
-    }
 
-    @Override
-    public void onRoutingCancelled() {
+
+        }
 
     }
 }

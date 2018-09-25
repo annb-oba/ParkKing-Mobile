@@ -4,13 +4,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +43,6 @@ public class FloorMap extends AppCompatActivity {
     private TextView floorTitleTextView;
     private TextView availableSlotsTextView;
     private TextView selectedSlotTextView;
-
     private WifiScanner wifiScanner;
     private String floorID = "5";
     private ImageButton backButton;
@@ -49,42 +52,131 @@ public class FloorMap extends AppCompatActivity {
     private ArrayList<String> floorTitleArray;
     private BroadcastReceiver resultReceiver;
     private TextView FloorMap_txtProgressBarTxt;
+    private Spinner floorSpinner;
+    private String[] buildingFloorID;
+    private String[] buildingFloorTitle;
+    private String buildingID;
+    private int spinner_check=0;
+    private Boolean floorsLoaded=false;
+    private String currentFloorID;
+    public static final String CURRENT_FLOOR_ID = "currentFloorId";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_floor_map);
 
+        initResources();
+        initEvents();
+        initFloorScanner();
+    }
+
+    private void initResources() {
         floorMapView = (FloorMapView) findViewById(R.id.FloorMap_floorMapView);
         FloorMap_txtProgressBarTxt = (TextView) findViewById(R.id.FloorMap_txtProgressBarTxt);
         findViewById(R.id.FloorMap_floorMapView).setVisibility(View.GONE);
         backButton = (ImageButton)findViewById(R.id.FloorMap_btnBackButton);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(FloorMap.this, Home.class);
-                startActivity(myIntent);
-                finish();
-            }
-        });
-
-        resultReceiver = createBroadcastReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(resultReceiver, new IntentFilter("com.parkking.floor.id.broadcast"));
-
-        initFloorScanner();
-
-        initResources();
-        initEvents();
-        // Log.w("FLOOR MAP",intent.getStringExtra("floor_info"));
-        // WifiScanner wifiScanner = new WifiScanner(getApplicationContext(),floorMapView);
-        //initFloorMap();
-    }
-
-    private void initResources() {
+        floorSpinner = (Spinner) findViewById(R.id.FloorMap_floorSpinner);
+        floorSpinner.setVisibility(View.GONE);
         floorMapView = (FloorMapView) findViewById(R.id.FloorMap_floorMapView);
         parkingFeeTextView = (TextView) findViewById(R.id.parkingFeeTextView);
         floorTitleTextView = (TextView) findViewById(R.id.floorTitleTextView);
         availableSlotsTextView = (TextView) findViewById(R.id.availableSlotsTextView);
         selectedSlotTextView = (TextView) findViewById(R.id.selectedSlotTextView);
+
+        resultReceiver = createBroadcastReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(resultReceiver, new IntentFilter("com.parkking.floor.id.broadcast"));
+
+        Intent myIntent;
+        myIntent = getIntent();
+        buildingID = myIntent.getStringExtra("building_id");
+
+        buildingFloorID = new String[0];
+        buildingFloorTitle = new String[0];
+
+        getBuildingFloors();
+    }
+
+    private void getBuildingFloors() {
+        Integer index;
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.getBuildingFloorsURL) + buildingID, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, response.toString());
+                try {
+                    JSONObject responseObj = new JSONObject(response);
+                    if (responseObj.getBoolean("success")) {
+                        floorsLoaded=true;
+                        JSONArray floorJSONArray = new JSONArray(responseObj.getString("floors"));
+
+                        buildingFloorID = new String[floorJSONArray.length()];
+                        buildingFloorTitle = new String[floorJSONArray.length()];
+                        ArrayList<FloorSpinnerObject> floorSpinnerObjects = new ArrayList<FloorSpinnerObject>();
+                        for (int i = 0; i < floorJSONArray.length(); i++) {
+                            JSONObject floorJSONObj = floorJSONArray.getJSONObject(i);
+                            FloorSpinnerObject object = new FloorSpinnerObject(floorJSONObj.getString("id"),floorJSONObj.getString("title"));
+                            buildingFloorID[i] = floorJSONObj.getString("id");
+                            buildingFloorTitle[i] = floorJSONObj.getString("title");
+                            floorSpinnerObjects.add(object);
+                        }
+                        FloorSpinnerAdapter floorSpinnerAdapter = new FloorSpinnerAdapter(getApplicationContext(),R.layout.floor_spinner_layout,floorSpinnerObjects);
+//                        ArrayAdapter<String> buildingFloorSpinnerAdapter = new ArrayAdapter<String>(
+//                                FloorMap.this,
+//                                android.R.layout.simple_spinner_item,
+//                                buildingFloorTitle
+//                        );
+//                        buildingFloorSpinnerAdapter.setDropDownViewResource(R.layout.floor_spinner_layout);
+                        floorSpinner.setAdapter(floorSpinnerAdapter);
+                        floorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                if(++spinner_check > 1)
+                                    getFloorInformation(buildingFloorID[position]);
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> parent) {
+
+                            }
+                        });
+                        SharedPreferences sharedPreferences = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
+                        String currentFloorID = sharedPreferences.getString("currentFloorID", "");
+                        for(int i=0; i<buildingFloorID.length;i++){
+                            if(buildingFloorID[i].equals(currentFloorID)){
+                                floorSpinner.setSelection(i);
+                                break;
+                            }
+                        }
+                    } else {
+                        floorsLoaded=false;
+                        Toast.makeText(FloorMap.this, responseObj.getString("message"), Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<String, String>();
+                return parameters;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(strRequest);
+    }
+
+    private void getFloorInformation(String floorID) {
+        this.floorID = floorID;
+        floorMapView.detatchValueEventListener();
+        initFloorMap();
     }
 
     public void initEvents() {
@@ -103,19 +195,31 @@ public class FloorMap extends AppCompatActivity {
                 }
             }
         });
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Intent myIntent = new Intent(FloorMap.this, Home.class);
+//                startActivity(myIntent);
+                finish();
+            }
+        });
     }
 
     private BroadcastReceiver createBroadcastReceiver() {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.w("LOGGGG","BROADCAST RECEIVED FROM BACKGROUND THREAD");
-                floorID = intent.getStringExtra("floor_id");
-                FloorMap_txtProgressBarTxt.setText("Loading Floor Map. . .");
-                findViewById(R.id.FloorMap_loadingLayout).setVisibility(View.GONE);
-                findViewById(R.id.FloorMap_floorMapView).setVisibility(View.VISIBLE);
-                initFloorMap();
-
+                if(floorsLoaded==true){
+                    Log.w("LOGGGG","BROADCAST RECEIVED FROM BACKGROUND THREAD");
+                    currentFloorID = intent.getStringExtra("floor_id");
+                    FloorMap_txtProgressBarTxt.setText("Loading Floor Map. . .");
+                    findViewById(R.id.FloorMap_loadingLayout).setVisibility(View.GONE);
+                    findViewById(R.id.FloorMap_floorMapView).setVisibility(View.VISIBLE);
+                    findViewById(R.id.FloorMap_floorSpinner).setVisibility(View.VISIBLE);
+                    getBuildingFloors();
+                    //getFloorInformation(currentFloorID);
+//                    initFloorMap();
+                }
             }
         };
     }
@@ -124,7 +228,18 @@ public class FloorMap extends AppCompatActivity {
         if (resultReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(resultReceiver);
         }
+        if(wifiScanner!=null){
+          wifiScanner.getWifiRangeScannerRunnable().stop();
+          wifiScanner.onDestroy();
+        }
+        floorMapView.detatchValueEventListener();
         super.onDestroy();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.w("LOG","FloorMap onPause");
+        wifiScanner.getWifiRangeScannerRunnable().pause();
     }
 
     public void initFloorMap(){
@@ -159,6 +274,8 @@ public class FloorMap extends AppCompatActivity {
                                 floorIndicatorsArray, floorSlotsArray, floorObj.getDouble("map_width"),floorObj.getDouble("map_height"),
                                 floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView,
                                 floorObj.getDouble("grid_size"));
+
+                        floorMapView.setSupportFragmentManager(getSupportFragmentManager());
                     } else {
                         Toast.makeText(getApplicationContext(), responseObj.getString("message"), Toast.LENGTH_SHORT).show();
                     }
@@ -220,7 +337,7 @@ public class FloorMap extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        WifiScanner wifiScanner = new WifiScanner(getApplicationContext(),router1Array, router2Array,router3Array,floorIdArray,floorTitleArray);
+         wifiScanner = new WifiScanner(getApplicationContext(),router1Array, router2Array,router3Array,floorIdArray,floorTitleArray);
     }
 }
 

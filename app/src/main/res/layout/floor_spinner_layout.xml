@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:id="@+id/title"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorBlack"
+        android:padding="10dp"/>
+    <ImageView
+        android:id="@+id/currentFloorImage"
+        android:layout_marginRight="30dp"
+        android:layout_weight="3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>

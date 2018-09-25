@@ -1,6 +1,7 @@
 package com.example.afbu.parkking.FloorMapView;
 
 import android.annotation.SuppressLint;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -32,6 +33,7 @@ import com.example.afbu.parkking.AppController;
 import com.example.afbu.parkking.CarObject;
 import com.example.afbu.parkking.FloorMap;
 import com.example.afbu.parkking.R;
+import com.example.afbu.parkking.SaveSlotPromptDialog;
 import com.example.afbu.parkking.SectionSlot;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -84,7 +86,7 @@ public class FloorMapView extends View {
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference slotRef;
-    //    private DatabaseReference userRef;
+    private DatabaseReference userRef;
     private String floorID;
 
     private List<String> parkingFeeInformationList;
@@ -94,14 +96,19 @@ public class FloorMapView extends View {
 
     private List<SectionSlot> sectionSlotListArray;
 
-//    private SharedPreferences sharedPreferences;
-//    private static final String PreferenceName = "UserPreference";
-//    private static final String PROFID_KEY = "ProfileIDKey";
+    private SharedPreferences sharedPreferences;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+    public static final String CURRENT_FLOOR_ID = "currentFloorId";
 
+    private List<ValueEventListener> slotEventListener;
     private float floorMapHeight, floorMapWIdth;
 
+
+
     private float canvasRotation;
-//    private float floorMapGridSize;
+    private float floorMapGridSize;
+    private android.support.v4.app.FragmentManager supportFragmentManager;
 
     public FloorMapView(Context context) {
         super(context);
@@ -148,27 +155,27 @@ public class FloorMapView extends View {
         grid_coords = null;
 
         sectionSlotListArray = new ArrayList<>();
+        slotEventListener = new ArrayList<>();
+        sharedPreferences = mContext.getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
 
-//        sharedPreferences = mContext.getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-//
-//        if (!sharedPreferences.getString(PROFID_KEY, "").trim().isEmpty()) {
-//            userRef = database.getReference().child("users").child(sharedPreferences.getString(PROFID_KEY, ""));
-//            userRef.addValueEventListener(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(DataSnapshot dataSnapshot) {
-//                    if (dataSnapshot.hasChildren()) {
-//                        if (dataSnapshot.child("x").exists() && dataSnapshot.child("y").exists()) {
-//                            repositionUser(Integer.parseInt(dataSnapshot.child("x").getValue().toString()), Integer.parseInt(dataSnapshot.child("y").getValue().toString()));
-//                        }
-//                    }
-//                }
-//
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//
-//                }
-//            });
-//        }
+        if (!sharedPreferences.getString(PROFID_KEY, "").trim().isEmpty()) {
+            userRef = database.getReference().child("users").child(sharedPreferences.getString(PROFID_KEY, ""));
+            userRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.hasChildren()) {
+                        if (dataSnapshot.child("x").exists() && dataSnapshot.child("y").exists()) {
+                            repositionUser(Integer.parseInt(dataSnapshot.child("x").getValue().toString()), Integer.parseInt(dataSnapshot.child("y").getValue().toString()));
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     @Override
@@ -223,8 +230,11 @@ public class FloorMapView extends View {
 
                 routePath.reset();
             }
+             sharedPreferences = mContext.getSharedPreferences(CURRENT_FLOOR_ID, mContext.MODE_PRIVATE);
 
-            canvas.drawBitmap(userBitmap, (userPositionX - (getWidth() / 10f) / 2) + floorImagePosX, (userPositionY - (getWidth() / 10f) / 2) + floorImagePosY, null);
+            if(String.valueOf(this.floorID).equals(sharedPreferences.getString("currentFloorID", ""))){
+                canvas.drawBitmap(userBitmap, (userPositionX - (getWidth() / 10f) / 2) + floorImagePosX, (userPositionY - (getWidth() / 10f) / 2) + floorImagePosY, null);
+            }
             canvas.restore();
         }
     }
@@ -232,6 +242,14 @@ public class FloorMapView extends View {
     public void setFloorMapInformation(String floorMapURL, JSONArray floorIndicatorsJSONArray, JSONArray floorSlotsJSONArray, Double floor_width, Double floor_height, String floorID, TextView parkingFeeTextView, TextView availableSlotsTextView, TextView selectedSlotTextView, double grid_size) {
         floorImagePosX = 0f;
         floorImagePosY = 0f;
+
+        detatchValueEventListener();
+
+        slotEventListener = new ArrayList<>();
+        sectionSlotListArray = new ArrayList<>();
+
+        grid_coords = null;
+
         floorIndicators = new ArrayList<>();
         floorIndicatorCoords = new ArrayList<>();
 
@@ -241,7 +259,7 @@ public class FloorMapView extends View {
         floorSlots = new ArrayList<>();
         this.floorID = floorID;
 
-//        this.floorMapGridSize = (float) grid_size;
+        this.floorMapGridSize = (float) grid_size;
 
         if (floorIndicatorsJSONArray.length() > 0) {
             for (int i = 0; i < floorIndicatorsJSONArray.length(); i++) {
@@ -291,10 +309,11 @@ public class FloorMapView extends View {
             slotRef = database.getReference("section").child(String.valueOf(section_id)).child("slot").child(String.valueOf(slot_id)).child("status");
 
             final int finalI = i;
-            slotRef.addValueEventListener(new ValueEventListener() {
+            slotEventListener.add(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
+                        Toast.makeText(mContext, "Change", Toast.LENGTH_SHORT).show();
                         int status = Integer.valueOf(String.valueOf(dataSnapshot.getValue()));
                         changeSlotBitmapStatus(slotStatusFile[status], finalI);
                         if (floorSlotObject.isFirst_read()) {
@@ -307,17 +326,20 @@ public class FloorMapView extends View {
                                 case 1:
                                 case 2:
 
-                                    Log.d("slot_computation","POINT A: " + floorSlotObject.getPointA().toString());
-                                    Log.d("slot_computation","POINT B: " + floorSlotObject.getPointB().toString());
-                                    Log.d("slot_computation","POINT C: " + floorSlotObject.getPointC().toString());
-                                    Log.d("slot_computation","POINT D: " + floorSlotObject.getPointD().toString());
-                                    Log.d("slot_computation","User Pos: " + new LatLng(((userPositionX / floorImageWidth) * floor_map_width), ((userPositionY / floorImageHeight) * floor_map_height)).toString());
-                                    if(inSlotArea(floorSlotObject.getPointA(),
-                                            floorSlotObject.getPointB(),
-                                            floorSlotObject.getPointC(),
-                                            floorSlotObject.getPointD(),
-                                            new LatLng(((userPositionX / floorImageWidth) * floor_map_width), ((userPositionY / floorImageHeight) * floor_map_height)))) {
+                                    if (status == 1) {
+                                        if (inSlotArea(floorSlotObject.getPointA(),
+                                                floorSlotObject.getPointB(),
+                                                floorSlotObject.getPointC(),
+                                                floorSlotObject.getPointD(),
+                                                new LatLng(((userPositionX / floorImageWidth) * floor_map_width), ((userPositionY / floorImageHeight) * floor_map_height)))) {
+                                            SaveSlotPromptDialog saveSlotPromptDialog = new SaveSlotPromptDialog();
+                                            saveSlotPromptDialog.setSlotTitle(floorSlotObject.getSlotTitle());
+                                            saveSlotPromptDialog.show(supportFragmentManager, "Save Slot Prompt");
 
+                                            saveVehicleLog(floorSlotObject.getSlotID());
+                                        }
+                                    } else {
+                                        Toast.makeText(mContext, "This slot is closed!", Toast.LENGTH_SHORT).show();
                                     }
                                     if (floorSlotObject.getCurr_stat() == 0)
                                         availableSlotsTextView.setText(String.valueOf(Integer.valueOf(availableSlotsTextView.getText().toString()) - 1));
@@ -334,7 +356,44 @@ public class FloorMapView extends View {
 
                 }
             });
+            slotRef.addValueEventListener(slotEventListener.get(i));
         }
+    }
+
+    private void saveVehicleLog(final int slotID) {
+        StringRequest strRequest = new StringRequest(Request.Method.POST, mContext.getString(R.string.createVehicleLogURL), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, response.toString());
+                try {
+                    JSONObject requestObj = new JSONObject(response);
+                    if (requestObj.getBoolean("success")) {
+
+                    } else {
+                        Toast.makeText(mContext, requestObj.getString("message"), Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(mContext,
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<String, String>();
+                parameters.put("vehicle_owner_profile_id", sharedPreferences.getString(PROFID_KEY, ""));
+                parameters.put("section_slot_id", String.valueOf(slotID));
+                return parameters;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(strRequest);
     }
 
     private void changeSlotBitmapStatus(String slotURL, final int slotIndex) {
@@ -379,6 +438,15 @@ public class FloorMapView extends View {
 
         retrieveFloorIndicatorImg.execute(getResources().getString(R.string.system_files) + imgURL);
     }
+
+//    public void setSupportFragmentManager(FragmentManager supportFragmentManager) {
+//        this.supportFragmentManager = supportFragmentManager;
+//    }
+
+    public void setSupportFragmentManager(android.support.v4.app.FragmentManager supportFragmentManager) {
+        this.supportFragmentManager = supportFragmentManager;
+    }
+
 
     class RetrieveFloorImageTask extends AsyncTask<String, Void, Void> {
 
@@ -597,13 +665,13 @@ public class FloorMapView extends View {
 
         postInvalidate();
     }
-//
-//    private void repositionUser(int gridPosX, int gridPosY) {
-//        userPositionX = ((gridPosX / floor_map_width) * floorImageWidth) / (1 / floorMapGridSize);
-//        userPositionY = ((gridPosY / floor_map_height) * floorImageHeight) / (1 / floorMapGridSize);
-//
-//        postInvalidate();
-//    }
+
+
+    private void repositionUser(int gridPosX, int gridPosY) {
+        userPositionX = ((gridPosX / floor_map_width) * floorImageWidth) / (1 / floorMapGridSize);
+        userPositionY = ((gridPosY / floor_map_height) * floorImageHeight) / (1 / floorMapGridSize);
+        postInvalidate();
+    }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
@@ -628,8 +696,8 @@ public class FloorMapView extends View {
         area = Math.abs(
                 (
                         (pointA.latitude * (pointB.longitude - pointC.longitude))
-                        +(pointB.latitude * (pointC.longitude - pointA.longitude))
-                        + (pointC.latitude * (pointA.longitude - pointB.longitude))
+                                + (pointB.latitude * (pointC.longitude - pointA.longitude))
+                                + (pointC.latitude * (pointA.longitude - pointB.longitude))
                 ) / 2);
         return area;
     }
@@ -647,21 +715,33 @@ public class FloorMapView extends View {
         DPC = getTriangleArea(pointD, userPosition, pointC);
         CPB = getTriangleArea(pointC, userPosition, pointB);
         PBA = getTriangleArea(userPosition, pointB, pointA);
-        Log.d("slot_computation","Point A: "+Double.toString(pointA.latitude)+", "+pointA.longitude);
-        Log.d("slot_computation","Point B: "+Double.toString(pointB.latitude)+", "+pointB.longitude);
-        Log.d("slot_computation","Point C: "+Double.toString(pointC.latitude)+", "+pointC.longitude);
-        Log.d("slot_computation","Point D: "+Double.toString(pointD.latitude)+", "+pointD.longitude);
+        Log.d("slot_computation", "Point A: " + Double.toString(pointA.latitude) + ", " + pointA.longitude);
+        Log.d("slot_computation", "Point B: " + Double.toString(pointB.latitude) + ", " + pointB.longitude);
+        Log.d("slot_computation", "Point C: " + Double.toString(pointC.latitude) + ", " + pointC.longitude);
+        Log.d("slot_computation", "Point D: " + Double.toString(pointD.latitude) + ", " + pointD.longitude);
 
-        Log.d("slot_computation","Rectangle area: "+ Double.toString(rectangleArea));
-        Log.d("slot_computation","APD: "+ Double.toString(APD));
-        Log.d("slot_computation","DPC: "+ Double.toString(DPC));
-        Log.d("slot_computation","CPB: "+ Double.toString(CPB));
-        Log.d("slot_computation","PBA: "+ Double.toString(PBA));
-        Log.d("slot_computation","Total area: "+ Double.toString(APD + DPC + CPB + PBA));
+        Log.d("slot_computation", "Rectangle area: " + Double.toString(rectangleArea));
+        Log.d("slot_computation", "APD: " + Double.toString(APD));
+        Log.d("slot_computation", "DPC: " + Double.toString(DPC));
+        Log.d("slot_computation", "CPB: " + Double.toString(CPB));
+        Log.d("slot_computation", "PBA: " + Double.toString(PBA));
+        Log.d("slot_computation", "Total area: " + Double.toString(APD + DPC + CPB + PBA));
         if ((APD + DPC + CPB + PBA) == rectangleArea) {
             return true;
         } else {
             return false;
+        }
+    }
+    public void detatchValueEventListener() {
+        if(slotEventListener.size() > 0 && sectionSlotListArray.size() > 0) {
+            for(int i = 0; i < slotEventListener.size(); i ++) {
+                final SectionSlot floorSlotObject = sectionSlotListArray.get(i);
+                final int slot_id = floorSlotObject.getSlotID();
+                int section_id = floorSlotObject.getSectionID();
+
+                slotRef = database.getReference("section").child(String.valueOf(section_id)).child("slot").child(String.valueOf(slot_id)).child("status");
+                slotRef.removeEventListener(slotEventListener.get(i));
+            }
         }
     }
 }
