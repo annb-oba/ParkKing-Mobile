@@ -15,6 +15,7 @@ public class SectionSlot {
     int billingID;
     int curr_stat;
     boolean first_read;
+    private String slotTitle;
 
     public void setFirst_read(boolean first_read) {
         this.first_read = first_read;
@@ -28,15 +29,16 @@ public class SectionSlot {
             this.slotID = slotObject.getInt("slot_id");
             this.billingID = slotObject.getInt("billing");
             this.curr_stat = slotObject.getInt("curr_stat");
+            this.slotTitle = slotObject.getString("slot_tag");
             this.first_read = true;
 
             JSONArray slotPoints = slotObject.getJSONArray("points");
-            if(slotPoints.length() == 4) {
+            if (slotPoints.length() == 4) {
                 JSONArray point1_coord = slotPoints.getJSONArray(0);
                 pointA = new LatLng(
                         Double.parseDouble(String.format("%.5f", point1_coord.getDouble(0) * floor_width)),
                         Double.parseDouble(String.format("%.5f", point1_coord.getDouble(1) * floor_height))
-                        );
+                );
 
                 JSONArray point2_coord = slotPoints.getJSONArray(1);
                 pointB = new LatLng(
@@ -104,5 +106,9 @@ public class SectionSlot {
 
     public void setCurr_stat(int curr_stat) {
         this.curr_stat = curr_stat;
+    }
+
+    public String getSlotTitle() {
+        return slotTitle;
     }
 }
