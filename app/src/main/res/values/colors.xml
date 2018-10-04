@@ -7,5 +7,6 @@
     <color name="colorGrayBG">#EEEFF0</color>
     <color name="colorRed">#ad0808</color>
     <color name="colorParkKingBlue">#3e55a4</color>
+    <color name="colorOffBlack">#545454</color>
 
 </resources>

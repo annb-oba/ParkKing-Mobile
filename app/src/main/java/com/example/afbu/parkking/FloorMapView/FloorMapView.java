@@ -13,6 +13,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -103,7 +104,8 @@ public class FloorMapView extends View {
 
     private List<ValueEventListener> slotEventListener;
     private float floorMapHeight, floorMapWIdth;
-
+    private static final int INVALID_POINTER_ID = -1;
+    private int mActivePointerID = INVALID_POINTER_ID;
 
 
     private float canvasRotation;
@@ -313,7 +315,7 @@ public class FloorMapView extends View {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
-                        Toast.makeText(mContext, "Change", Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(mContext, "Change", Toast.LENGTH_SHORT).show();
                         int status = Integer.valueOf(String.valueOf(dataSnapshot.getValue()));
                         changeSlotBitmapStatus(slotStatusFile[status], finalI);
                         if (floorSlotObject.isFirst_read()) {
@@ -551,11 +553,15 @@ public class FloorMapView extends View {
                     }
                 }
 
+                mActivePointerID = event.getPointerId(0);
+
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                final float x = event.getX();
-                final float y = event.getY();
+
+                final int pointerIndex = event.findPointerIndex(mActivePointerID);
+                final float x = event.getX(pointerIndex);
+                final float y = event.getY(pointerIndex);
 
                 if (!mScaleDetector.isInProgress()) {
                     final float dX = x - mLastTouchX;
@@ -569,6 +575,24 @@ public class FloorMapView extends View {
 
                     invalidate();
                 }
+                break;
+            }
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL: {
+                mActivePointerID = INVALID_POINTER_ID;
+                break;
+            }
+            case MotionEvent.ACTION_POINTER_UP: {
+                final int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+                final int pointerId = event.getPointerId(pointerIndex);
+
+                if (pointerId == mActivePointerID) {
+                    final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+                    mLastTouchX = event.getX(newPointerIndex);
+                    mLastTouchY = event.getY(newPointerIndex);
+                    mActivePointerID = event.getPointerId(newPointerIndex);
+                }
+
                 break;
             }
         }
@@ -702,7 +726,7 @@ public class FloorMapView extends View {
         return area;
     }
 
-    public Double getRectangleArea(LatLng pointA, LatLng pointB, LatLng pointC, LatLng pointD) {
+    public Double getRectangleArea(LatLng pointA, LatLng pointB, LatLng pointD, LatLng pointC) {
         Double area = 2d;
         area = (Math.sqrt(Math.pow((pointA.latitude - pointB.latitude), 2) + Math.pow((pointA.longitude - pointB.longitude), 2))) * (Math.sqrt(Math.pow((pointA.latitude - pointC.latitude), 2) + Math.pow((pointA.longitude - pointC.longitude), 2)));
         return area;
@@ -720,13 +744,16 @@ public class FloorMapView extends View {
         Log.d("slot_computation", "Point C: " + Double.toString(pointC.latitude) + ", " + pointC.longitude);
         Log.d("slot_computation", "Point D: " + Double.toString(pointD.latitude) + ", " + pointD.longitude);
 
-        Log.d("slot_computation", "Rectangle area: " + Double.toString(rectangleArea));
+        Log.d("slot_computation", "Rectangle area: " + Double.toString(Math.round(rectangleArea*10000.0)/10000.0));
         Log.d("slot_computation", "APD: " + Double.toString(APD));
         Log.d("slot_computation", "DPC: " + Double.toString(DPC));
         Log.d("slot_computation", "CPB: " + Double.toString(CPB));
         Log.d("slot_computation", "PBA: " + Double.toString(PBA));
-        Log.d("slot_computation", "Total area: " + Double.toString(APD + DPC + CPB + PBA));
-        if ((APD + DPC + CPB + PBA) == rectangleArea) {
+        Log.d("slot_computation", "Total area: " + Double.toString((Math.round((APD + DPC + CPB + PBA)*10000.0)/10000.0)));
+
+
+
+        if ((Math.round((APD + DPC + CPB + PBA)*10000.0)/10000.0) == (Math.round(rectangleArea*10000.0)/10000.0)) {
             return true;
         } else {
             return false;

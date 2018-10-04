@@ -46,6 +46,7 @@ public class WifiScanner {
     private SharedPreferences.Editor editor;
     private SharedPreferences sharedPreferences;
     public static final String CURRENT_FLOOR_ID = "currentFloorId";
+    public static final String BROADCAST_RECEIVED ="bradcastReceived";
 
 
     private ArrayList<String> floorIdArray;
@@ -326,8 +327,10 @@ public class WifiScanner {
     }
 
     public void getRouterRangeSignal(int size, List<ScanResult> results) {
+        Boolean floorDetected=false;
         Log.w("LOG", "CHECKING IF IN RANGE OF FLOOR: ");
         String tempSSID;
+        Double distance1=null,distance2=null,distance3=null;
         ArrayList<String> ssidResultsArray = new ArrayList<String>();
         for (int i = 0; i < results.size(); i++) {
             ssidResultsArray.add(results.get(i).SSID);
@@ -339,29 +342,54 @@ public class WifiScanner {
                 Log.w("LOG", "A FLOOR'S ROUTERS WERE DETECTED : ");
                 for (int j = 0; j < results.size(); j++) {
                     if (router1Array.get(i).getSSID().equals(results.get(j).SSID)) {
-                        Double distance = calculateDistance(results.get(j).frequency, results.get(j).level);
-                        Log.w("LOG", "DISTANCE FROM " + router1Array.get(i).getSSID() + ": " + Double.toString(distance));
-                        if (distance < 5d) {
-                            Log.w("LOG", "FLOOR FOUND: ");
-                            sharedPreferences = mContext.getSharedPreferences(CURRENT_FLOOR_ID, mContext.MODE_PRIVATE);
-                            String currentFloorID = sharedPreferences.getString("currentFloorID", "");
-                            if (currentFloorID == "" || currentFloorID != floorIdArray.get(i)) {
-                                Log.w("LOG","NEW FLOOR");
-                                editor.putString("currentFloorID", floorIdArray.get(i));
+                         distance1 = calculateDistance(results.get(j).frequency, results.get(j).level);
+                        Log.w("LOG", "DISTANCE FROM " + router1Array.get(i).getSSID() + ": " + Double.toString(distance1));
+                    }
+                    else if (router2Array.get(i).getSSID().equals(results.get(j).SSID)) {
+                         distance2 = calculateDistance(results.get(j).frequency, results.get(j).level);
+                        Log.w("LOG", "DISTANCE FROM " + router2Array.get(i).getSSID() + ": " + Double.toString(distance2));
+                    }
+                    else if (router3Array.get(i).getSSID().equals(results.get(j).SSID)) {
+                         distance3 = calculateDistance(results.get(j).frequency, results.get(j).level);
+                        Log.w("LOG", "DISTANCE FROM " + router3Array.get(i).getSSID() + ": " + Double.toString(distance3));
+                    }
+                }
+                if(distance1!=null && distance2!=null && distance3!=null){
+                    if(distance1<15d || distance2<15d || distance3<15d){
+                        Log.w("LOG", "FLOOR FOUND: ");
+                        sharedPreferences = mContext.getSharedPreferences(CURRENT_FLOOR_ID, mContext.MODE_PRIVATE);
+                        String currentFloorID = sharedPreferences.getString("currentFloorID", "");
+                        if (currentFloorID == "" || currentFloorID != floorIdArray.get(i)) {
+                            Log.w("LOG","NEW FLOOR");
+                            floorDetected=true;
+                            editor.putString("currentFloorID", floorIdArray.get(i));
+                            editor.commit();
+                            Intent intent = new Intent("com.parkking.floor.id.broadcast");
+                            intent.putExtra("floor_id", floorIdArray.get(i));
+                            Log.w("LOG",floorIdArray.get(i));
+                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                        }
+                        else{
+                            Log.w("LOG","SAME FLOOR");
+                            floorDetected=true;
+                            sharedPreferences = mContext.getSharedPreferences(BROADCAST_RECEIVED, mContext.MODE_PRIVATE);
+                            String broadcastReceived = sharedPreferences.getString("broadcastReceived", "");
+                            if(broadcastReceived.equals("")){
+                                editor.putString("currentFloorID", "");
                                 editor.commit();
-                                Intent intent = new Intent("com.parkking.floor.id.broadcast");
-                                intent.putExtra("floor_id", floorIdArray.get(i));
-                                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                             }
-                            else{
-                                Log.w("LOG","SAME FLOOR");
-                            }
-
-
                         }
                     }
                 }
             }
+        }
+
+        if(floorDetected==true){
+            //do nothing
+        }
+        else{
+            editor.putString("currentFloorID", "");
+            editor.commit();
         }
     }
 

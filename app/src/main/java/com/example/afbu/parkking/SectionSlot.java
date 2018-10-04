@@ -47,13 +47,13 @@ public class SectionSlot {
                 );
 
                 JSONArray point3_coord = slotPoints.getJSONArray(2);
-                pointC = new LatLng(
+                pointD = new LatLng(
                         Double.parseDouble(String.format("%.5f", point3_coord.getDouble(0) * floor_width)),
                         Double.parseDouble(String.format("%.5f", point3_coord.getDouble(1) * floor_height))
                 );
 
                 JSONArray point4_coord = slotPoints.getJSONArray(3);
-                pointD = new LatLng(
+                pointC = new LatLng(
                         Double.parseDouble(String.format("%.5f", point4_coord.getDouble(0) * floor_width)),
                         Double.parseDouble(String.format("%.5f", point4_coord.getDouble(1) * floor_height))
                 );
