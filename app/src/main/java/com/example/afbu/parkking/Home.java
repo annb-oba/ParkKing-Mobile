@@ -522,6 +522,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                         Intent gotoStartUp = new Intent(getApplicationContext(), StartUp.class);
                         startActivity(gotoStartUp);
                         break;
+
+                    case R.id.nav_parked_cars:
+                        Intent gotoParkedCars = new Intent(getApplicationContext(), ParkedCars.class);
+                        startActivity(gotoParkedCars);
+                        mDrawer.closeDrawer(NavMenu);
+                        break;
+
                     case R.id.nav_change_password:
                         Intent gotoChangPassword = new Intent(getApplicationContext(), ChangePassword.class);
                         startActivity(gotoChangPassword);
@@ -652,6 +659,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         //gMap.setMyLocationEnabled(true);
         gMap.setMyLocationEnabled(true);
         gMap.getUiSettings().setMyLocationButtonEnabled(false);
+        gMap.getUiSettings().setMapToolbarEnabled(false);
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(13.954371, 121.163004), 10));
 
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
