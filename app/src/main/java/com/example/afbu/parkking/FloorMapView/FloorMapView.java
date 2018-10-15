@@ -657,11 +657,11 @@ public class FloorMapView extends View {
     private Bitmap resizeBitmap(Bitmap floorImage) {
         float proportion = 0f;
         if (floorImage.getWidth() > floorImage.getHeight()) {
-            proportion = getHeight() / floorImage.getHeight();
+            proportion = (float) getMeasuredHeight() / floorImage.getHeight();
             floorImageWidth = proportion * floorImage.getWidth();
             floorImageHeight = getHeight();
         } else {
-            proportion = getWidth() / floorImage.getWidth();
+            proportion = (float) getWidth() / floorImage.getWidth();
             floorImageHeight = proportion * floorImage.getHeight();
             floorImageWidth = getWidth();
 
