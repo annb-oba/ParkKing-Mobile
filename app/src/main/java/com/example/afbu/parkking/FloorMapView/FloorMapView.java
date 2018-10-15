@@ -176,7 +176,10 @@ public class FloorMapView extends View {
                                     Integer.parseInt(dataSnapshot.child("x").getValue().toString()) > 0 ? Integer.parseInt(dataSnapshot.child("x").getValue().toString()) : 0
                                     , Integer.parseInt(dataSnapshot.child("y").getValue().toString()) > 0 ? Integer.parseInt(dataSnapshot.child("y").getValue().toString()) : 0
                             );
-                            getPathToSlot();
+
+                            if(blocked_grids.size() > 0) {
+                                getPathToSlot();
+                            }
                         }
                     }
                 }
@@ -767,6 +770,10 @@ public class FloorMapView extends View {
         } else {
             destination_x = sectionSlotListArray.get(i).getGrid_coordinates()[1];
             destination_y = sectionSlotListArray.get(i).getGrid_coordinates()[0];
+
+            if(blocked_grids.size() == 0) {
+                Toast.makeText(mContext, "No route defined on this map", Toast.LENGTH_SHORT).show();
+            }
         }
 
         StringRequest strRequest = new StringRequest(Request.Method.GET, mContext.getString(R.string.getBillingInfoURL) + sectionSlotListArray.get(i).getSlotID(), new Response.Listener<String>() {
@@ -817,7 +824,9 @@ public class FloorMapView extends View {
         };
         AppController.getInstance().addToRequestQueue(strRequest);
 
-        getPathToSlot();
+        if(blocked_grids.size() > 0) {
+            getPathToSlot();
+        }
     }
 
     public void repositionUserBitmap(Double userPercentageX, Double userPercentageY) {
