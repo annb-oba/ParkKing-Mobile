@@ -57,7 +57,13 @@ public class CarList extends AppCompatActivity {
         initEvents();
     }
 
+    @Override
+    protected void onResume() {
+        initResources();
+        initEvents();
+        super.onResume();
 
+    }
 
     private void initEvents() {
         btnBackHome.setOnClickListener(new View.OnClickListener() {

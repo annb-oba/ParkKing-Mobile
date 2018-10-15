@@ -19,7 +19,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        >
 
         <RelativeLayout
             android:alpha="0.8"
@@ -55,7 +56,8 @@
                 android:textColor="@color/colorWhite"
                 android:textColorHint="@color/colorWhite"
                 android:textSize="17sp"
-                app:fontFamily="@font/righteous" />
+                app:fontFamily="@font/open_sans"
+                android:textStyle="bold"/>
 
             <ImageButton
                 android:id="@+id/Home_btnNotif"
@@ -191,9 +193,11 @@
             android:layout_alignParentRight="true"
             android:layout_below="@+id/Home_searchBarRelativeLayout"
             android:layout_marginTop="15dp"
-            android:background="@null"
+            android:background="@drawable/shadow"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/get_user_position" />
+            app:srcCompat="@drawable/get_user_position"
+            android:elevation="15dp"
+            />
 
         <ImageButton
             android:id="@+id/Home_btnDirect"
@@ -203,9 +207,10 @@
             android:layout_alignParentRight="true"
             android:layout_marginBottom="15dp"
             android:layout_marginRight="10dp"
-            android:background="@null"
+            android:background="@drawable/shadow"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/route" />
+            app:srcCompat="@drawable/route"
+            android:elevation="15dp"/>
 
         <ImageButton
             android:id="@+id/Home_btnBuilding"
@@ -215,9 +220,10 @@
             android:layout_alignParentLeft="true"
             android:layout_marginBottom="15dp"
             android:layout_marginLeft="10dp"
-            android:background="@null"
+            android:background="@drawable/shadow"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/building" />
+            app:srcCompat="@drawable/building"
+            android:elevation="15dp"/>
 
     </RelativeLayout>
 

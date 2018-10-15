@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CarList"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/colorGrayBG">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -50,13 +51,13 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical"
-        android:padding="20dp"
+        android:padding="10dp"
         android:weightSum="100">
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/drop_shadow"
+            android:background="@drawable/rounded_border_white"
+            android:elevation="5dp"
             android:padding="8dp">
 
             <TextView
@@ -74,23 +75,26 @@
 
             <ImageButton
                 android:id="@+id/CarList_btnAddCar"
-                android:layout_width="47dp"
-                android:layout_height="41dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:background="@null"
                 android:scaleType="fitCenter"
-                app:srcCompat="@drawable/add_button_inside_black_circle" />
+                app:srcCompat="@drawable/add_button_inside_blue_circle" />
         </RelativeLayout>
         <ListView
+
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
             android:id="@+id/CarList_carListView"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:layout_marginTop="15dp"
-            android:background="@drawable/drop_shadow">
+            android:background="@drawable/rounded_border_white"
+            android:elevation="5dp"
+             >
             </ListView>
     </LinearLayout>
 
