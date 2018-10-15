@@ -14,11 +14,16 @@ public class SectionSlot {
     int sectionID, slotID;
     int billingID;
     int curr_stat;
+    int[] grid_coordinates;
     boolean first_read;
     private String slotTitle;
 
     public void setFirst_read(boolean first_read) {
         this.first_read = first_read;
+    }
+
+    public int[] getGrid_coordinates() {
+        return grid_coordinates;
     }
 
     public SectionSlot(JSONObject slotObject, Double floor_width, Double floor_height) {
@@ -31,6 +36,7 @@ public class SectionSlot {
             this.curr_stat = slotObject.getInt("curr_stat");
             this.slotTitle = slotObject.getString("slot_tag");
             this.first_read = true;
+            this.grid_coordinates = new int[]{slotObject.getInt("grid_x"), slotObject.getInt("grid_y")};
 
             JSONArray slotPoints = slotObject.getJSONArray("points");
             if (slotPoints.length() == 4) {

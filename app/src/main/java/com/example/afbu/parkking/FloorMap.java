@@ -64,6 +64,10 @@ public class FloorMap extends AppCompatActivity {
     public static final String CURRENT_FLOOR_ID = "currentFloorId";
     public static final String BROADCAST_RECEIVED ="bradcastReceived";
     private SharedPreferences.Editor editor;
+    private SharedPreferences sharedPreferences;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,7 +129,7 @@ public class FloorMap extends AppCompatActivity {
             initFloorMap();
         }
 
-
+        sharedPreferences = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
     }
 
     private void getBuildingFloors(final String intent) {
@@ -279,20 +283,31 @@ public class FloorMap extends AppCompatActivity {
           wifiScanner.onDestroy();
         }
         floorMapView.detatchValueEventListener();
+
+        if(intent.equals("park")) {
+
+        } else if(intent.equals("view")) {
+            initResources(intent);
+            initEvents();
+        }
+
         super.onDestroy();
     }
     @Override
     protected void onPause() {
         super.onPause();
-        Log.w("LOG","FloorMap onPause");
-        wifiScanner.getWifiRangeScannerRunnable().pause();
+
+        if(wifiScanner != null) {
+            Log.w("LOG","FloorMap onPause");
+            wifiScanner.getWifiRangeScannerRunnable().pause();
+        }
     }
 
     public void initFloorMap(){
         if(floorID.equals("")){
             return;
         }//BUG FIX FOR FLOOR MAP LOADING WHEN SPINNER IS INITIALIZED
-        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.get_floor_url) + floorID, new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.get_floor_url_with_tenant) + floorID + "/" + sharedPreferences.getString(PROFID_KEY, ""), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, response.toString());
@@ -302,28 +317,10 @@ public class FloorMap extends AppCompatActivity {
                     if (responseObj.getBoolean("success")) {
                         JSONObject floorObj = new JSONObject(responseObj.getString("floor_data"));
 
-                        JSONObject floorIndicatorsObj = new JSONObject(floorObj.getString("floor_indicators"));
-                        JSONArray floorIndicatorsArray = new JSONArray();
-                        if (floorIndicatorsObj.getBoolean("has_indicators")) {
-                            floorIndicatorsArray = new JSONArray(floorIndicatorsObj.getString("indicators"));
-                        }
-
-                        JSONObject floorSlotsObj = new JSONObject(floorObj.getString("floor_slots"));
-                        JSONArray floorSlotsArray = new JSONArray();
-                        if(floorSlotsObj.getBoolean("has_slots")) {
-                            floorSlotsArray = new JSONArray(floorSlotsObj.getString("slots"));
-                        } else {
-                            Toast.makeText(FloorMap.this, "No Slots", Toast.LENGTH_SHORT).show();
-                        }
-
                         floorTitleTextView.setText("1F");
                         availableSlotsTextView.setText(floorObj.getString("open_slots"));
-                        floorMapView.setFloorMapInformation(
-                                getString(R.string.floor_map_folder) + floorObj.getString("image"),
-                                floorIndicatorsArray, floorSlotsArray, floorObj.getDouble("map_width"),floorObj.getDouble("map_height"),
-                                floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView,
-                                floorObj.getDouble("grid_size"));
 
+                        floorMapView.setFloorMapInformation(floorObj, floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView);
                         floorMapView.setSupportFragmentManager(getSupportFragmentManager());
                     } else {
                         Toast.makeText(getApplicationContext(), responseObj.getString("message"), Toast.LENGTH_SHORT).show();

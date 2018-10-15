@@ -1,4 +1,4 @@
-package com.example.vince.testastarmobile.AStar;
+package com.example.afbu.parkking.AStar;
 
 public class Grid {
 
