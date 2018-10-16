@@ -178,7 +178,15 @@ public class FloorMapView extends View {
                             );
 
                             if(blocked_grids.size() > 0) {
-                                getPathToSlot();
+                                Runnable runnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        getPathToSlot();
+                                    }
+                                };
+                                Thread thread = new Thread(runnable);
+                                thread.start();
+
                             }
                         }
                     }
@@ -198,34 +206,30 @@ public class FloorMapView extends View {
                     y_line_count,
                     x_line_count,
                     (int) Math.floor(((userPositionY * floor_map_height) * (1 / floorMapGridSize)) / floorImageHeight),
-                    (int) Math.floor(((userPositionX * floor_map_width) * (1 / floorMapGridSize)) / floorImageWidth),
+                    (int) Math.flo.or(((userPositionX * floor_map_width) * (1 / floorMapGridSize)) / floorImageWidth),
                     blocked_grids);
             pathfindingAStar.endGrid(destination_x, destination_y);
-            pathfindingAStar.process();
-            List<Grid> solutionGrids = pathfindingAStar.getSolution();
+            if(destination_x != -1 && destination_y != -1) {
+                pathfindingAStar.process();
+                List<Grid> solutionGrids = pathfindingAStar.getSolution();
 
-            if(solutionGrids.size() > 0) {
-                path_grids = new int[solutionGrids.size()][2];
-                for (int x = 0; x < solutionGrids.size(); x ++) {
-                    path_grids[x][1] = solutionGrids.get(x).x;
-                    path_grids[x][0] = solutionGrids.get(x).y;
+                if(solutionGrids.size() > 0) {
+                    path_grids = new int[solutionGrids.size()][2];
+                    for (int x = 0; x < solutionGrids.size(); x ++) {
+                        path_grids[x][1] = solutionGrids.get(x).x;
+                        path_grids[x][0] = solutionGrids.get(x).y;
+                    }
+
+                    routePaint = new Paint();
+                    routePaint.setAntiAlias(true); // enable anti aliasing
+                    routePaint.setColor(Color.WHITE); // set default color to white
+                    routePaint.setDither(true); // enable dithering
+                    routePaint.setStyle(Paint.Style.STROKE); // set to STOKE
+                    routePaint.setStrokeJoin(Paint.Join.ROUND); // set the join to round you want
+                    routePaint.setStrokeCap(Paint.Cap.ROUND);  // set the paint cap to round too
+                    routePaint.setStrokeWidth(getHeight() / y_line_count);
+                    routePaint.setPathEffect(new CornerPathEffect(getHeight() / 20)); // set the path effect when they join.
                 }
-
-                routePaint = new Paint();
-                routePaint.setAntiAlias(true); // enable anti aliasing
-                routePaint.setColor(Color.WHITE); // set default color to white
-                routePaint.setDither(true); // enable dithering
-                routePaint.setStyle(Paint.Style.STROKE); // set to STOKE
-                routePaint.setStrokeJoin(Paint.Join.ROUND); // set the join to round you want
-                routePaint.setStrokeCap(Paint.Cap.ROUND);  // set the paint cap to round too
-                routePaint.setStrokeWidth(getHeight() / y_line_count);
-                routePaint.setPathEffect(new CornerPathEffect(getHeight() / 20)); // set the path effect when they join.
-            } else {
-                Toast.makeText(mContext, "No route to slot found", Toast.LENGTH_SHORT).show();
-                routePaint = null;
-                routePath = null;
-                path_grids = null;
-                destination_x = -1; destination_y = -1;
             }
 
         } else {

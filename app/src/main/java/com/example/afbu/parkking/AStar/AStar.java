@@ -24,6 +24,8 @@ public class AStar {
     private int startX, startY;
     private int endX, endY;
 
+    private int width, height;
+
     private String output;
     private String scores, solution;
 
@@ -31,6 +33,8 @@ public class AStar {
     private MinHeap nearestNeighborHeap;
 
     public AStar(int width, int height, int sx, int sy, List<String> blocks) {
+        this.width = width;
+        this.height = height;
         grid = new Grid[width][height];
         closedGrids = new boolean[width][height];
         openGridHashMap = new HashMap<String, Float>();
@@ -77,6 +81,18 @@ public class AStar {
     }
 
     public void startGrid(int x, int y) {
+        if(x >= width) {
+            x = width - 1;
+        } else if(x < 0) {
+            x = 0;
+        }
+
+        if(y >= height) {
+            y = height - 1;
+        } else if(y < 0) {
+            y = 0;
+        }
+
         startX = x;
         startY = y;
 
