@@ -206,7 +206,7 @@ public class FloorMapView extends View {
                     y_line_count,
                     x_line_count,
                     (int) Math.floor(((userPositionY * floor_map_height) * (1 / floorMapGridSize)) / floorImageHeight),
-                    (int) Math.flo.or(((userPositionX * floor_map_width) * (1 / floorMapGridSize)) / floorImageWidth),
+                    (int) Math.floor(((userPositionX * floor_map_width) * (1 / floorMapGridSize)) / floorImageWidth),
                     blocked_grids);
             pathfindingAStar.endGrid(destination_x, destination_y);
             if(destination_x != -1 && destination_y != -1) {
