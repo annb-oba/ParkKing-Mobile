@@ -123,7 +123,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
     private ArrayList<String> ParkKingPlaces;
     private ArrayList<Double> ParkKingLat, ParkKingLong;
-    private boolean haveArrived = false;
+    private String chosenBldg;
+    private boolean haveArrived = false, onRouting = false;
     private TextView txtdistanceFromChosenBldg;
     private List<Polyline> polylinePaths = new ArrayList<>();
     private ProgressDialog progressDialog;
@@ -248,7 +249,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             public void onErrorResponse(VolleyError error) {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Failed to get markers. Check connectivity and restart app.", Toast.LENGTH_SHORT).show();
             }
         }) {
             @Override
@@ -287,13 +288,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
-                    if (polylinePaths != null && toPlace != null) {
-                        String string_FromPlace = fromlat+","+fromlng;
-                        String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
-                        try {
-                            new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
+                    if(onRouting == true){
+                        if (polylinePaths != null && toPlace != null) {
+                            String string_FromPlace = fromlat+","+fromlng;
+                            String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
+                            try {
+                                new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
@@ -322,15 +325,18 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
-                    if (polylinePaths != null && toPlace != null) {
-                        String string_FromPlace = fromlat+","+fromlng;
-                        String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
-                        try {
-                            new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
+                    if(onRouting == true){
+                        if (polylinePaths != null && toPlace != null) {
+                            String string_FromPlace = fromlat+","+fromlng;
+                            String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
+                            try {
+                                new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
+
                 }
 
                 @Override
@@ -429,7 +435,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         btnDirect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                haveArrived=false;
+                if (polylinePaths != null) {
+                    for (Polyline polyline:polylinePaths ) {
+                        polyline.remove();
+                    }
+                }
+                haveArrived = false;
+                onRouting = true;
                 Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
                 makeDirections(toPlace);
             }
@@ -469,6 +481,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                         break;
 
                     case R.id.nav_parkinghistory:
+                        Intent gotoParkingHistory = new Intent(getApplicationContext(), ParkingHistory.class);
+                        startActivity(gotoParkingHistory);
+                        mDrawer.closeDrawer(NavMenu);
                         break;
 
                     case R.id.nav_mycarlist:
@@ -619,6 +634,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             public boolean onMarkerClick(Marker marker) {
                 String title = marker.getSnippet();
                 onClickBuilding = title;
+                if(chosenBldg == null){
+                    chosenBldg = title;
+                }else{
+                    if(!chosenBldg.equals(onClickBuilding)){
+                        onRouting = false;
+                        haveArrived = false;
+                        onClickBuilding = chosenBldg;
+                    }
+                }
                 StringRequest strRequest1 = new StringRequest(Request.Method.GET,
                         getString(R.string.apiURL) + "get_building_infos/" + title,
                         new Response.Listener<String>() {
@@ -656,10 +680,17 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 };
                 AppController.getInstance().addToRequestQueue(strRequest1);
 
-                tolat = marker.getPosition().latitude;
-                tolng = marker.getPosition().longitude;
-                toPlace = new LatLng(tolat, tolng);
+                if(!haveArrived) {
+                    tolat = marker.getPosition().latitude;
+                    tolng = marker.getPosition().longitude;
+                    toPlace = new LatLng(tolat, tolng);
+                }
                 btnDirect.setVisibility(View.VISIBLE);
+                float[] results = new float[1];
+                Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
+                        toPlace.latitude, toPlace.longitude,
+                        results);
+                txtdistanceFromChosenBldg.setText(Float.toString(results[0]));
                 return false;
             }
         });
@@ -710,7 +741,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
         for (com.example.afbu.parkking.Route route : routes) {
 
-            if(route.distance.value <= 15 && haveArrived == false){
+            float[] results = new float[1];
+            Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
+                    toPlace.latitude, toPlace.longitude,
+                    results);
+
+            if(results[0] <= 20 && haveArrived == false){
                 //Toast.makeText(getApplicationContext(),"You have arrived at your destionation",Toast.LENGTH_SHORT).show();
                 haveArrived = true;
                 if (polylinePaths != null) {
@@ -739,8 +775,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     polylineOptions.add(route.points.get(i));
 
                 polylinePaths.add(gMap.addPolyline(polylineOptions));
-                txtdistanceFromChosenBldg.setText(route.distance.text);
             }
+            txtdistanceFromChosenBldg.setText(Float.toString(results[0]));
+
 
 
 

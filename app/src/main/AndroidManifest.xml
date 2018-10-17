@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.Manifest.permission.NETWORK_SETTINGS"/>
+    <uses-permission android:name="android.Manifest.permission.NETWORK_SETTINGS" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -64,7 +64,9 @@
         <activity android:name=".CarProfile" />
         <activity android:name=".CarCoOwners" />
         <activity android:name=".AddCoOwner" />
-        <activity android:name=".FloorMap"></activity>
+        <activity android:name=".FloorMap" />
+        <activity android:name=".ParkingHistory" />
+        <activity android:name=".TermsAndCondition"></activity>
     </application>
 
 </manifest>

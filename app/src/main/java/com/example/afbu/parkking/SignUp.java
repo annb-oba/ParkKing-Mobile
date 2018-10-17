@@ -75,6 +75,7 @@ public class SignUp extends AppCompatActivity{
     private ImageView imgUser, imgCar;
     private Integer ChosenModelId;
     private Bitmap carimg, usrimg;
+    private TextView EULA;
     Uri selectedImage;
 
 
@@ -104,6 +105,7 @@ public class SignUp extends AppCompatActivity{
         imgCar = (ImageView) findViewById(R.id.SignUp_imgVehicle);
         Password = (EditText) findViewById(R.id.SignUp_edtPassword);
         MiddleName = (EditText) findViewById(R.id.SignUp_edtMName);
+        EULA = (TextView) findViewById(R.id.SignUp_txtEula2);
 
         imgCar.setVisibility(View.GONE);
 
@@ -195,6 +197,7 @@ public class SignUp extends AppCompatActivity{
     }
 
     private void initEvents(){
+
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -418,4 +421,9 @@ public class SignUp extends AppCompatActivity{
         }
 
     }*/
+
+   public void openEULA(View v){
+       Intent gotoEULA = new Intent(getApplicationContext(), TermsAndCondition.class);
+       startActivity(gotoEULA);
+   }
 }

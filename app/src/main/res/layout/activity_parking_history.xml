@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ParkingHistory">
+
+
+<RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:elevation="15dp">
+
+
+        <ImageButton
+            android:id="@+id/ParkingHistory_btnBack"
+            android:layout_width="37dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="11dp"
+            android:background="#0000"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/arrow_back_white" />
+
+        <TextView
+            android:id="@+id/ParkingHistory_txtActivityTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="62dp"
+            android:text="Parking History"
+            android:textColor="@color/colorWhite"
+            android:textSize="23sp"
+            app:fontFamily="@font/righteous"></TextView>
+
+
+
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/ParkingHistory_lstHistory"
+            android:layout_width="match_parent"
+            android:layout_height="520dp"
+            android:divider="@color/colorBlack"
+            android:dividerHeight="2px" />
+
+    </LinearLayout>
+
+
+
+
+</RelativeLayout>

@@ -233,7 +233,8 @@
                         android:text="Terms of Service and Privacy Policy"
                         android:textColor="@color/colorLink"
                         app:fontFamily="@font/open_sans"
-                        android:layout_centerHorizontal="true"/>
+                        android:layout_centerHorizontal="true"
+                        android:onClick="openEULA"/>
 
             </RelativeLayout>
 
