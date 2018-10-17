@@ -4,9 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Notifications">
+    tools:context=".Notifications"
+    android:background="@color/colorGrayBG">
 
     <RelativeLayout
+        android:id="@+id/notification_topbar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentStart="true"
@@ -25,19 +27,32 @@
             android:background="#0000"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/arrow_back_white" />
-
         <TextView
             android:id="@+id/Notifications_txtActivityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginStart="62dp"
+            android:layout_marginLeft="62dp"
             android:text="Notifications"
             android:textColor="@color/colorWhite"
             android:textSize="23sp"
             app:fontFamily="@font/righteous" />
-
     </RelativeLayout>
+    <LinearLayout
+        android:layout_below="@+id/notification_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorGrayBG"
+        android:padding="10dp">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/Notifications_RecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorWhite"
+            >
+        </android.support.v7.widget.RecyclerView>
+    </LinearLayout>
 
 </RelativeLayout>

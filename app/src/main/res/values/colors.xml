@@ -4,8 +4,11 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorBlack">#000000</color>
     <color name="colorLink">#6480C8</color>
-    <color name="colorGrayBG">#EEEFF0</color>
+    <color name="colorGrayBG">#e0e0e0</color>
+    <color name="colorSelectedGray">#d3d3d3</color>
     <color name="colorRed">#ad0808</color>
     <color name="colorParkKingBlue">#3e55a4</color>
+    <color name="colorParkKingLightBlue">#cceefc</color>
+    <color name="colorOffBlack">#545454</color>
 
 </resources>
