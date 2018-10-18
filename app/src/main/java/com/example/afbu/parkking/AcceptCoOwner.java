@@ -63,9 +63,50 @@ public class AcceptCoOwner extends AppCompatActivity {
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //accept request
+                acceptRequest();
             }
         });
+    }
+    public void acceptRequest(){
+        StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.acceptRelationshipURL), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, response.toString());
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = new JSONObject(response);
+                    String status = jsonObject.getString("status");
+                    if(jsonObject.getString("status").equals("success")){
+                        String message = jsonObject.getString("message");
+                        Toast.makeText(getApplicationContext(),message, Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getApplicationContext(),CarList.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                    else{
+                        String message = jsonObject.getString("message");
+                        Toast.makeText(getApplicationContext(),message, Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(), "Server Error", Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<String, String>();
+                parameters.put("request_id", request_id);
+                return parameters;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(strRequest);
     }
     public void getRequestData(){
 

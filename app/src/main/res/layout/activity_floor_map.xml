@@ -63,6 +63,7 @@
         app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/FloorMap_loadingLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -89,13 +90,12 @@
                 android:textSize="25dp" />
         </LinearLayout>
         <Spinner
-            android:background="@color/colorOffBlack"
+            android:background="@color/colorWhite"
             android:id="@+id/FloorMap_floorSpinner"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="4"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"/>
+            android:layout_height="45dp"
+
+            />
         <com.example.afbu.parkking.FloorMapView.FloorMapView
             android:id="@+id/FloorMap_floorMapView"
             android:layout_width="match_parent"
@@ -127,7 +127,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:text="N/A"
+                    android:text="1F"
                     android:textAlignment="center"
                     android:textColor="#000"
                     android:textSize="32dp"
