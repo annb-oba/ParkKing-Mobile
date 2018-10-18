@@ -43,6 +43,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.bumptech.glide.Glide;
 import com.directions.route.AbstractRouting;
 import com.directions.route.Route;
 import com.directions.route.RouteException;
@@ -108,6 +109,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     private DrawerLayout mDrawer;
     private ImageButton btnMenu, btnNotif, btnDirect, btnPosition,btnBuilding;
     private NavigationView NavMenu;
+    private View headerView;
     private ImageView NavImgUser;
     private TextView Name, Email, AvailSlot;
     private String Firstname, Lastname, Middlename, Emailtxt, ProfilePicture;
@@ -151,6 +153,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
         initResources();
         initEvents();
+        getVehicleOwnerInformation();
     }
     @Override
     protected void onResume(){
@@ -622,9 +625,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 Middlename = userinfo.getString("middle_name");
                                 Emailtxt = object.getString("email");
                                 ProfilePicture = userinfo.getString("profile_picture");
-                                Toast.makeText(getApplicationContext(), Lastname, Toast.LENGTH_SHORT).show();
-                                //Name.setText(Lastname);
-                                //Email.setText(Emailtxt);
+                               // Toast.makeText(getApplicationContext(), Lastname, Toast.LENGTH_SHORT).show();
+                                Name.setText(Firstname+" "+Middlename+" "+Lastname);
+                                Email.setText(Emailtxt);
+                                Glide.with(getApplicationContext()).asBitmap().load(getString(R.string.profilepictureURL)+ProfilePicture).into(NavImgUser);
                                 //getProfilePicture();
                             } else if (status.equals("failed")) {
                                 String message = object.getString("message");
@@ -678,10 +682,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         mDrawer = (DrawerLayout) findViewById(R.id.drawerLayout);
         btnMenu = (ImageButton) findViewById(R.id.Home_btnMenu);
         NavMenu = (NavigationView) findViewById(R.id.nav_menu);
+        headerView = NavMenu.getHeaderView(0);
+        NavImgUser = (ImageView) headerView.findViewById(R.id.NavHeader_imgUser);
+        Name = (TextView) headerView.findViewById(R.id.NavHeader_Name);
+        Email = (TextView) headerView.findViewById(R.id.NavHeader_Email);
         btnNotif = (ImageButton) findViewById(R.id.Home_btnNotif);
-        NavImgUser = (ImageView) findViewById(R.id.NavHeader_imgUser);
-        Name = (TextView) findViewById(R.id.NavHeader_Name);
-        Email = (TextView) findViewById(R.id.NavHeader_Email);
         searchPlace = (AutoCompleteTextView) findViewById(R.id.Home_txtPlaces);
         btnBuilding = (ImageButton) findViewById(R.id.Home_btnBuilding);
         btnDirect = (ImageButton) findViewById(R.id.Home_btnDirect);
