@@ -100,6 +100,7 @@ public class FloorMapView extends View {
     private List<SectionSlot> sectionSlotListArray;
 
     private SharedPreferences sharedPreferences;
+    private SharedPreferences floorIDSharedPreference;
     private static final String PreferenceName = "UserPreference";
     private static final String PROFID_KEY = "ProfileIDKey";
     public static final String CURRENT_FLOOR_ID = "currentFloorId";
@@ -113,6 +114,8 @@ public class FloorMapView extends View {
     private float canvasRotation;
     private float floorMapGridSize;
     private android.support.v4.app.FragmentManager supportFragmentManager;
+    private String intent;
+    private String parkedSlot;
 
     public FloorMapView(Context context) {
         super(context);
@@ -158,12 +161,14 @@ public class FloorMapView extends View {
         userBitmap = null;
         path_grids = null;
         blocked_grids = new ArrayList<>();
-        destination_x = -1; destination_y = -1;
+        destination_x = -1;
+        destination_y = -1;
         pathfindingAStar = null;
 
         sectionSlotListArray = new ArrayList<>();
         slotEventListener = new ArrayList<>();
         sharedPreferences = mContext.getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        floorIDSharedPreference = mContext.getSharedPreferences(CURRENT_FLOOR_ID, mContext.MODE_PRIVATE);
 
         if (!sharedPreferences.getString(PROFID_KEY, "").trim().isEmpty()) {
             userRef = database.getReference().child("users").child(sharedPreferences.getString(PROFID_KEY, ""));
@@ -177,7 +182,7 @@ public class FloorMapView extends View {
                                     , Integer.parseInt(dataSnapshot.child("y").getValue().toString()) > 0 ? Integer.parseInt(dataSnapshot.child("y").getValue().toString()) : 0
                             );
 
-                            if(blocked_grids.size() > 0) {
+                            if (blocked_grids.size() > 0 && !intent.equals("view_parked")) {
                                 Runnable runnable = new Runnable() {
                                     @Override
                                     public void run() {
@@ -201,7 +206,7 @@ public class FloorMapView extends View {
     }
 
     private void getPathToSlot() {
-        if(destination_x >= 0 && destination_y >= 0) {
+        if (destination_x >= 0 && destination_y >= 0) {
             pathfindingAStar = new AStar(
                     y_line_count,
                     x_line_count,
@@ -209,13 +214,13 @@ public class FloorMapView extends View {
                     (int) Math.floor(((userPositionX * floor_map_width) * (1 / floorMapGridSize)) / floorImageWidth),
                     blocked_grids);
             pathfindingAStar.endGrid(destination_x, destination_y);
-            if(destination_x != -1 && destination_y != -1) {
+            if (destination_x != -1 && destination_y != -1) {
                 pathfindingAStar.process();
                 List<Grid> solutionGrids = pathfindingAStar.getSolution();
 
-                if(solutionGrids.size() > 0) {
+                if (solutionGrids.size() > 0) {
                     path_grids = new int[solutionGrids.size()][2];
-                    for (int x = 0; x < solutionGrids.size(); x ++) {
+                    for (int x = 0; x < solutionGrids.size(); x++) {
                         path_grids[x][1] = solutionGrids.get(x).x;
                         path_grids[x][0] = solutionGrids.get(x).y;
                     }
@@ -279,8 +284,8 @@ public class FloorMapView extends View {
             }
 
             for (int i = 0; i < floorSlots.size(); i++) {
-                float floorSlotX = ((float) sectionSlotListArray.get(i).getIndicatorCoordinate().latitude * floorImageWidth - 50) + floorImagePosX;
-                float floorSlotY = ((float) sectionSlotListArray.get(i).getIndicatorCoordinate().longitude * floorImageHeight - 150) + floorImagePosY;
+                float floorSlotX = ((float) sectionSlotListArray.get(i).getIndicatorCoordinate().latitude * floorImageWidth - (String.valueOf(sectionSlotListArray.get(i).getSlotID()).equals(parkedSlot) ? 82 : 50)) + floorImagePosX;
+                float floorSlotY = ((float) sectionSlotListArray.get(i).getIndicatorCoordinate().longitude * floorImageHeight - (String.valueOf(sectionSlotListArray.get(i).getSlotID()).equals(parkedSlot) ? 200 : 150)) + floorImagePosY;
                 canvas.drawBitmap(floorSlots.get(i), floorSlotX, floorSlotY, null);
             }
 
@@ -295,10 +300,9 @@ public class FloorMapView extends View {
 
                 routePath.reset();
             }
-             sharedPreferences = mContext.getSharedPreferences(CURRENT_FLOOR_ID, mContext.MODE_PRIVATE);
 
-//            if(String.valueOf(this.floorID).equals(sharedPreferences.getString("currentFloorID", ""))){
-                canvas.drawBitmap(userBitmap, (userPositionX - (getWidth() / 10f) / 2) + floorImagePosX, (userPositionY - (getWidth() / 10f) / 2) + floorImagePosY, null);
+//            if(String.valueOf(this.floorID).equals(floorIDSharedPreference.getString("currentFloorID", ""))){
+            canvas.drawBitmap(userBitmap, (userPositionX - (getWidth() / 10f) / 2) + floorImagePosX, (userPositionY - (getWidth() / 10f) / 2) + floorImagePosY, null);
 //            }
             canvas.restore();
         }
@@ -316,7 +320,8 @@ public class FloorMapView extends View {
 
         path_grids = null;
         blocked_grids = new ArrayList<>();
-        destination_x = -1; destination_y = -1;
+        destination_x = -1;
+        destination_y = -1;
 
         floorIndicators = new ArrayList<>();
         floorIndicatorCoords = new ArrayList<>();
@@ -354,13 +359,13 @@ public class FloorMapView extends View {
 
             // slots
             JSONObject floorSlotsObj = new JSONObject(floorObj.getString("floor_slots"));
-            if(floorSlotsObj.getBoolean("has_slots")) {
+            if (floorSlotsObj.getBoolean("has_slots")) {
                 JSONArray floorSlotsJSONArray = new JSONArray(floorSlotsObj.getString("slots"));
                 if (floorSlotsJSONArray.length() > 0) {
                     for (int i = 0; i < floorSlotsJSONArray.length(); i++) {
                         try {
                             this.sectionSlotListArray.add(new SectionSlot(floorSlotsJSONArray.getJSONObject(i), floorObj.getDouble("map_width"), floorObj.getDouble("map_height")));
-                            getSlotBitmap();
+                            getSlotBitmap(floorSlotsJSONArray.getJSONObject(i).getString("slot_id"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -388,14 +393,14 @@ public class FloorMapView extends View {
             }
 
             // map grids
-            if(floorObj.getString("map_grid") != "null") {
+            if (floorObj.getString("map_grid") != "null") {
                 JSONArray gridY = new JSONArray(floorObj.getString("map_grid"));
 
                 for (int i = 0; i < gridY.length(); i++) {
                     JSONArray gridX = new JSONArray(gridY.getString(i));
 
-                    for (int j = 0; j < gridX.length(); j ++) {
-                        if(gridX.getInt(j) == 0) {
+                    for (int j = 0; j < gridX.length(); j++) {
+                        if (gridX.getInt(j) == 0) {
                             blocked_grids.add(String.valueOf(i) + "," + String.valueOf(j));
                         }
                     }
@@ -447,7 +452,7 @@ public class FloorMapView extends View {
             for (int i = 0; i < floorSlotsJSONArray.length(); i++) {
                 try {
                     this.sectionSlotListArray.add(new SectionSlot(floorSlotsJSONArray.getJSONObject(i), floor_width, floor_height));
-                    getSlotBitmap();
+                    getSlotBitmap(floorSlotsJSONArray.getJSONObject(i).getString("slot_id"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -484,9 +489,11 @@ public class FloorMapView extends View {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
-                       // Toast.makeText(mContext, "Change", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(mContext, "Change", Toast.LENGTH_SHORT).show();
                         int status = Integer.valueOf(String.valueOf(dataSnapshot.getValue()));
-                        changeSlotBitmapStatus(slotStatusFile[status], finalI);
+                        if(!String.valueOf(slot_id).equals(parkedSlot)) {
+                            changeSlotBitmapStatus(slotStatusFile[status], finalI);
+                        }
                         if (floorSlotObject.isFirst_read()) {
                             floorSlotObject.setFirst_read(false);
                         } else {
@@ -534,12 +541,10 @@ public class FloorMapView extends View {
         StringRequest strRequest = new StringRequest(Request.Method.POST, mContext.getString(R.string.createVehicleLogURL), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, response.toString());
+                Log.d(TAG, response);
                 try {
                     JSONObject requestObj = new JSONObject(response);
-                    if (requestObj.getBoolean("success")) {
-
-                    } else {
+                    if (!requestObj.getBoolean("success")) {
                         Toast.makeText(mContext, requestObj.getString("message"), Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException e) {
@@ -567,20 +572,23 @@ public class FloorMapView extends View {
     }
 
     private void changeSlotBitmapStatus(String slotURL, final int slotIndex) {
-        if(floorSlots.size() > slotIndex) {
+        if (floorSlots.size() > slotIndex) {
             floorSlots.set(slotIndex,
                     resizeSlotIndicator(
-                            BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(slotURL, "drawable", mContext.getPackageName()))
+                            BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(slotURL, "drawable", mContext.getPackageName())), false
                     ));
             postInvalidate();
         }
     }
 
-    private void getSlotBitmap() {
+    private void getSlotBitmap(String slot_id) {
         floorSlots.add(
-            resizeSlotIndicator(
-                BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("default_slot", "drawable", mContext.getPackageName()))
-            )
+                slot_id.equals(parkedSlot) ?
+                resizeSlotIndicator(
+                    BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("logo", "drawable", mContext.getPackageName())), slot_id.equals(parkedSlot)
+                ) : resizeSlotIndicator(
+                    BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("default_slot", "drawable", mContext.getPackageName())), slot_id.equals(parkedSlot)
+                )
         );
     }
 
@@ -604,6 +612,14 @@ public class FloorMapView extends View {
 
     public void setSupportFragmentManager(android.support.v4.app.FragmentManager supportFragmentManager) {
         this.supportFragmentManager = supportFragmentManager;
+    }
+
+    public void setIntent(String intent) {
+        this.intent = intent;
+    }
+
+    public void setParkedSlot(String parkedSlot) {
+        this.parkedSlot = parkedSlot;
     }
 
     class RetrieveFloorImageTask extends AsyncTask<String, Void, Void> {
@@ -682,11 +698,17 @@ public class FloorMapView extends View {
         return Bitmap.createBitmap(floorImage, 0, 0, floorImage.getWidth(), floorImage.getHeight(), matrix, true);
     }
 
-    private Bitmap resizeSlotIndicator(Bitmap indicator) {
+    private Bitmap resizeSlotIndicator(Bitmap indicator, boolean isParked) {
         Matrix matrix = new Matrix();
 
         RectF src = new RectF(0, 0, indicator.getWidth(), indicator.getHeight());
-        RectF dest = new RectF(0, 0, 100, 150);
+        RectF dest;
+        if(!isParked) {
+            dest = new RectF(0, 0, 100, 150);
+        } else {
+            dest = new RectF(0, 0, (float) 164.8, 200);
+        }
+
         matrix.setRectToRect(src, dest, Matrix.ScaleToFit.FILL);
 
         return Bitmap.createBitmap(indicator, 0, 0, indicator.getWidth(), indicator.getHeight(), matrix, true);
@@ -769,13 +791,14 @@ public class FloorMapView extends View {
     private void getSlotInformation(int i) {
 //        Toast.makeText(mContext, "x: " + String.valueOf((int) Math.floor(((userPositionX * floor_map_width) * (1 / floorMapGridSize)) / floorImageWidth)) + " | " + "y: " + String.valueOf((int) Math.floor(((userPositionY * floor_map_height) * (1 / floorMapGridSize)) / floorImageHeight)), Toast.LENGTH_SHORT).show();
 //        Toast.makeText(mContext, "x: " + String.valueOf(sectionSlotListArray.get(i).getGrid_coordinates()[0]) + " | " + "y: " + String.valueOf(sectionSlotListArray.get(i).getGrid_coordinates()[1]), Toast.LENGTH_SHORT).show();
-        if(destination_x == sectionSlotListArray.get(i).getGrid_coordinates()[1] && destination_y == sectionSlotListArray.get(i).getGrid_coordinates()[0]) {
-            destination_x = -1; destination_y = -1;
+        if (destination_x == sectionSlotListArray.get(i).getGrid_coordinates()[1] && destination_y == sectionSlotListArray.get(i).getGrid_coordinates()[0]) {
+            destination_x = -1;
+            destination_y = -1;
         } else {
             destination_x = sectionSlotListArray.get(i).getGrid_coordinates()[1];
             destination_y = sectionSlotListArray.get(i).getGrid_coordinates()[0];
 
-            if(blocked_grids.size() == 0) {
+            if (blocked_grids.size() == 0) {
                 Toast.makeText(mContext, "No route defined on this map", Toast.LENGTH_SHORT).show();
             }
         }
@@ -828,7 +851,7 @@ public class FloorMapView extends View {
         };
         AppController.getInstance().addToRequestQueue(strRequest);
 
-        if(blocked_grids.size() > 0) {
+        if (blocked_grids.size() > 0 && !intent.equals("view_parked")) {
             getPathToSlot();
         }
     }
@@ -896,24 +919,24 @@ public class FloorMapView extends View {
         Log.d("slot_computation", "Point C: " + Double.toString(pointC.latitude) + ", " + pointC.longitude);
         Log.d("slot_computation", "Point D: " + Double.toString(pointD.latitude) + ", " + pointD.longitude);
 
-        Log.d("slot_computation", "Rectangle area: " + Double.toString(Math.round(rectangleArea*10000.0)/10000.0));
+        Log.d("slot_computation", "Rectangle area: " + Double.toString(Math.round(rectangleArea * 10000.0) / 10000.0));
         Log.d("slot_computation", "APD: " + Double.toString(APD));
         Log.d("slot_computation", "DPC: " + Double.toString(DPC));
         Log.d("slot_computation", "CPB: " + Double.toString(CPB));
         Log.d("slot_computation", "PBA: " + Double.toString(PBA));
-        Log.d("slot_computation", "Total area: " + Double.toString((Math.round((APD + DPC + CPB + PBA)*10000.0)/10000.0)));
+        Log.d("slot_computation", "Total area: " + Double.toString((Math.round((APD + DPC + CPB + PBA) * 10000.0) / 10000.0)));
 
 
-
-        if ((Math.round((APD + DPC + CPB + PBA)*10000.0)/10000.0) == (Math.round(rectangleArea*10000.0)/10000.0)) {
+        if ((Math.round((APD + DPC + CPB + PBA) * 10000.0) / 10000.0) == (Math.round(rectangleArea * 10000.0) / 10000.0)) {
             return true;
         } else {
             return false;
         }
     }
+
     public void detatchValueEventListener() {
-        if(slotEventListener.size() > 0 && sectionSlotListArray.size() > 0) {
-            for(int i = 0; i < slotEventListener.size(); i ++) {
+        if (slotEventListener.size() > 0 && sectionSlotListArray.size() > 0) {
+            for (int i = 0; i < slotEventListener.size(); i++) {
                 final SectionSlot floorSlotObject = sectionSlotListArray.get(i);
                 final int slot_id = floorSlotObject.getSlotID();
                 int section_id = floorSlotObject.getSectionID();
