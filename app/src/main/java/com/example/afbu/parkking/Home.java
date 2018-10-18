@@ -98,7 +98,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
     private Object mLastKnownLocation;
     private DrawerLayout mDrawer;
-    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition,btnBuilding;
+    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition;
     private NavigationView NavMenu;
     private ImageView NavImgUser;
     private TextView Name, Email, AvailSlot;
@@ -123,10 +123,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
     private ArrayList<String> ParkKingPlaces;
     private ArrayList<Double> ParkKingLat, ParkKingLong;
-
-    private String chosenBldg;
-    private boolean haveArrived = false, onRouting = false;
-
+    private boolean haveArrived = false;
     private TextView txtdistanceFromChosenBldg;
     private List<Polyline> polylinePaths = new ArrayList<>();
     private ProgressDialog progressDialog;
@@ -136,7 +133,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-//        getBuildingFloorRouters("2");
+        //getBuildingFloorRouters("2");
 
         initResources();
         initEvents();
@@ -167,7 +164,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 Intent myIntent = new Intent(Home.this, FloorMap.class);
                                 myIntent.putExtra("floor_info", tempResponse);
                                 myIntent.putExtra("building_id", building_id);
-                                myIntent.putExtra("intent","park");
                                 startActivity(myIntent);
                             }})
                         .setNegativeButton("Cancel", null).show();
@@ -228,7 +224,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
                                 markerOptions = new MarkerOptions();
                                 markerOptions.title(name);
-                                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo_non_transparent", 80, 110)));
+                                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo", 80, 110)));
                                 markerOptions.position(new LatLng(latitude, longitude));
                                 markerOptions.snippet(BuildingID);
                                 gMap.addMarker(markerOptions);
@@ -291,15 +287,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
-                    if(onRouting == true){
-                        if (polylinePaths != null && toPlace != null) {
-                            String string_FromPlace = fromlat+","+fromlng;
-                            String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
-                            try {
-                                new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
+                    if (polylinePaths != null && toPlace != null) {
+                        String string_FromPlace = fromlat+","+fromlng;
+                        String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
+                        try {
+                            new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -328,15 +322,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
-                    if(onRouting == true){
-                        if (polylinePaths != null && toPlace != null) {
-                            String string_FromPlace = fromlat+","+fromlng;
-                            String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
-                            try {
-                                new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
+                    if (polylinePaths != null && toPlace != null) {
+                        String string_FromPlace = fromlat+","+fromlng;
+                        String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
+                        try {
+                            new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -434,42 +426,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 Log.w("LOG", "BTN POSITION CLICKED");
             }
         });
-
-        btnBuilding.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(onClickBuilding!=null){
-                    Intent myIntent = new Intent(Home.this, FloorMap.class);
-                    myIntent.putExtra("building_id", onClickBuilding);
-                    myIntent.putExtra("intent","view");
-                    startActivity(myIntent);
-                }
-            }
-        });
-
         btnDirect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (polylinePaths != null) {
-                    for (Polyline polyline:polylinePaths ) {
-                        polyline.remove();
-                    }
-                }
-                haveArrived = false;
-                onRouting = true;
-               try{
-                   Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
-                   makeDirections(toPlace);
-               }catch(Exception e){
-                   new android.app.AlertDialog.Builder(Home.this)
-                           .setTitle("GPS Error")
-                           .setMessage("Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings")
-                           .setPositiveButton("Go", new DialogInterface.OnClickListener() {
-                               public void onClick(DialogInterface dialog, int whichButton) {
-                                   //Redirect to GPS settings
-                               }})
-                           .setNegativeButton("Cancel", null).show();
-               }
+                haveArrived=false;
+                Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
+                makeDirections(toPlace);
             }
         });
 
@@ -522,13 +484,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                         Intent gotoStartUp = new Intent(getApplicationContext(), StartUp.class);
                         startActivity(gotoStartUp);
                         break;
-
-                    case R.id.nav_parked_cars:
-                        Intent gotoParkedCars = new Intent(getApplicationContext(), ParkedCars.class);
-                        startActivity(gotoParkedCars);
-                        mDrawer.closeDrawer(NavMenu);
-                        break;
-
                     case R.id.nav_change_password:
                         Intent gotoChangPassword = new Intent(getApplicationContext(), ChangePassword.class);
                         startActivity(gotoChangPassword);
@@ -617,10 +572,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         Name = (TextView) findViewById(R.id.NavHeader_Name);
         Email = (TextView) findViewById(R.id.NavHeader_Email);
         searchPlace = (AutoCompleteTextView) findViewById(R.id.Home_txtPlaces);
-        btnBuilding = (ImageButton) findViewById(R.id.Home_btnBuilding);
         btnDirect = (ImageButton) findViewById(R.id.Home_btnDirect);
         btnDirect.setVisibility(View.GONE);
-        btnBuilding.setVisibility(View.GONE);
         btnPosition = (ImageButton) findViewById(R.id.Home_btnPosition);
         btnPosition.setVisibility(View.GONE);
         polylines = new ArrayList<>();
@@ -659,7 +612,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         //gMap.setMyLocationEnabled(true);
         gMap.setMyLocationEnabled(true);
         gMap.getUiSettings().setMyLocationButtonEnabled(false);
-        gMap.getUiSettings().setMapToolbarEnabled(false);
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(13.954371, 121.163004), 10));
 
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -667,15 +619,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             public boolean onMarkerClick(Marker marker) {
                 String title = marker.getSnippet();
                 onClickBuilding = title;
-                if(chosenBldg == null){
-                    chosenBldg = title;
-                }else{
-                    if(!chosenBldg.equals(onClickBuilding)){
-                        onRouting = false;
-                        haveArrived = false;
-                        onClickBuilding = chosenBldg;
-                    }
-                }
                 StringRequest strRequest1 = new StringRequest(Request.Method.GET,
                         getString(R.string.apiURL) + "get_building_infos/" + title,
                         new Response.Listener<String>() {
@@ -713,42 +656,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 };
                 AppController.getInstance().addToRequestQueue(strRequest1);
 
-                if(!haveArrived) {
-                    tolat = marker.getPosition().latitude;
-                    tolng = marker.getPosition().longitude;
-                    toPlace = new LatLng(tolat, tolng);
-                }
-
-                try{
-                    btnDirect.setVisibility(View.VISIBLE);
-                    btnBuilding.setVisibility(View.VISIBLE);
-                    float[] results = new float[1];
-                    Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
-                            toPlace.latitude, toPlace.longitude,
-                            results);
-                    int temp = Math.round(results[0]);
-                    if(temp>100){
-                        temp = Math.round(temp/1000);
-                        txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"km");
-                    }else{
-                        txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
-                    }
-
-
-                }catch(Exception e){
-                    btnDirect.setVisibility(View.INVISIBLE);
-                    btnBuilding.setVisibility(View.INVISIBLE);
-                    new android.app.AlertDialog.Builder(Home.this)
-                            .setTitle("GPS Error")
-                            .setMessage("Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings")
-                            .setPositiveButton("Go", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    //Redirect to GPS settings
-                                }})
-                            .setNegativeButton("Cancel", null).show();
-                }
-
-
+                tolat = marker.getPosition().latitude;
+                tolng = marker.getPosition().longitude;
+                toPlace = new LatLng(tolat, tolng);
+                btnDirect.setVisibility(View.VISIBLE);
                 return false;
             }
         });
@@ -799,12 +710,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
         for (com.example.afbu.parkking.Route route : routes) {
 
-            float[] results = new float[1];
-            Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
-                    toPlace.latitude, toPlace.longitude,
-                    results);
-
-            if(results[0] <= 200 && haveArrived == false){
+            if(route.distance.value <= 15 && haveArrived == false){
                 //Toast.makeText(getApplicationContext(),"You have arrived at your destionation",Toast.LENGTH_SHORT).show();
                 haveArrived = true;
                 if (polylinePaths != null) {
@@ -833,20 +739,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     polylineOptions.add(route.points.get(i));
 
                 polylinePaths.add(gMap.addPolyline(polylineOptions));
+                txtdistanceFromChosenBldg.setText(route.distance.text);
             }
-            int temp = Math.round(results[0]);
-            if(temp>100){
-                temp = Math.round(temp/1000);
-                txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"km");
-            }else{
-                txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
-            }
-
 
 
 
         }
-
 
     }
 }
