@@ -64,7 +64,11 @@
         <activity android:name=".CarProfile" />
         <activity android:name=".CarCoOwners" />
         <activity android:name=".AddCoOwner" />
-        <activity android:name=".FloorMap"></activity>
+        <activity android:name=".FloorMap" />
+        <activity android:name=".ParkedCars" />
+        <activity android:name=".AcceptCoOwner" />
+        <activity android:name=".TermsAndCondition"/>
+        <activity android:name=".ParkingHistory" />
     </application>
 
 </manifest>

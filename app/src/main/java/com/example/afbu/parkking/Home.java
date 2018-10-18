@@ -308,7 +308,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             public void onErrorResponse(VolleyError error) {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Failed to get markers. Check connectivity and restart app.", Toast.LENGTH_SHORT).show();
             }
         }) {
             @Override
@@ -564,6 +564,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                         break;
 
                     case R.id.nav_parkinghistory:
+                        Intent gotoParkingHistory = new Intent(getApplicationContext(), ParkingHistory.class);
+                        startActivity(gotoParkingHistory);
+                        mDrawer.closeDrawer(NavMenu);
                         break;
 
                     case R.id.nav_mycarlist:
@@ -873,7 +876,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     toPlace.latitude, toPlace.longitude,
                     results);
 
-            if(results[0] <= 200 && haveArrived == false){
+            if(results[0] <= 50 && haveArrived == false){
                 //Toast.makeText(getApplicationContext(),"You have arrived at your destionation",Toast.LENGTH_SHORT).show();
                 haveArrived = true;
                 if (polylinePaths != null) {

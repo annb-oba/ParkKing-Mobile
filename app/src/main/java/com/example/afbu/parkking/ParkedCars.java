@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -39,6 +40,7 @@ public class ParkedCars extends AppCompatActivity implements SwipeRefreshLayout.
     private RecyclerView parkedCarsRecyclerView;
     private List<ParkedCar> parkedCarList;
     private SwipeRefreshLayout parkedCarsContainer;
+    private ImageButton backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,16 @@ public class ParkedCars extends AppCompatActivity implements SwipeRefreshLayout.
             public void run() {
                 parkedCarsContainer.setRefreshing(true);
                 getParkedCars();
+            }
+        });
+
+        backButton = (ImageButton)findViewById(R.id.ParkedCars_btnBack);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Intent myIntent = new Intent(FloorMap.this, Home.class);
+//                startActivity(myIntent);
+                finish();
             }
         });
     }

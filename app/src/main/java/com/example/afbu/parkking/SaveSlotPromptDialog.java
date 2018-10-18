@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -48,7 +49,11 @@ public class SaveSlotPromptDialog extends AppCompatDialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent parkedCarsIntent = new Intent(getContext(), ParkedCars.class);
-                        Objects.requireNonNull(getContext()).startActivity(parkedCarsIntent);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            Objects.requireNonNull(getContext()).startActivity(parkedCarsIntent);
+                        } else {
+                            getContext().startActivity(parkedCarsIntent);
+                        }
                     }
                 });
 

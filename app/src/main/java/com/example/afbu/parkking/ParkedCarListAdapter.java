@@ -49,7 +49,7 @@ public class ParkedCarListAdapter extends RecyclerView.Adapter<ParkedCarListAdap
 
     @Override
     public void onBindViewHolder(@NonNull ParkedCarListAdapter.ParkedCarViewHolder holder, int position) {
-        ParkedCar parkedCar = parkedCarList.get(position);
+        final ParkedCar parkedCar = parkedCarList.get(position);
 
         holder.plateNumberTextView.setText(parkedCar.getPlate_number());
         holder.carMakeTextView.setText(parkedCar.getCar_make());
@@ -116,8 +116,8 @@ public class ParkedCarListAdapter extends RecyclerView.Adapter<ParkedCarListAdap
             e.printStackTrace();
         }
 
-        String finalBuilding_id = building_id;
-        String finalSlot_id = slot_id;
+        final String finalBuilding_id = building_id;
+        final String finalSlot_id = slot_id;
         StringRequest strRequest = new StringRequest(Request.Method.GET, mCtx.getString(R.string.apiURL) + "get_building_floor_routers/" + building_id, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -127,6 +127,7 @@ public class ParkedCarListAdapter extends RecyclerView.Adapter<ParkedCarListAdap
                     myIntent.putExtra("building_id", finalBuilding_id);
                     myIntent.putExtra("slot_id", finalSlot_id);
                     myIntent.putExtra("intent","view_parked");
+                    myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mCtx.startActivity(myIntent);
             }
         }, new Response.ErrorListener() {
