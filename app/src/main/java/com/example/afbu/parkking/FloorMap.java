@@ -67,6 +67,7 @@ public class FloorMap extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private static final String PreferenceName = "UserPreference";
     private static final String PROFID_KEY = "ProfileIDKey";
+    private String parkedSlotID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,13 +78,16 @@ public class FloorMap extends AppCompatActivity {
         myIntent = getIntent();
         buildingID = myIntent.getStringExtra("building_id");
         intent = myIntent.getStringExtra("intent");
+        parkedSlotID = myIntent.getStringExtra("slot_id");
 
-        if(intent.equals("park")){
+        if(intent.equals("park") || intent.equals("view_parked")){
             initResources(intent);
             initEvents();
-            initFloorScanner();
+            if(!intent.equals("view_parked")) {
+                initFloorScanner();
+            }
 
-        }else if(intent.equals("view")){
+        }else if(intent.equals("view")) {
             initResources(intent);
             initEvents();
         }
@@ -113,12 +117,23 @@ public class FloorMap extends AppCompatActivity {
 
 
 
-        if(intent.equals("park")){
+        if(intent.equals("park") || intent.equals("view_parked")){
            // Toast.makeText(getApplicationContext(),"Park",Toast.LENGTH_SHORT).show();
-            FloorMap_txtProgressBarTxt = (TextView) findViewById(R.id.FloorMap_txtProgressBarTxt);
-            resultReceiver = createBroadcastReceiver();
-            LocalBroadcastManager.getInstance(this).registerReceiver(resultReceiver, new IntentFilter("com.parkking.floor.id.broadcast"));
-            getBuildingFloors(intent);
+            if(!intent.equals("view_parked")) {
+                FloorMap_txtProgressBarTxt = (TextView) findViewById(R.id.FloorMap_txtProgressBarTxt);
+                resultReceiver = createBroadcastReceiver();
+                LocalBroadcastManager.getInstance(this).registerReceiver(resultReceiver, new IntentFilter("com.parkking.floor.id.broadcast"));
+                getBuildingFloors(intent);
+            } else {
+                // Toast.makeText(getApplicationContext(),"View",Toast.LENGTH_SHORT).show();
+                findViewById(R.id.FloorMap_loadingLayout).setVisibility(View.GONE);
+                findViewById(R.id.FloorMap_floorMapView).setVisibility(View.VISIBLE);
+                findViewById(R.id.FloorMap_floorSpinner).setVisibility(View.VISIBLE);
+                //floorID = "2";
+                getBuildingFloors(intent);
+                initFloorMap();
+            }
+
         }else if(intent.equals("view")){
            // Toast.makeText(getApplicationContext(),"View",Toast.LENGTH_SHORT).show();
             findViewById(R.id.FloorMap_loadingLayout).setVisibility(View.GONE);
@@ -174,9 +189,9 @@ public class FloorMap extends AppCompatActivity {
 
                             }
                         });
-                        if(intent.equals("park")){
-                            SharedPreferences sharedPreferences = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
-                            String currentFloorID = sharedPreferences.getString("currentFloorID", "");
+                        if(intent.equals("park") || intent.equals("view_parked")){
+                            SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
+                            String currentFloorID = floorIDSharedPreference.getString("currentFloorID", "");
                             for(int i=0; i<buildingFloorID.length;i++){
                                 if(buildingFloorID[i].equals(currentFloorID)){
                                     floorSpinner.setSelection(i);
@@ -317,9 +332,11 @@ public class FloorMap extends AppCompatActivity {
                     if (responseObj.getBoolean("success")) {
                         JSONObject floorObj = new JSONObject(responseObj.getString("floor_data"));
 
-                        floorTitleTextView.setText("1F");
+                        floorTitleTextView.setText(floorObj.getString("title"));
                         availableSlotsTextView.setText(floorObj.getString("open_slots"));
 
+                        floorMapView.setIntent(intent);
+                        floorMapView.setParkedSlot(parkedSlotID);
                         floorMapView.setFloorMapInformation(floorObj, floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView);
                         floorMapView.setSupportFragmentManager(getSupportFragmentManager());
                     } else {

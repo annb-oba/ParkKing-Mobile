@@ -3,14 +3,18 @@ package com.example.afbu.parkking;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+
+import java.util.Objects;
 
 public class SaveSlotPromptDialog extends AppCompatDialogFragment {
 
@@ -43,10 +47,22 @@ public class SaveSlotPromptDialog extends AppCompatDialogFragment {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        Intent parkedCarsIntent = new Intent(getContext(), ParkedCars.class);
+                        Objects.requireNonNull(getContext()).startActivity(parkedCarsIntent);
                     }
                 });
 
         return builder.create();
+    }
+
+    @Override
+    public void show(FragmentManager manager, String tag) {
+        try {
+            FragmentTransaction ft = manager.beginTransaction();
+            ft.add(this, tag);
+            ft.commit();
+        } catch (IllegalStateException e) {
+            Log.d(tag, "Failed to show prompt");
+        }
     }
 }
