@@ -57,7 +57,7 @@ public class EditAccount extends AppCompatActivity {
     private ImageButton btnBackHome, btnEditImage;
     private Button btnUpdateAccount;
     private ImageView imgUser;
-    private EditText FirstName, MiddleName, LastName, Email, ContactNumber;
+    private EditText FirstName, MiddleName, LastName,ContactNumber;
     private TextView DeactivateAccount;
     private String ProfilePicture, ProfileID;
     private String Firstname, Lastname, Middlename, Contactnumber, Emailtxt;
@@ -149,7 +149,6 @@ public class EditAccount extends AppCompatActivity {
         MiddleName = (EditText) findViewById(R.id.EditAccount_edtMName);
         LastName = (EditText) findViewById(R.id.EditAccount_edtLName);
         ContactNumber = (EditText) findViewById(R.id.EditAccount_edtCNumber);
-        Email = (EditText) findViewById(R.id.EditAccount_edtEmail);
         btnUpdateAccount = (Button) findViewById(R.id.EditAccount_btnApply);
         DeactivateAccount = (TextView) findViewById(R.id.EditAccount_txtDeactivate);
     }
@@ -206,7 +205,6 @@ public class EditAccount extends AppCompatActivity {
                             LastName.setText(Lastname);
                             MiddleName.setText(Middlename);
                             ContactNumber.setText(Contactnumber);
-                            Email.setText(Emailtxt);
 
                         getProfilePicture();
                     }else if(status.equals("failed")){
@@ -290,11 +288,10 @@ public class EditAccount extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("vehicle_owner_id", ProfileID);                                           //change ID //done
-                parameters.put("last_name", FirstName.getText().toString().trim());
-                parameters.put("first_name", LastName.getText().toString().trim());
+                parameters.put("last_name", LastName.getText().toString().trim());
+                parameters.put("first_name", FirstName.getText().toString().trim());
                 parameters.put("middle_name", MiddleName.getText().toString().trim());
                 parameters.put("contact_number", ContactNumber.getText().toString().trim());
-                parameters.put("email", Email.getText().toString().trim());
                 parameters.put("profile_picture", ProfilePicture);
                 return parameters;
             }

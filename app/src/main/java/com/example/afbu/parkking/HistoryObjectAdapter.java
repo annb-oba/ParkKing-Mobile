@@ -31,6 +31,7 @@ public class HistoryObjectAdapter extends ArrayAdapter<HistoryObject> {
         String slot_id = getItem(position).getSlot_id();
         String time_in = getItem(position).getTime_in();
         String time_out = getItem(position).getTime_out();
+        String amount_incurred = getItem(position).getAmount_incurred();
 
         //CarObject carObject = new CarObject(building_name,slot_id,time_in,time_out);
 
@@ -41,6 +42,7 @@ public class HistoryObjectAdapter extends ArrayAdapter<HistoryObject> {
         TextView txttime_in = (TextView) convertView.findViewById(R.id.row_txt_value_timein);
         TextView txttime_out = (TextView) convertView.findViewById(R.id.row_txt_value_timeout);
         TextView txtslot_id = (TextView) convertView.findViewById(R.id.row_slot);
+        TextView txt_amount = (TextView) convertView.findViewById(R.id.row_txt_value_amount);
         ImageView img = (ImageView) convertView.findViewById(R.id.row_logo);
         Bitmap icon = BitmapFactory.decodeResource(mContext.getResources(),
                 R.drawable.logo);
@@ -49,6 +51,7 @@ public class HistoryObjectAdapter extends ArrayAdapter<HistoryObject> {
         txtslot_id.setText(slot_id);
         txttime_in.setText(time_in);
         txttime_out.setText(time_out);
+        txt_amount.setText(amount_incurred);
 
         return convertView;
     }

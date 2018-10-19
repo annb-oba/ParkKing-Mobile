@@ -42,7 +42,6 @@ public class ParkingHistory extends AppCompatActivity {
 
     private ListView list_History;
     private ImageButton backButton;
-    private TextView try1;
     private ArrayList<String> BuildingNames;
     private ArrayList<String> SlotIDs;
     private ArrayList<String> TimeIn;
@@ -96,6 +95,7 @@ public class ParkingHistory extends AppCompatActivity {
                                         historyAdapter.setSlot_id(c.getString("slot_id"));
                                         historyAdapter.setTime_in(c.getString("time_in"));
                                         historyAdapter.setTime_out(c.getString("time_out"));
+                                        historyAdapter.setAmount_incurred(c.getString("amount_incurred"));
                                         historyObjects.add(historyAdapter);
                                     }
                                 }else if((object.getString("status")).equals("success") &&
@@ -105,6 +105,7 @@ public class ParkingHistory extends AppCompatActivity {
                                     historyAdapter.setSlot_id("");
                                     historyAdapter.setTime_in("");
                                     historyAdapter.setTime_out("");
+                                    historyAdapter.setAmount_incurred("");
                                     historyObjects.add(historyAdapter);
                                 }else{
                                     HistoryObject historyAdapter = new HistoryObject();
@@ -112,6 +113,7 @@ public class ParkingHistory extends AppCompatActivity {
                                     historyAdapter.setSlot_id("");
                                     historyAdapter.setTime_in("");
                                     historyAdapter.setTime_out("");
+                                    historyAdapter.setAmount_incurred("");
                                     historyObjects.add(historyAdapter);
                                 }
 
@@ -139,8 +141,6 @@ public class ParkingHistory extends AppCompatActivity {
             }
         };
         AppController.getInstance().addToRequestQueue(strRequest);
-
-        //try1.setText(historyObjects.toString());
     }
 
     private void initResources() {

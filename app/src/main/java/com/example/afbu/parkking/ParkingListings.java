@@ -3,6 +3,7 @@ package com.example.afbu.parkking;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -77,7 +78,6 @@ public class ParkingListings extends AppCompatActivity {
         SearchBuildings = (EditText) findViewById(R.id.ParkingListings_edtSearch);
         NumberOfAvailableSlots = (TextView) findViewById(R.id.ParkingListings_txtNoOfAvlSlots);
         NumberOfFloors = (TextView) findViewById(R.id.ParkingListings_txtNoOfFloors);
-        Distance = (TextView) findViewById(R.id.ParkingListings_txtDistance);
     }
 
     private void initEvents(){
@@ -111,49 +111,8 @@ public class ParkingListings extends AppCompatActivity {
         ParkingList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
                 ChosenBuilding = BuildingIDs.get(i).toString();
-
-                Toast.makeText(getApplicationContext(),ChosenBuilding, Toast.LENGTH_SHORT).show();
-
-                StringRequest strRequest = new StringRequest(Request.Method.GET,
-                        getString(R.string.apiURL) + "get_building_infos/" + ChosenBuilding,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                try {
-                                    JSONObject object = new JSONObject(response);
-                                    String status = object.getString("status");
-                                    if(status.equals("success")){
-                                        String num_of_floors = object.getString("number_of_floors");
-                                        String num_of_avail_slots = object.getString("number_of_available_slots");
-                                        NumberOfAvailableSlots.setText(num_of_avail_slots);
-                                        NumberOfFloors.setText(num_of_floors);
-                                    }else if(status.equals("failed")){
-                                        String message = object.getString("message");
-                                        Toast.makeText(getApplicationContext(),
-                                                message, Toast.LENGTH_SHORT).show();
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        VolleyLog.d(TAG, "Error: " + error.getMessage());
-                        Toast.makeText(getApplicationContext(),
-                                error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }) {
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String, String> parameters = new HashMap<String, String>();
-                        return parameters;
-                    }
-                };
-                AppController.getInstance().addToRequestQueue(strRequest);
+                getBuildingInformation();
             }
         });
 
@@ -180,6 +139,47 @@ public class ParkingListings extends AppCompatActivity {
 
                                 dataAdapter = new CostumArrayAdapter(getApplicationContext(), BuildingNames);
                                 ParkingList.setAdapter(dataAdapter);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<String, String>();
+                return parameters;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(strRequest);
+    }
+
+    private void getBuildingInformation(){
+        StringRequest strRequest = new StringRequest(Request.Method.GET,
+                getString(R.string.apiURL) + "get_building_infos/" + ChosenBuilding,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject object = new JSONObject(response);
+                            String status = object.getString("status");
+                            if(status.equals("success")){
+                                String num_of_floors = object.getString("number_of_floors");
+                                String num_of_avail_slots = object.getString("number_of_available_slots");
+                                NumberOfAvailableSlots.setText(num_of_avail_slots);
+                                NumberOfFloors.setText(num_of_floors);
+                            }else if(status.equals("failed")){
+                                String message = object.getString("message");
+                                Toast.makeText(getApplicationContext(),
+                                        message, Toast.LENGTH_SHORT).show();
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

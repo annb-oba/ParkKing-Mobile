@@ -165,33 +165,6 @@
                 android:typeface="sans" />
 
             <TextView
-                android:id="@+id/EditAccount_txtEmail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="25dp"
-                android:layout_marginTop="10dp"
-                android:text="Email Address:"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                app:fontFamily="@font/open_sans" />
-
-            <EditText
-                android:id="@+id/EditAccount_edtEmail"
-                android:layout_width="match_parent"
-                android:layout_height="49dp"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
-                android:background="@drawable/input_border"
-                android:ems="10"
-                android:hint="Email Address"
-                android:inputType="textPersonName"
-                android:padding="10dp"
-                android:textStyle="bold"
-                android:typeface="sans" />
-
-            <TextView
                 android:id="@+id/EditAccount_txtCNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

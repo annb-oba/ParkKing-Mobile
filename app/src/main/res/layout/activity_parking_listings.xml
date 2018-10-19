@@ -43,9 +43,9 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="20dp">
+            >
 
             <EditText
                 android:id="@+id/ParkingListings_edtSearch"
@@ -58,110 +58,88 @@
                 android:textStyle="bold"
                 android:typeface="sans"
                 android:background="@drawable/signup_btnborder"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 />
+
             <ListView
                 android:id="@+id/ParkingListings_lstListings"
                 android:layout_width="match_parent"
-                android:layout_height="485dp"
+                android:layout_height="0dp"
+                android:layout_weight="5"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:layout_marginTop="15dp"
                 android:divider="@color/colorBlack"
                 android:dividerHeight="2px" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/ParkingListings_availSlots"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:paddingVertical="2dp"
+                        android:text="Available Slots"
+                        android:textAlignment="center"
+                        />
+
+                    <TextView
+                        android:id="@+id/ParkingListings_txtNoOfAvlSlots"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textSize="32dp"
+                        android:textStyle="bold"
+                        />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/ParkingListings_noOfFloors"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:paddingVertical="2dp"
+                        android:text="Floors"
+                        android:textAlignment="center"
+                        />
+
+                    <TextView
+                        android:id="@+id/ParkingListings_txtNoOfFloors"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textSize="32sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+
+            </LinearLayout>
+
         </LinearLayout>
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="62dp"
-        android:padding="5dp">
 
-        <RelativeLayout
-            android:layout_width="127dp"
-            android:layout_height="56dp">
-
-            <TextView
-                android:id="@+id/ParkingListings_lblNoOfFloors"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:text="Number of floor/s"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                app:fontFamily="@font/open_sans" />
-
-            <TextView
-                android:id="@+id/ParkingListings_txtNoOfFloors"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:paddingTop="5dp"
-                android:text="0"
-                android:textSize="18sp" />
-
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="138dp"
-            android:layout_height="56dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="5dp">
-
-            <TextView
-                android:id="@+id/ParkingListings_lblNoOfAvlSlots"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:gravity="center"
-                android:text="Available Parking Slot/s"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                app:fontFamily="@font/open_sans" />
-
-            <TextView
-                android:id="@+id/ParkingListings_txtNoOfAvlSlots"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:paddingTop="5dp"
-                android:text="0"
-                android:textSize="18sp" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="119dp"
-            android:layout_height="56dp">
-
-            <TextView
-                android:id="@+id/ParkingListings_lblDistance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:gravity="center"
-                android:text="Distance (meters)"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                app:fontFamily="@font/open_sans" />
-
-            <TextView
-                android:id="@+id/ParkingListings_txtDistance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:paddingTop="5dp"
-                android:text="0"
-                android:textSize="18sp" />
-
-
-        </RelativeLayout>
-    </LinearLayout>
 
 
 </LinearLayout>

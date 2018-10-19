@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
@@ -143,6 +144,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private Query notif_ref;
+
+    private Marker chosenMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -607,6 +610,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 return false;
             }
         });
+
+        searchPlace.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                LatLng gotoChosenBldg = new LatLng(ParkKingLat.get(position), ParkKingLong.get(position));
+                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(gotoChosenBldg, 16));
+            }
+        });
     }
 
     private void getVehicleOwnerInformation() {
@@ -744,6 +755,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             public boolean onMarkerClick(Marker marker) {
                 String title = marker.getSnippet();
                 onClickBuilding = title;
+                chosenMarker = marker;
                 if(chosenBldg == null){
                     chosenBldg = title;
                 }else{
@@ -849,6 +861,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             }
         });
         btnPosition.setVisibility(View.VISIBLE);
+
+        gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if (chosenMarker != null){
+                    chosenMarker.hideInfoWindow();
+                }
+            }
+        });
+
     }
 
     private void makeDirections(LatLng toPlace) {

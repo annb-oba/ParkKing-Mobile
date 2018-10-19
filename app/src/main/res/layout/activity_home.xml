@@ -200,6 +200,20 @@
             />
 
         <ImageButton
+            android:id="@+id/Home_btnRefresh"
+            android:layout_width="41dp"
+            android:layout_height="39dp"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/Home_btnPosition"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/shadow"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/refresh"
+            android:elevation="15dp"
+            />
+
+        <ImageButton
             android:id="@+id/Home_btnDirect"
             android:layout_width="82dp"
             android:layout_height="78dp"

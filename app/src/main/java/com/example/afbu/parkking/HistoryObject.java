@@ -3,13 +3,22 @@ package com.example.afbu.parkking;
 class HistoryObject {
     private String building_name;
     private String slot_id;
-    private String time_in, time_out;
+    private String time_in, time_out, amount_incurred;
 
     public HistoryObject() {
         this.building_name = "";
         this.slot_id = "";
         this.time_in = "";
         this.time_out = "";
+        this.amount_incurred = "";
+    }
+
+    public String getAmount_incurred() {
+        return amount_incurred;
+    }
+
+    public void setAmount_incurred(String amount_incurred) {
+        this.amount_incurred = amount_incurred;
     }
 
     public String getBuilding_name() {
