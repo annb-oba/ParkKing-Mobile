@@ -91,7 +91,7 @@ public class SignIn extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Failed to connect to Park King Servers", Toast.LENGTH_SHORT).show();
             }
         }) {
             @Override

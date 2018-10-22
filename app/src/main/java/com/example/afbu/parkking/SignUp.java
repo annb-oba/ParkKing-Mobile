@@ -297,6 +297,7 @@ public class SignUp extends AppCompatActivity{
                         if(editor.commit()){
                             Intent gotoHome = new Intent(getApplicationContext(), Home.class);
                             startActivity(gotoHome);
+                            finish();
                         }
                     }else if(status.equals("failed")){
                         String message = object.getString("message");

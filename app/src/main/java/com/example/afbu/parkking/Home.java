@@ -108,11 +108,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
     private Object mLastKnownLocation;
     private DrawerLayout mDrawer;
-    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition,btnBuilding;
+    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition,btnBuilding,btnRefresh;
     private NavigationView NavMenu;
     private View headerView;
     private ImageView NavImgUser;
-    private TextView Name, Email, AvailSlot;
+    private TextView Name, Email, AvailSlot,txtNoOfFloors;
     private String Firstname, Lastname, Middlename, Emailtxt, ProfilePicture;
 
     private String BuildingID, name;
@@ -163,6 +163,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         super.onResume();
 //        initResources();
 //        initEvents();
+        getVehicleOwnerInformation();
     }
 
     @Override
@@ -186,6 +187,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     }})
                 .setNegativeButton("Cancel", null).show();
     }
+
+
 
     public void setNotificationListener(){
         notif_ref = database.getReference().child("notif_individual").child(ProfileID).orderByChild("timestamp");
@@ -498,6 +501,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             }
         });
 
+        btnRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                putParkKingMarker();
+                getVehicleOwnerInformation();
+            }
+        });
+
         btnBuilding.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -689,6 +700,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     }
 
     private void initResources() {
+        txtNoOfFloors = (TextView) findViewById(R.id.Home_txtNoOfFloors);
         txtdistanceFromChosenBldg = (TextView) findViewById(R.id.Home_txtDistance);
         mDrawer = (DrawerLayout) findViewById(R.id.drawerLayout);
         btnMenu = (ImageButton) findViewById(R.id.Home_btnMenu);
@@ -703,6 +715,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         btnDirect = (ImageButton) findViewById(R.id.Home_btnDirect);
         btnDirect.setVisibility(View.GONE);
         btnBuilding.setVisibility(View.GONE);
+        btnRefresh = (ImageButton) findViewById(R.id.Home_btnRefresh);
         btnPosition = (ImageButton) findViewById(R.id.Home_btnPosition);
         btnPosition.setVisibility(View.GONE);
         polylines = new ArrayList<>();
@@ -774,8 +787,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                     JSONObject object = new JSONObject(response);
                                     String status = object.getString("status");
                                     if (status.equals("success")) {
+                                        String num_of_floors = object.getString("number_of_floors");
                                         String num_of_avail_slots = object.getString("number_of_available_slots");
                                         AvailSlot.setText(num_of_avail_slots);
+                                        txtNoOfFloors.setText(num_of_floors);
                                     } else if (status.equals("failed")) {
                                         String message = object.getString("message");
                                         Toast.makeText(getApplicationContext(),
@@ -867,7 +882,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             public void onMapClick(LatLng latLng) {
                 if (chosenMarker != null){
                     chosenMarker.hideInfoWindow();
+                    btnBuilding.setVisibility(View.INVISIBLE);
+                    btnDirect.setVisibility(View.INVISIBLE);
+                    txtdistanceFromChosenBldg.setText("0km");
+                    AvailSlot.setText("0");
+                    txtNoOfFloors.setText("0");
                 }
+
             }
         });
 

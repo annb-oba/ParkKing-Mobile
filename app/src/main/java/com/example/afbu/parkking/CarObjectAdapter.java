@@ -12,14 +12,21 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import android.content.SharedPreferences;
 public class CarObjectAdapter extends ArrayAdapter<CarObject> {
     private Context mContext;
+    private SharedPreferences SharedPreference;
+    private SharedPreferences.Editor editor;
+    private String ProfileID;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
     int mResource;
     public CarObjectAdapter(@NonNull Context context, int resource, @NonNull ArrayList<CarObject> objects) {
         super(context, resource, objects);
         mContext = context;
         mResource = resource;
+        SharedPreference = context.getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        ProfileID = SharedPreference.getString(PROFID_KEY, "");
     }
 
     @NonNull
@@ -43,7 +50,7 @@ public class CarObjectAdapter extends ArrayAdapter<CarObject> {
         tvBrand.setText(brand);
         tvModel.setText(model);
 
-        if(getItem(position).getUsed_by().equals(getItem(position).getVehicle_owner_profile_id())){
+        if(getItem(position).getUsed_by().equals(ProfileID)){
             image.setImageResource(R.drawable.logo);
         }
 

@@ -1,6 +1,8 @@
 package com.example.afbu.parkking;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +31,11 @@ public class AddCoOwner extends AppCompatActivity {
     private ImageButton btnBack;
     private EditText edtEmail;
     private String carID,email,message;
+    private SharedPreferences SharedPreference;
+    private SharedPreferences.Editor editor;
+    private String ProfileID;
+    private static final String PreferenceName = "UserPreference";
+    private static final String PROFID_KEY = "ProfileIDKey";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +45,9 @@ public class AddCoOwner extends AppCompatActivity {
         btnBack = (ImageButton) findViewById(R.id.AddCoOwner_btnBack);
         addCoOwner = (Button)findViewById(R.id.AddCoOwner_btnAdd);
         edtEmail = (EditText)findViewById(R.id.AddCoOwner_edtEmail);
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        ProfileID = SharedPreference.getString(PROFID_KEY, "");
+
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,7 +100,7 @@ public class AddCoOwner extends AppCompatActivity {
                     Map<String, String> parameters = new HashMap<String, String>();
 
                     parameters.put("email", email);
-                    parameters.put("vehicle_owner_id", "2");
+                    parameters.put("vehicle_owner_id", ProfileID);
                     parameters.put("car_id", carID);
 
 

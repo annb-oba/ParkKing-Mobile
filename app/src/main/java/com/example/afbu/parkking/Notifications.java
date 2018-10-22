@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -127,6 +128,7 @@ public class Notifications extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         adapter = new NotificationRecyclerViewAdapter(this,notificationArrayList);
         recyclerView.setAdapter(adapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
     }
     private void initEvents() {
         btnBackHome.setOnClickListener(new View.OnClickListener() {
