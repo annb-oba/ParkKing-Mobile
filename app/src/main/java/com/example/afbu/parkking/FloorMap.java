@@ -50,6 +50,7 @@ public class FloorMap extends AppCompatActivity {
     private ArrayList<Router> router1Array,router2Array,router3Array;
     private ArrayList<String> floorIdArray;
     private ArrayList<String> floorTitleArray;
+    private ArrayList<Integer> buildingFloorHierarchy;
     private BroadcastReceiver resultReceiver;
     private TextView FloorMap_txtProgressBarTxt;
     private Spinner floorSpinner;
@@ -79,6 +80,15 @@ public class FloorMap extends AppCompatActivity {
         buildingID = myIntent.getStringExtra("building_id");
         intent = myIntent.getStringExtra("intent");
         parkedSlotID = myIntent.getStringExtra("slot_id");
+
+        // for testing purposes
+        SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
+        editor = floorIDSharedPreference.edit();
+        editor.putString("currentFloorID", "3");
+        editor.commit();
+
+        editor = null;
+        // for testing purposes
 
         if(intent.equals("park") || intent.equals("view_parked")){
             initResources(intent);
@@ -115,7 +125,7 @@ public class FloorMap extends AppCompatActivity {
         buildingFloorID = new String[0];
         buildingFloorTitle = new String[0];
 
-
+        buildingFloorHierarchy = new ArrayList<>();
 
         if(intent.equals("park") || intent.equals("view_parked")){
            // Toast.makeText(getApplicationContext(),"Park",Toast.LENGTH_SHORT).show();
@@ -157,6 +167,11 @@ public class FloorMap extends AppCompatActivity {
                     JSONObject responseObj = new JSONObject(response);
                     if (responseObj.getBoolean("success")) {
                         floorsLoaded=true;
+                        JSONArray floorHierarchyJSONArray = new JSONArray(responseObj.getString("floor_hierarchy"));
+                        for (int i = 0; i < floorHierarchyJSONArray.length(); i++) {
+                            buildingFloorHierarchy.add(floorHierarchyJSONArray.getInt(i));
+                        }
+
                         JSONArray floorJSONArray = new JSONArray(responseObj.getString("floors"));
 
                         buildingFloorID = new String[floorJSONArray.length()];
@@ -298,6 +313,8 @@ public class FloorMap extends AppCompatActivity {
           wifiScanner.onDestroy();
         }
         floorMapView.detatchValueEventListener();
+        floorMapView.destroyDrawingCache();
+        floorMapView.destroySlotSharedPreference();
 
         if(intent.equals("park")) {
 
@@ -337,7 +354,7 @@ public class FloorMap extends AppCompatActivity {
 
                         floorMapView.setIntent(intent);
                         floorMapView.setParkedSlot(parkedSlotID);
-                        floorMapView.setFloorMapInformation(floorObj, floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView);
+                        floorMapView.setFloorMapInformation(floorObj, floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView, buildingFloorHierarchy);
                         floorMapView.setSupportFragmentManager(getSupportFragmentManager());
                     } else {
                         Toast.makeText(getApplicationContext(), responseObj.getString("message"), Toast.LENGTH_SHORT).show();
