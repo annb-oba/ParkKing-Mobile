@@ -223,9 +223,6 @@
 
                 </LinearLayout>
 
-
-                
-
                 <Button
                     android:id="@+id/CarProfile_btnEditInfo"
                     android:layout_width="335dp"
