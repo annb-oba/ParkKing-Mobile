@@ -223,14 +223,6 @@
 
                 </LinearLayout>
 
-
-                <Switch
-                    android:id="@+id/switch1"
-                    style="@android:style/Widget.Holo.Light.CompoundButton.Switch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Switch" />
-
                 <Button
                     android:id="@+id/CarProfile_btnEditInfo"
                     android:layout_width="335dp"

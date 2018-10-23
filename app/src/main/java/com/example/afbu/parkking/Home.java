@@ -108,11 +108,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
     private Object mLastKnownLocation;
     private DrawerLayout mDrawer;
-    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition,btnBuilding;
+    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition,btnBuilding,btnRefresh;
     private NavigationView NavMenu;
     private View headerView;
     private ImageView NavImgUser;
-    private TextView Name, Email, AvailSlot;
+    private TextView Name, Email, AvailSlot,txtNoOfFloors;
     private String Firstname, Lastname, Middlename, Emailtxt, ProfilePicture;
 
     private String BuildingID, name;
@@ -146,6 +146,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     private Query notif_ref;
 
     private Marker chosenMarker;
+    private String string_ToPlace = "";
+    private int chosenBldgID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,6 +165,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         super.onResume();
 //        initResources();
 //        initEvents();
+        getVehicleOwnerInformation();
     }
 
     @Override
@@ -349,21 +352,37 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    //Toast.makeText(Home.this, "Heres10.", Toast.LENGTH_SHORT).show();
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
-                    if(onRouting == true){
-                        if (polylinePaths != null && toPlace != null) {
-                            String string_FromPlace = fromlat+","+fromlng;
-                            String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
-                            try {
-                                new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
+
+                    float[] results = new float[1];
+
+                    if (polylinePaths != null && string_ToPlace != "") {
+                        for (Polyline polyline : polylinePaths) {
+                            polyline.remove();
+                        }
+
+                        String[] LatLng = string_ToPlace.split(",");
+                        Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
+                                Double.parseDouble(LatLng[0]), Double.parseDouble(LatLng[1]),
+                                results);
+                        int temp = Math.round(results[0]);
+                        if(temp>100){
+                            temp = Math.round(temp/1000);
+                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"km");
+                        }else{
+                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                        }
+
+                        String string_FromPlace = fromlat+","+fromlng;
+                        try {
+                            new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
                         }
                     }
+
                 }
 
                 @Override
@@ -386,21 +405,37 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    // Toast.makeText(Home.this, "Heres8.", Toast.LENGTH_SHORT).show();
                     fromlat = location.getLatitude();
                     fromlng = location.getLongitude();
                     fromPlace = new LatLng(fromlat, fromlng);
-                    if(onRouting == true){
-                        if (polylinePaths != null && toPlace != null) {
-                            String string_FromPlace = fromlat+","+fromlng;
-                            String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
-                            try {
-                                new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
+
+                    float[] results = new float[1];
+
+                    if (polylinePaths != null && string_ToPlace != "") {
+                        for (Polyline polyline : polylinePaths) {
+                            polyline.remove();
+                        }
+
+                        String[] LatLng = string_ToPlace.split(",");
+                        Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
+                                Double.parseDouble(LatLng[0]), Double.parseDouble(LatLng[1]),
+                                results);
+                        int temp = Math.round(results[0]);
+                        if(temp>100){
+                            temp = Math.round(temp/1000);
+                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"km");
+                        }else{
+                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                        }
+
+                        String string_FromPlace = fromlat+","+fromlng;
+                        try {
+                            new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
                         }
                     }
+
                 }
 
                 @Override
@@ -522,7 +557,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 onRouting = true;
                try{
                    Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
-                   makeDirections(toPlace);
+                   makeDirections();
                }catch(Exception e){
                    new android.app.AlertDialog.Builder(Home.this)
                            .setTitle("GPS Error")
@@ -618,6 +653,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(gotoChosenBldg, 16));
             }
         });
+
+        btnRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                putParkKingMarker();
+                getVehicleOwnerInformation();
+            }
+        });
     }
 
     private void getVehicleOwnerInformation() {
@@ -689,6 +732,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     }
 
     private void initResources() {
+        txtNoOfFloors = (TextView) findViewById(R.id.Home_txtNoOfFloors);
+        btnRefresh = (ImageButton) findViewById(R.id.Home_btnRefresh);
         txtdistanceFromChosenBldg = (TextView) findViewById(R.id.Home_txtDistance);
         mDrawer = (DrawerLayout) findViewById(R.id.drawerLayout);
         btnMenu = (ImageButton) findViewById(R.id.Home_btnMenu);
@@ -753,18 +798,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         gMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                for (Polyline polyline : polylinePaths) {
+                    polyline.remove();
+                }
                 String title = marker.getSnippet();
+                chosenBldgID = Integer.parseInt(marker.getSnippet());
                 onClickBuilding = title;
                 chosenMarker = marker;
-                if(chosenBldg == null){
-                    chosenBldg = title;
-                }else{
-                    if(!chosenBldg.equals(onClickBuilding)){
-                        onRouting = false;
-                        haveArrived = false;
-                        onClickBuilding = chosenBldg;
-                    }
-                }
+                haveArrived = false;
+                string_ToPlace = "";
                 StringRequest strRequest1 = new StringRequest(Request.Method.GET,
                         getString(R.string.apiURL) + "get_building_infos/" + title,
                         new Response.Listener<String>() {
@@ -774,8 +816,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                     JSONObject object = new JSONObject(response);
                                     String status = object.getString("status");
                                     if (status.equals("success")) {
+                                        String num_of_floors = object.getString("number_of_floors");
                                         String num_of_avail_slots = object.getString("number_of_available_slots");
                                         AvailSlot.setText(num_of_avail_slots);
+                                        txtNoOfFloors.setText(num_of_floors);
                                     } else if (status.equals("failed")) {
                                         String message = object.getString("message");
                                         Toast.makeText(getApplicationContext(),
@@ -802,11 +846,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 };
                 AppController.getInstance().addToRequestQueue(strRequest1);
 
-                if(!haveArrived) {
                     tolat = marker.getPosition().latitude;
                     tolng = marker.getPosition().longitude;
                     toPlace = new LatLng(tolat, tolng);
-                }
 
                 try{
                     btnDirect.setVisibility(View.VISIBLE);
@@ -865,17 +907,68 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                string_ToPlace = "";
+                for (Polyline polyline : polylinePaths) {
+                    polyline.remove();
+                }
                 if (chosenMarker != null){
                     chosenMarker.hideInfoWindow();
+                    btnBuilding.setVisibility(View.INVISIBLE);
+                    btnDirect.setVisibility(View.INVISIBLE);
+                    txtdistanceFromChosenBldg.setText("0km");
+                    AvailSlot.setText("0");
+                    txtNoOfFloors.setText("0");
                 }
             }
         });
 
     }
 
-    private void makeDirections(LatLng toPlace) {
+    private void makeDirections() {
+        for (Polyline polyline : polylinePaths) {
+            polyline.remove();
+        }
+        if(string_ToPlace == ""){
+            Toast.makeText(getApplicationContext(),
+                   "Generating route", Toast.LENGTH_LONG).show();
+        }
         String string_FromPlace = fromlat+","+fromlng;
-        String string_ToPlace = toPlace.latitude+","+toPlace.longitude;
+        StringRequest strRequest1 = new StringRequest(Request.Method.GET,
+                getString(R.string.apiURL) + "getLatLng/" + chosenBldgID,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject object = new JSONObject(response);
+                            String status = object.getString("status");
+                            if (status.equals("success")) {
+                                string_ToPlace = object.getString("LatLng");
+                            } else if (status.equals("failed")) {
+                                String message = object.getString("message");
+                                Toast.makeText(getApplicationContext(),
+                                        message, Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "GMAP ONCLICK Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<String, String>();
+                return parameters;
+            }
+        };
+        AppController.getInstance().addToRequestQueue(strRequest1);
+
         try {
             new DirectionFinder(this, string_FromPlace, string_ToPlace).execute();
         } catch (UnsupportedEncodingException e) {
@@ -896,6 +989,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     public void onDirectionFinderSuccess(List<com.example.afbu.parkking.Route> routes) {
         polylinePaths = new ArrayList<>();
 
+        if (polylinePaths != null) {
+            for (Polyline polyline : polylinePaths) {
+                polyline.remove();
+            }
+        }
+
         for (com.example.afbu.parkking.Route route : routes) {
 
             float[] results = new float[1];
@@ -906,22 +1005,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             if(results[0] <= 50 && haveArrived == false){
                 //Toast.makeText(getApplicationContext(),"You have arrived at your destionation",Toast.LENGTH_SHORT).show();
                 haveArrived = true;
-                if (polylinePaths != null) {
-                    for (Polyline polyline : polylinePaths) {
-                        polyline.remove();
-                    }
-                }
                 if(onClickBuilding!=null){
                     getBuildingFloorRouters(onClickBuilding);
                 }
             }else if(haveArrived == false){
-                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fromPlace, 16));
-
-                if (polylinePaths != null) {
-                    for (Polyline polyline:polylinePaths ) {
-                        polyline.remove();
-                    }
-                }
 
                 PolylineOptions polylineOptions = new PolylineOptions().
                         geodesic(true).
@@ -940,12 +1027,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             }else{
                 txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
             }
-
-
-
-
         }
-
-
     }
 }

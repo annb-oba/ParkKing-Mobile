@@ -53,7 +53,8 @@
 
         <activity android:name=".SignIn" />
         <activity android:name=".SignUp" />
-        <activity android:name=".Home" />
+        <activity android:name=".Home"
+            android:windowSoftInputMode="stateHidden"/>
         <activity android:name=".EditAccount" />
         <activity android:name=".Notifications" />
         <activity android:name=".CarList" />
