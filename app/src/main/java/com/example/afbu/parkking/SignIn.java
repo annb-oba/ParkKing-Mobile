@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -20,6 +21,7 @@ import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +36,7 @@ public class SignIn extends AppCompatActivity {
     private static String TAG = SignUp.class.getSimpleName();
 
     private EditText Email, Password;
+    private TextView forgetPassword;
     private Button btnSignIn;
     private String ProfileID;
 
@@ -56,6 +59,14 @@ public class SignIn extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 signIn();
+            }
+        });
+
+        forgetPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent gotoForgetPass = new Intent(SignIn.this, ForgetPassword.class);
+                startActivity(gotoForgetPass);
             }
         });
     }
@@ -110,5 +121,6 @@ public class SignIn extends AppCompatActivity {
         Email = (EditText) findViewById(R.id.SignIn_edtEmail);
         Password = (EditText) findViewById(R.id.SignIn_edtPassword);
         btnSignIn = (Button) findViewById(R.id.SignIn_btnSignIn);
+        forgetPassword = (TextView) findViewById(R.id.SignIn_txtForgotPassword);
     }
 }
