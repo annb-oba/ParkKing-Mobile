@@ -82,10 +82,10 @@ public class FloorMap extends AppCompatActivity {
         parkedSlotID = myIntent.getStringExtra("slot_id");
 
         // for testing purposes
-        SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
-        editor = floorIDSharedPreference.edit();
-        editor.putString("currentFloorID", "3");
-        editor.commit();
+//        SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
+//        editor = floorIDSharedPreference.edit();
+//        editor.putString("currentFloorID", "1");
+//        editor.commit();
 
         editor = null;
         // for testing purposes
