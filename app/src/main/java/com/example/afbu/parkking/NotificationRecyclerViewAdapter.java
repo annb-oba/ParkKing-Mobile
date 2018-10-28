@@ -57,6 +57,9 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
             case "co_owner_request":
                 holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.shared_cars));
                 break;
+            case "incident_report":
+                holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.incident_report));
+                break;
                 default:
                     holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.open));
 
@@ -64,6 +67,7 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
         holder.titleText.setText(notificationArrayList.get(position).getTitle());
         holder.messageText.setText(notificationArrayList.get(position).getMessage());
         holder.dateText.setText(notificationArrayList.get(position).getDate());
+
 
         holder.notificationLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override

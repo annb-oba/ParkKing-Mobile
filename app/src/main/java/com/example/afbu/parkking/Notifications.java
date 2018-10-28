@@ -89,16 +89,17 @@ public class Notifications extends AppCompatActivity {
                         String tempDate = notifData.child("notification_date").getValue().toString();
                         String tempIs_read = notifData.child("is_read").getValue().toString();
                         String tempTimestamp = notifData.child("timestamp").getValue().toString();
+                        String tempClickable = notifData.child("clickable").getValue().toString();
                         try{
                             switch(tempModule){
                                 case "co_owner_request": //with request_id
                                     String tempRequest_id = notifData.child("request_id").getValue().toString();
-                                    notification = new Notification(tempId,tempTitle,tempMessage,tempDate,tempModule,tempIs_read,tempTimestamp,tempRequest_id);
+                                    notification = new Notification(tempId,tempTitle,tempMessage,tempDate,tempModule,tempIs_read,tempTimestamp,tempClickable, tempRequest_id);
                                     notificationArrayList.add(notification);
                                     break;
                                 default:
                                     //no request ID
-                                    notification = new Notification(tempId,tempTitle,tempMessage,tempDate,tempModule,tempIs_read,tempTimestamp,"");
+                                    notification = new Notification(tempId,tempTitle,tempMessage,tempDate,tempModule,tempIs_read,tempTimestamp,tempClickable);
                                     notificationArrayList.add(notification);
                             }
                         }catch(Exception e){

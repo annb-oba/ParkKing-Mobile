@@ -5,8 +5,9 @@ public class Notification {
     private String title,message,date,module,request_id;
     private String is_read;
     private String timestamp;
+    private String clickable;
 
-    public Notification(String id, String title, String message, String date, String module, String is_read, String timestamp, String request_id) {
+    public Notification(String id, String title, String message, String date, String module, String is_read, String timestamp,String clickable, String request_id) {
         this.id = id;
         this.title = title;
         this.message = message;
@@ -15,8 +16,9 @@ public class Notification {
         this.request_id = request_id;
         this.is_read = is_read;
         this.timestamp = timestamp;
+        this.clickable = clickable;
     }
-    public Notification(String id, String title, String message, String date, String module, String is_read, String timestamp) {
+    public Notification(String id, String title, String message, String date, String module, String is_read, String timestamp,String clickable) {
         this.id = id;
         this.title = title;
         this.message = message;
@@ -24,6 +26,15 @@ public class Notification {
         this.module = module;
         this.is_read = is_read;
         this.timestamp = timestamp;
+        this.clickable = clickable;
+    }
+
+    public String getClickable() {
+        return clickable;
+    }
+
+    public void setClickable(String clickable) {
+        this.clickable = clickable;
     }
 
     public String getId() {
