@@ -1,5 +1,6 @@
 package com.example.afbu.parkking;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -71,7 +72,7 @@ public class ParkingHistory extends AppCompatActivity {
     private void getParkingHistory() {
 
         StringRequest strRequest = new StringRequest(Request.Method.GET,
-                getString(R.string.apiURL) + "getHistory/" + 1,                                //ID
+                getString(R.string.apiURL) + "getHistory/" + ProfileID,                                //ID
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -146,6 +147,12 @@ public class ParkingHistory extends AppCompatActivity {
     private void initResources() {
         list_History = (ListView) findViewById(R.id.ParkingHistory_lstHistory);
         backButton = (ImageButton) findViewById(R.id.ParkingHistory_btnBack);
+        SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+        if(!SharedPreference.contains(PROFID_KEY)){
+            finish();
+        }else{
+            ProfileID = SharedPreference.getString(PROFID_KEY, "");
+        }
     }
 
 }

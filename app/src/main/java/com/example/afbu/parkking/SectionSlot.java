@@ -16,7 +16,12 @@ public class SectionSlot {
     int curr_stat;
     int[] grid_coordinates;
     boolean first_read;
+    boolean is_pwd;
     private String slotTitle;
+
+    public boolean isIs_pwd() {
+        return is_pwd;
+    }
 
     public void setFirst_read(boolean first_read) {
         this.first_read = first_read;
@@ -27,7 +32,6 @@ public class SectionSlot {
     }
 
     public SectionSlot(JSONObject slotObject, Double floor_width, Double floor_height) {
-        Log.d("SectionSlot", "created");
         try {
             this.indicatorCoordinate = new LatLng(slotObject.getDouble("x"), slotObject.getDouble("y"));
             this.sectionID = slotObject.getInt("section_id");
@@ -35,6 +39,7 @@ public class SectionSlot {
             this.billingID = slotObject.getInt("billing");
             this.curr_stat = slotObject.getInt("curr_stat");
             this.slotTitle = slotObject.getString("slot_tag");
+            this.is_pwd = slotObject.getBoolean("is_pwd");
             this.first_read = true;
             this.grid_coordinates = new int[]{slotObject.getInt("grid_x"), slotObject.getInt("grid_y")};
 

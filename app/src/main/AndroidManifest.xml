@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.Manifest.permission.NETWORK_SETTINGS"/>
+    <uses-permission android:name="android.Manifest.permission.NETWORK_SETTINGS" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -53,8 +53,9 @@
 
         <activity android:name=".SignIn" />
         <activity android:name=".SignUp" />
-        <activity android:name=".Home"
-            android:windowSoftInputMode="stateHidden"/>
+        <activity
+            android:name=".Home"
+            android:windowSoftInputMode="stateHidden" />
         <activity android:name=".EditAccount" />
         <activity android:name=".Notifications" />
         <activity android:name=".CarList" />
@@ -68,8 +69,9 @@
         <activity android:name=".FloorMap" />
         <activity android:name=".ParkedCars" />
         <activity android:name=".AcceptCoOwner" />
-        <activity android:name=".TermsAndCondition"/>
+        <activity android:name=".TermsAndCondition" />
         <activity android:name=".ParkingHistory" />
+        <activity android:name=".ForgetPassword"></activity>
     </application>
 
 </manifest>
