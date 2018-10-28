@@ -88,8 +88,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     SharedPreferences.Editor editor;
     private static final String PreferenceName = "UserPreference";
     private static final String PROFID_KEY = "ProfileIDKey";
+    private static final String CAR_ID_KEY = "CarIDKey";
     private static final String ON_FLOOR_KEY = "OnFloorKey";
-    private String ProfileID;
+    private String ProfileID,activeCarID;
 
     private static String TAG = Home.class.getSimpleName();
 
@@ -683,7 +684,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 Name.setText(Firstname+" "+Middlename+" "+Lastname);
                                 Email.setText(Emailtxt);
                                 Glide.with(getApplicationContext()).asBitmap().load(getString(R.string.profilepictureURL)+ProfilePicture).into(NavImgUser);
-                                //getProfilePicture();
+                                if(!object.getString("car_id").equals("")){
+                                    activeCarID = object.getString("car_id");
+                                    editor = SharedPreference.edit();
+                                    editor.putString(CAR_ID_KEY, activeCarID);
+                                    editor.commit();
+                                }
                             } else if (status.equals("failed")) {
                                 String message = object.getString("message");
                                 Toast.makeText(getApplicationContext(),

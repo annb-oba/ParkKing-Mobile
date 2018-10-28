@@ -81,14 +81,14 @@ public class FloorMap extends AppCompatActivity {
         intent = myIntent.getStringExtra("intent");
         parkedSlotID = myIntent.getStringExtra("slot_id");
 
-        // for testing purposes
+//        // for testing purposes
 //        SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
 //        editor = floorIDSharedPreference.edit();
-//        editor.putString("currentFloorID", "1");
+//        editor.putString("currentFloorID", "3");
 //        editor.commit();
-
-        editor = null;
-        // for testing purposes
+//
+//        editor = null;
+//        // for testing purposes
 
         if(intent.equals("park") || intent.equals("view_parked")){
             initResources(intent);

@@ -358,7 +358,7 @@ public class WifiScanner {
                     if(distance1<15d || distance2<15d || distance3<15d){
                         Log.w("LOG", "FLOOR FOUND: ");
                         sharedPreferences = mContext.getSharedPreferences(CURRENT_FLOOR_ID, mContext.MODE_PRIVATE);
-                        String currentFloorID = sharedPreferences.getString("currentFloorID", "");
+                        String currentFloorID = sharedPreferences.getString("currentFloorID", "-1");
                         if (currentFloorID == "" || currentFloorID != floorIdArray.get(i)) {
                             Log.w("LOG","NEW FLOOR");
                             floorDetected=true;
@@ -375,7 +375,7 @@ public class WifiScanner {
                             sharedPreferences = mContext.getSharedPreferences(BROADCAST_RECEIVED, mContext.MODE_PRIVATE);
                             String broadcastReceived = sharedPreferences.getString("broadcastReceived", "");
                             if(broadcastReceived.equals("")){
-                                editor.putString("currentFloorID", "");
+                                editor.putString("currentFloorID", "-1");
                                 editor.commit();
                             }
                         }
@@ -388,7 +388,7 @@ public class WifiScanner {
             //do nothing
         }
         else{
-            editor.putString("currentFloorID", "");
+            editor.putString("currentFloorID", "-1");
             editor.commit();
         }
     }

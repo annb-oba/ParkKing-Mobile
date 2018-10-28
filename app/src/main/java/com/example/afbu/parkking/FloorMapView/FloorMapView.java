@@ -996,6 +996,10 @@ public class FloorMapView extends View {
             return;
         }
 
+        if (currentFloorID.equals("-1")) {
+            return;
+        }
+
         if (floorID.equals(selectedSlotFloorID)) {
             if (isCurrentFloor) {
                 // draw path from position to slot
