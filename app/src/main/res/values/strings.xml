@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">Park King</string>
-    <string name="apiURL">http://parkking.online/api/</string>
-    <string name="profilepictureURL">http://parkking.online/uploads/vehicle_owners_profile_picture/</string>
-    <string name="vehiclepictureURL">http://parkking.online/uploads/vehicle_owners_cars/</string>
-    <string name="addCarURL">http://parkking.online/api/cars</string>
+    <string name="apiURL">http://192.168.100.4/Park-King-Initial/public/api/</string>
+    <string name="profilepictureURL">http://192.168.100.4/uploads/vehicle_owners_profile_picture/</string>
+    <string name="vehiclepictureURL">http://192.168.100.4/uploads/vehicle_owners_cars/</string>
+    <string name="addCarURL">http://192.168.100.4/api/cars</string>
     <string name="addCoOwnerURL">http://parkking.online/api/relationships</string>
     <string name="changeCarURL">http://parkking.online/api/cars/changecar</string>
     <string name="getCarInfoURL">http://parkking.online/api/cars/profile/</string>

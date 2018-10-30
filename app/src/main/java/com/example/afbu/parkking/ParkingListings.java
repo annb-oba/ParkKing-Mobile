@@ -24,6 +24,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +44,7 @@ public class ParkingListings extends AppCompatActivity {
     SharedPreferences.Editor editor;
     private static final String PreferenceName = "UserPreference";
     private static final String PROFID_KEY = "ProfileIDKey";
-    private String ProfileID;
+    private String ProfileID = "";
 
     private static String TAG = ParkingListings.class.getSimpleName();
 
@@ -61,10 +64,7 @@ public class ParkingListings extends AppCompatActivity {
         setContentView(R.layout.activity_parking_listings);
 
         SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-        if(!SharedPreference.contains(PROFID_KEY)){
-            Intent myIntent = new Intent(ParkingListings.this, StartUp.class);
-            startActivity(myIntent);
-        }else{
+        if(SharedPreference.contains(PROFID_KEY)){
             ProfileID = SharedPreference.getString(PROFID_KEY, "");
         }
 
@@ -121,13 +121,14 @@ public class ParkingListings extends AppCompatActivity {
     }
 
     private void getParkingList() {
-        StringRequest strRequest = new StringRequest(Request.Method.GET,
-                getString(R.string.apiURL) + "get_parking_list/",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject object = new JSONObject(response);
+        if(ProfileID != "") {
+            StringRequest strRequest = new StringRequest(Request.Method.GET,
+                    getString(R.string.apiURL) + "get_parking_list/",
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                JSONObject object = new JSONObject(response);
                                 JSONArray result = object.getJSONArray("data");
                                 BuildingNames = new ArrayList<String>();
                                 BuildingIDs = new ArrayList<>();
@@ -139,26 +140,74 @@ public class ParkingListings extends AppCompatActivity {
 
                                 dataAdapter = new CostumArrayAdapter(getApplicationContext(), BuildingNames);
                                 ParkingList.setAdapter(dataAdapter);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                }, new Response.ErrorListener() {
+                    }, new Response.ErrorListener() {
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.d(TAG, "Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> parameters = new HashMap<String, String>();
-                return parameters;
-            }
-        };
-        AppController.getInstance().addToRequestQueue(strRequest);
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+                    Toast.makeText(getApplicationContext(),
+                            error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> parameters = new HashMap<String, String>();
+                    return parameters;
+                }
+            };
+            AppController.getInstance().addToRequestQueue(strRequest);
+        }else{
+            StringRequest strRequest = new StringRequest(Request.Method.GET,
+                    getString(R.string.apiURL) + "get_parking_markers_partial/",
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                BuildingNames = new ArrayList<String>();
+                                BuildingIDs = new ArrayList<>();
+                                JSONObject object = new JSONObject(response);
+                                if(object.getString("status").equals("failed")){
+                                    Toast.makeText(getApplicationContext(),
+                                            object.getString("message"), Toast.LENGTH_SHORT).show();
+                                }else{
+                                    JSONArray result = object.getJSONArray("buildings");
+                                    for (int i = 0; i < result.length(); i++) {
+                                        JSONArray a = result.getJSONArray(i);
+                                        for (int j = 0; j < a.length(); j++) {
+                                            JSONObject b = a.getJSONObject(j);
+                                            BuildingIDs.add(Integer.valueOf(b.getString("id")));
+                                            BuildingNames.add(b.getString("title"));
+                                        }
+
+                                    }
+                                    dataAdapter = new CostumArrayAdapter(getApplicationContext(), BuildingNames);
+                                    ParkingList.setAdapter(dataAdapter);
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+                    Toast.makeText(getApplicationContext(),
+                            "Failed to get markers. Check connectivity and restart app.", Toast.LENGTH_SHORT).show();
+                }
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> parameters = new HashMap<String, String>();
+                    return parameters;
+                }
+            };
+            AppController.getInstance().addToRequestQueue(strRequest);
+        }
     }
 
     private void getBuildingInformation(){

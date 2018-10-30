@@ -90,7 +90,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     private static final String PROFID_KEY = "ProfileIDKey";
     private static final String CAR_ID_KEY = "CarIDKey";
     private static final String ON_FLOOR_KEY = "OnFloorKey";
-    private String ProfileID,activeCarID;
+    private String ProfileID = "",activeCarID;
 
     private static String TAG = Home.class.getSimpleName();
 
@@ -159,14 +159,18 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
         initResources();
         initEvents();
-        getVehicleOwnerInformation();
+        if(ProfileID != "") {
+            getVehicleOwnerInformation();
+        }
     }
     @Override
     protected void onResume(){
         super.onResume();
 //        initResources();
 //        initEvents();
-        getVehicleOwnerInformation();
+        if(ProfileID != "") {
+            getVehicleOwnerInformation();
+        }
     }
 
     @Override
@@ -274,60 +278,124 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     }
 
     private void putParkKingMarker() {
-        StringRequest strRequest = new StringRequest(Request.Method.GET,
-                getString(R.string.apiURL) + "get_parking_markers/",
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            ParkKingPlaces = new ArrayList<String>();
-                            ParkKingLat = new ArrayList<Double>();
-                            ParkKingLong = new ArrayList<Double>();
-                            JSONObject object = new JSONObject(response);
-                            JSONArray result = object.getJSONArray("data");
-                            for (int i = 0; i < result.length(); i++) {
-                                JSONObject c = result.getJSONObject(i);
-                                BuildingID = c.getString("id");
-                                name = c.getString("name");
-                                latitude = Double.parseDouble(c.getString("latitude"));
-                                longitude = Double.parseDouble(c.getString("longitude"));
+        if(ProfileID != "") {
+            StringRequest strRequest = new StringRequest(Request.Method.GET,
+                    getString(R.string.apiURL) + "get_parking_markers/",
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                ParkKingPlaces = new ArrayList<String>();
+                                ParkKingLat = new ArrayList<Double>();
+                                ParkKingLong = new ArrayList<Double>();
+                                JSONObject object = new JSONObject(response);
+                                JSONArray result = object.getJSONArray("data");
+                                for (int i = 0; i < result.length(); i++) {
+                                    JSONObject c = result.getJSONObject(i);
+                                    BuildingID = c.getString("id");
+                                    name = c.getString("name");
+                                    latitude = Double.parseDouble(c.getString("latitude"));
+                                    longitude = Double.parseDouble(c.getString("longitude"));
 
-                                markerOptions = new MarkerOptions();
-                                markerOptions.title(name);
-                                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo_non_transparent", 80, 110)));
-                                markerOptions.position(new LatLng(latitude, longitude));
-                                markerOptions.snippet(BuildingID);
-                                gMap.addMarker(markerOptions);
+                                    markerOptions = new MarkerOptions();
+                                    markerOptions.title(name);
+                                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo_non_transparent", 80, 110)));
+                                    markerOptions.position(new LatLng(latitude, longitude));
+                                    markerOptions.snippet(BuildingID);
+                                    gMap.addMarker(markerOptions);
 
-                                ParkKingPlaces.add(name);
-                                ParkKingLat.add(latitude);
-                                ParkKingLong.add(longitude);
+                                    ParkKingPlaces.add(name);
+                                    ParkKingLat.add(latitude);
+                                    ParkKingLong.add(longitude);
 
-                                ArrayAdapter<String> dataAdapter = new CostumArrayAdapter(getApplicationContext(), ParkKingPlaces);
-                                searchPlace.setThreshold(1);
-                                searchPlace.setAdapter(dataAdapter);
+                                    ArrayAdapter<String> dataAdapter = new CostumArrayAdapter(getApplicationContext(), ParkKingPlaces);
+                                    searchPlace.setThreshold(1);
+                                    searchPlace.setAdapter(dataAdapter);
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
-                    }
-                }, new Response.ErrorListener() {
+                    }, new Response.ErrorListener() {
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.d(TAG, "Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
-                        "Failed to get markers. Check connectivity and restart app.", Toast.LENGTH_SHORT).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> parameters = new HashMap<String, String>();
-                return parameters;
-            }
-        };
-        AppController.getInstance().addToRequestQueue(strRequest);
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+                    Toast.makeText(getApplicationContext(),
+                            "Failed to get markers. Check connectivity and restart app.", Toast.LENGTH_SHORT).show();
+                }
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> parameters = new HashMap<String, String>();
+                    return parameters;
+                }
+            };
+            AppController.getInstance().addToRequestQueue(strRequest);
+        }else{
+            StringRequest strRequest = new StringRequest(Request.Method.GET,
+                    getString(R.string.apiURL) + "get_parking_markers_partial/",
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                ParkKingPlaces = new ArrayList<String>();
+                                ParkKingLat = new ArrayList<Double>();
+                                ParkKingLong = new ArrayList<Double>();
+                                JSONObject object = new JSONObject(response);
+                                if(object.getString("status").equals("failed")){
+                                    Toast.makeText(getApplicationContext(),
+                                            object.getString("message"), Toast.LENGTH_SHORT).show();
+                                }else{
+                                    JSONArray result = object.getJSONArray("buildings");
+                                    for (int i = 0; i < result.length(); i++) {
+                                        JSONArray a = result.getJSONArray(i);
+                                        for (int j = 0; j < a.length(); j++) {
+                                            JSONObject b = a.getJSONObject(j);
+                                            BuildingID = b.getString("id");
+                                            name = b.getString("title");
+                                            latitude = Double.parseDouble(b.getString("latitude"));
+                                            longitude = Double.parseDouble(b.getString("longitude"));
+
+                                            markerOptions = new MarkerOptions();
+                                            markerOptions.title(name);
+                                            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("logo_non_transparent", 80, 110)));
+                                            markerOptions.position(new LatLng(latitude, longitude));
+                                            markerOptions.snippet(BuildingID);
+                                            gMap.addMarker(markerOptions);
+
+                                            ParkKingPlaces.add(name);
+                                            ParkKingLat.add(latitude);
+                                            ParkKingLong.add(longitude);
+
+                                            ArrayAdapter<String> dataAdapter = new CostumArrayAdapter(getApplicationContext(), ParkKingPlaces);
+                                            searchPlace.setThreshold(1);
+                                            searchPlace.setAdapter(dataAdapter);
+                                        }
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    VolleyLog.d(TAG, "Error: " + error.getMessage());
+                    Toast.makeText(getApplicationContext(),
+                            "Failed to get markers. Check connectivity and restart app.", Toast.LENGTH_SHORT).show();
+                }
+            }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> parameters = new HashMap<String, String>();
+                    return parameters;
+                }
+            };
+            AppController.getInstance().addToRequestQueue(strRequest);
+        }
 
     }
 
@@ -470,9 +538,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 }
             });
             builder.show();
-
         }
-
     }
 
 
@@ -518,7 +584,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
 
     private void initEvents() {
-        setNotificationListener();
+
         if (isServicesOk()) {
             getLocationPermission();
         }
@@ -582,8 +648,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         btnNotif.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent gotoNotif = new Intent(getApplicationContext(), Notifications.class);
-                startActivity(gotoNotif);
+                if(ProfileID != "") {
+                    Intent gotoNotif = new Intent(getApplicationContext(), Notifications.class);
+                    startActivity(gotoNotif);
+                }else{
+                    Toast.makeText(getApplicationContext(),
+                            "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -593,9 +664,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 int id = item.getItemId();
                 switch (id) {
                     case R.id.nav_account:
-                        Intent gotoEditAcc = new Intent(getApplicationContext(), EditAccount.class);
-                        startActivity(gotoEditAcc);
-                        mDrawer.closeDrawer(NavMenu);
+                        if(ProfileID != ""){
+                            Intent gotoEditAcc = new Intent(getApplicationContext(), EditAccount.class);
+                            startActivity(gotoEditAcc);
+                            mDrawer.closeDrawer(NavMenu);
+                        }else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        }
                         //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                         break;
 
@@ -606,41 +682,67 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                         break;
 
                     case R.id.nav_parkinghistory:
-                        Intent gotoParkingHistory = new Intent(getApplicationContext(), ParkingHistory.class);
-                        startActivity(gotoParkingHistory);
-                        mDrawer.closeDrawer(NavMenu);
+                        if(ProfileID != "") {
+                            Intent gotoParkingHistory = new Intent(getApplicationContext(), ParkingHistory.class);
+                            startActivity(gotoParkingHistory);
+                            mDrawer.closeDrawer(NavMenu);
+                        }else{
+                            Toast.makeText(getApplicationContext(),
+                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        }
                         break;
 
                     case R.id.nav_mycarlist:
-                        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
-                        startActivity(gotoCarList);
-                        mDrawer.closeDrawer(NavMenu);
+                        if(ProfileID != "") {
+                            Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+                            startActivity(gotoCarList);
+                            mDrawer.closeDrawer(NavMenu);
+                        }else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        }
                         break;
 
                     case R.id.nav_logout:
-                        new android.app.AlertDialog.Builder(Home.this)
-                                .setTitle("Confirm Logout")
-                                .setMessage("Are you sure want to Logout of Park King?")
-                                .setPositiveButton("Go", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        editor = SharedPreference.edit();
-                                        editor.clear();
-                                        editor.commit();
-                                        finish();
-                                    }})
-                                .setNegativeButton("Cancel", null).show();
+                        if(ProfileID != "") {
+                            new android.app.AlertDialog.Builder(Home.this)
+                                    .setTitle("Confirm Logout")
+                                    .setMessage("Are you sure want to Logout of Park King?")
+                                    .setPositiveButton("Go", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            editor = SharedPreference.edit();
+                                            editor.clear();
+                                            editor.commit();
+                                            finish();
+                                        }
+                                    })
+                                    .setNegativeButton("Cancel", null).show();
+                        }else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        }
                         break;
 
                     case R.id.nav_parked_cars:
-                        Intent gotoParkedCars = new Intent(getApplicationContext(), ParkedCars.class);
-                        startActivity(gotoParkedCars);
-                        mDrawer.closeDrawer(NavMenu);
+                        if(ProfileID != "") {
+                            Intent gotoParkedCars = new Intent(getApplicationContext(), ParkedCars.class);
+                            startActivity(gotoParkedCars);
+                            mDrawer.closeDrawer(NavMenu);
+                        }else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        }
                         break;
 
                     case R.id.nav_change_password:
-                        Intent gotoChangPassword = new Intent(getApplicationContext(), ChangePassword.class);
-                        startActivity(gotoChangPassword);
-                        mDrawer.closeDrawer(NavMenu);
+                        if(ProfileID != "") {
+                            Intent gotoChangPassword = new Intent(getApplicationContext(), ChangePassword.class);
+                            startActivity(gotoChangPassword);
+                            mDrawer.closeDrawer(NavMenu);
+                        }else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        }
                         break;
                 }
                 return false;
@@ -659,9 +761,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             @Override
             public void onClick(View v) {
                 putParkKingMarker();
-                getVehicleOwnerInformation();
+                if(ProfileID != "") {
+                    getVehicleOwnerInformation();
+                }
             }
         });
+
+        if(ProfileID != ""){
+            setNotificationListener();
+        }
     }
 
     private void getVehicleOwnerInformation() {
@@ -759,9 +867,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         polylines = new ArrayList<>();
         AvailSlot = (TextView) findViewById(R.id.Home_txtNoOfAvailSlot);
         SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-        if(!SharedPreference.contains(PROFID_KEY)){
-            finish();
-        }else{
+        if(SharedPreference.contains(PROFID_KEY)){
             ProfileID = SharedPreference.getString(PROFID_KEY, "");
         }
     }
