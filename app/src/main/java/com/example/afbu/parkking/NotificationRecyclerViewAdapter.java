@@ -60,8 +60,17 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
             case "incident_report":
                 holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.incident_report));
                 break;
-                default:
-                    holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.open));
+            case "closed_parking_slot":
+                holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.closed));
+                break;
+            case "parking_transaction":
+                holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.notif_icon_parking_transaction));
+                break;
+            case "parked_car":
+                holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.notif_icon_parked_car));
+                break;
+            default:
+                holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.open));
 
         }
         holder.titleText.setText(notificationArrayList.get(position).getTitle());
@@ -78,6 +87,16 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
                         Intent i = new Intent(mContext, AcceptCoOwner.class);
                         i.putExtra("request_id",notificationArrayList.get(position).getRequest_id());
                         mContext.startActivity(i);
+                        break;
+                    case "closed_parking_slot":
+                    case "left_parking_slot":
+                    case "parking_transaction":
+                        Intent parkingHistoryIntent = new Intent(mContext, ParkingHistory.class);
+                        mContext.startActivity(parkingHistoryIntent);
+                        break;
+                    case "parked_car":
+                        Intent parkedCarsIntent = new Intent(mContext, ParkedCars.class);
+                        mContext.startActivity(parkedCarsIntent);
                         break;
                     default:
                         //do nothing on click
