@@ -75,6 +75,9 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
             case "tenant_removal":
                 holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.notif_icon_removed_tenant));
                 break;
+            case "facility_closing":
+                holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.notif_icon_closing_facility));
+                break;
             default:
                 holder.icon.setImageDrawable(mContext.getResources().getDrawable(R.drawable.open));
 

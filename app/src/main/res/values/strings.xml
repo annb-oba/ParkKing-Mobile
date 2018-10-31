@@ -1,27 +1,27 @@
 <resources>
     <string name="app_name">Park King</string>
-    <string name="apiURL">http://192.168.100.4/Park-King-Initial/public/api/</string>
-    <string name="profilepictureURL">http://192.168.100.4/uploads/vehicle_owners_profile_picture/</string>
-    <string name="vehiclepictureURL">http://192.168.100.4/uploads/vehicle_owners_cars/</string>
-    <string name="addCarURL">http://192.168.100.4/api/cars</string>
-    <string name="addCoOwnerURL">http://parkking.online/api/relationships</string>
-    <string name="changeCarURL">http://parkking.online/api/cars/changecar</string>
-    <string name="getCarInfoURL">http://parkking.online/api/cars/profile/</string>
+    <string name="apiURL">http://192.168.8.100/ParkKing/public/api/</string>
+    <string name="profilepictureURL">http://192.168.8.100/ParkKing/public/uploads/vehicle_owners_profile_picture/</string>
+    <string name="vehiclepictureURL">http://192.168.8.100/ParkKing/public/uploads/vehicle_owners_cars/</string>
+    <string name="addCarURL">http://192.168.8.100/ParkKing/public/api/cars</string>
+    <string name="addCoOwnerURL">http://192.168.8.100/ParkKing/public/api/relationships</string>
+    <string name="changeCarURL">http://192.168.8.100/ParkKing/public/api/cars/changecar</string>
+    <string name="getCarInfoURL">http://192.168.8.100/ParkKing/public/api/cars/profile/</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
     <string name="GOOGLE_MAPS_API_KEY">AIzaSyAZ2W-HJ0MxtDHTdnXCzehMwE
         MCL2fMBtg</string>
-    <string name="carImagesURL">http://parkking.online/uploads/vehicle_owners_cars/</string>
-    <string name="get_floor_url">http://parkking.online/api/getFloorInfo/</string>
-    <string name="get_floor_url_with_tenant">http://parkking.online/api/getFloorInfoWithTenant/</string>
-    <string name="floor_map_folder">http://parkking.online/uploads/floor_maps/</string>
-    <string name="system_files">http://parkking.online/system/</string>
-    <string name="getFloorRouteURL">http://parkking.online/api/getFloorRoute/</string>
-    <string name="getBuildingFloorsURL">http://parkking.online/api/get_building_floors/</string>
-    <string name="createVehicleLogURL">http://parkking.online/api/createVehicleLog</string>
-    <string name="getParkedCarsURL">http://parkking.online/api/getParkedVehicles/</string>
-    <string name="getBillingInfoURL">http://parkking.online/api/getBillingInfo/</string>
-    <string name="getVehicleLogURL">http://parkking.online/api/getVehicleLog/</string>
-    <string name="showRelationshipRequestURL">http://parkking.online/api/relationships/show</string>
-    <string name="acceptRelationshipURL">http://parkking.online/api/relationships/accept</string>
+    <string name="carImagesURL">http://192.168.8.100/ParkKing/public/uploads/vehicle_owners_cars/</string>
+    <string name="get_floor_url">http://192.168.8.100/ParkKing/public/api/getFloorInfo/</string>
+    <string name="get_floor_url_with_tenant">http://192.168.8.100/ParkKing/public/api/getFloorInfoWithTenant/</string>
+    <string name="floor_map_folder">http://192.168.8.100/ParkKing/public/uploads/floor_maps/</string>
+    <string name="system_files">http://192.168.8.100/ParkKing/public/system/</string>
+    <string name="getFloorRouteURL">http://192.168.8.100/ParkKing/public/api/getFloorRoute/</string>
+    <string name="getBuildingFloorsURL">http://192.168.8.100/ParkKing/public/api/get_building_floors/</string>
+    <string name="createVehicleLogURL">http://192.168.8.100/ParkKing/public/api/createVehicleLog</string>
+    <string name="getParkedCarsURL">http://192.168.8.100/ParkKing/public/api/getParkedVehicles/</string>
+    <string name="getBillingInfoURL">http://192.168.8.100/ParkKing/public/api/getBillingInfo/</string>
+    <string name="getVehicleLogURL">http://192.168.8.100/ParkKing/public/api/getVehicleLog/</string>
+    <string name="showRelationshipRequestURL">http://192.168.8.100/ParkKing/public/api/relationships/show</string>
+    <string name="acceptRelationshipURL">http://192.168.8.100/ParkKing/public/api/relationships/accept</string>
 </resources>
