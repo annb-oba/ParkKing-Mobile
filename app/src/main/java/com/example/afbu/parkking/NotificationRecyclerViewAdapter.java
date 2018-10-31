@@ -104,6 +104,7 @@ public class NotificationRecyclerViewAdapter extends RecyclerView.Adapter<Notifi
                         mContext.startActivity(parkingHistoryIntent);
                         break;
                     case "parked_car":
+                    case "facility_closing":
                         Intent parkedCarsIntent = new Intent(mContext, ParkedCars.class);
                         mContext.startActivity(parkedCarsIntent);
                         break;
