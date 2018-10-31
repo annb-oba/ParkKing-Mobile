@@ -204,8 +204,7 @@ public class SignUp extends AppCompatActivity{
                 if(FirstName.getText().toString() != null && LastName.getText().toString() != null
                         &&MiddleName.getText().toString() != null &&CNumber.getText().toString() != null
                         &&PlateNumber.getText().toString() != null &&Email.getText().toString() != null
-                        &&Password.getText().toString() != null && imageToString(usrimg) != null
-                        && imageToString(carimg) != null){
+                        &&Password.getText().toString() != null){
                     signUp();
                 }else{
                     Toast.makeText(getApplicationContext(), "Please complete all fields.",Toast.LENGTH_SHORT).show();
@@ -341,8 +340,16 @@ public class SignUp extends AppCompatActivity{
                 parameters.put("password", Password.getText().toString().trim());
                 parameters.put("model_id", Integer.toString(ChosenModelId).trim());
                 parameters.put("plate_number", PlateNumber.getText().toString().trim());
-                parameters.put("profile_picture", imageToString(usrimg));
-                parameters.put("vehicle_picture", imageToString(carimg));
+                if(usrimg == null){
+                    parameters.put("profile_picture", "noimage.jpg");
+                }else{
+                    parameters.put("profile_picture", imageToString(usrimg));
+                }
+                if(carimg == null){
+                    parameters.put("vehicle_picture", "noimage.jpg");
+                }else{
+                    parameters.put("vehicle_picture", imageToString(carimg));
+                }
 
                 return parameters;
             }
