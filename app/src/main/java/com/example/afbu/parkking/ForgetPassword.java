@@ -51,7 +51,7 @@ public class ForgetPassword extends AppCompatActivity {
                 if(edtEmail.getText().toString() == null){
                     Toast.makeText(getApplicationContext(), "Please input an email address.", Toast.LENGTH_SHORT).show();
                 }else{
-                    StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.apiURL) + "signinvehicleowner", new Response.Listener<String>() {
+                    StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.apiURL) + "forget_password", new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             try {
