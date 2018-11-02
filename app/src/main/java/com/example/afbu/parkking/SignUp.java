@@ -103,7 +103,6 @@ public class SignUp extends AppCompatActivity{
         btnUserImg = (ImageButton) findViewById(R.id.SignUp_btnProfilePicture);
         imgUser = (ImageView) findViewById(R.id.SignUp_imgUser);
         imgCar = (ImageView) findViewById(R.id.SignUp_imgVehicle);
-        Password = (EditText) findViewById(R.id.SignUp_edtPassword);
         MiddleName = (EditText) findViewById(R.id.SignUp_edtMName);
         EULA = (TextView) findViewById(R.id.SignUp_txtEula2);
 
@@ -203,8 +202,7 @@ public class SignUp extends AppCompatActivity{
             public void onClick(View v) {
                 if(FirstName.getText().toString() != null && LastName.getText().toString() != null
                         &&MiddleName.getText().toString() != null &&CNumber.getText().toString() != null
-                        &&PlateNumber.getText().toString() != null &&Email.getText().toString() != null
-                        &&Password.getText().toString() != null){
+                        &&PlateNumber.getText().toString() != null &&Email.getText().toString() != null){
                     signUp();
                 }else{
                     Toast.makeText(getApplicationContext(), "Please complete all fields.",Toast.LENGTH_SHORT).show();
@@ -290,32 +288,24 @@ public class SignUp extends AppCompatActivity{
                     Log.d("Response", response);
                     String status = object.getString("status");
                     if(status.equals("success")){
-                        String vehicleowner_id = object.getString("vehicle_owner_id");
-                        editor = SharedPreference.edit();
-                        editor.putString(PROFID_KEY, vehicleowner_id);
-                        if(editor.commit()){
-                            Intent gotoHome = new Intent(getApplicationContext(), Home.class);
-                            startActivity(gotoHome);
-                            finish();
-                        }
+//                        String message = object.getString("message");
+//                        Toast.makeText(getApplicationContext(),
+//                                message, Toast.LENGTH_SHORT).show();
+                        new android.app.AlertDialog.Builder(SignUp.this)
+                                .setTitle("Password")
+                                .setMessage("Your password has been sent to your e-mail address.")
+                                .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        Intent gotoSignIn = new Intent(getApplicationContext(), SignIn.class);
+                                        startActivity(gotoSignIn);
+                                        finish();
+                                    }
+                                }).show();
                     }else if(status.equals("failed")){
                         String message = object.getString("message");
                         Toast.makeText(getApplicationContext(),
                                 message, Toast.LENGTH_SHORT).show();
                     }
-
-                    //Toast.makeText(getApplicationContext(), status, Toast.LENGTH_SHORT).show();
-                    /*String status = object.getString("status");
-                    String VehiclOwnerID = object.getString("vehicle_owner_id");
-                    String UserID = object.getString("user_id");
-                    if(status.equals("success")){
-                        String filename = "profile_picture_"+VehiclOwnerID;
-                        /*Intent gotoHome = new Intent(getApplicationContext(), Home.class);
-                        startActivity(gotoHome);
-                    }else{
-                        Toast.makeText(getApplicationContext(),
-                                "Sign Up failed.", Toast.LENGTH_SHORT).show();
-                    }*/
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -326,7 +316,7 @@ public class SignUp extends AppCompatActivity{
             public void onErrorResponse(VolleyError error) {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Failed to connect to Park King Servers", Toast.LENGTH_SHORT).show();
             }
         }) {
             @Override
@@ -337,7 +327,6 @@ public class SignUp extends AppCompatActivity{
                 parameters.put("middle_name", MiddleName.getText().toString().trim());
                 parameters.put("contact_number", CNumber.getText().toString().trim());
                 parameters.put("email", Email.getText().toString().trim());
-                parameters.put("password", Password.getText().toString().trim());
                 parameters.put("model_id", Integer.toString(ChosenModelId).trim());
                 parameters.put("plate_number", PlateNumber.getText().toString().trim());
                 if(usrimg == null){

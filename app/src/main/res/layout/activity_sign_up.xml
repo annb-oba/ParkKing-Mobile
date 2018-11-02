@@ -138,21 +138,6 @@
                 android:typeface="sans" />
 
             <EditText
-                android:id="@+id/SignUp_edtPassword"
-                android:layout_width="match_parent"
-                android:layout_height="49dp"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/input_border"
-                android:ems="10"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:padding="10dp"
-                android:textStyle="bold"
-                android:typeface="sans" />
-
-            <EditText
                 android:id="@+id/SignUp_edtPlateNumber"
                 android:layout_width="match_parent"
                 android:layout_height="49dp"

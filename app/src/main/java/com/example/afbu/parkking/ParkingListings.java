@@ -197,7 +197,7 @@ public class ParkingListings extends AppCompatActivity {
                 public void onErrorResponse(VolleyError error) {
                     VolleyLog.d(TAG, "Error: " + error.getMessage());
                     Toast.makeText(getApplicationContext(),
-                            "Failed to get markers. Check connectivity and restart app.", Toast.LENGTH_SHORT).show();
+                            "Failed to get list. Check connectivity and restart app.", Toast.LENGTH_SHORT).show();
                 }
             }) {
                 @Override
