@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -70,6 +71,14 @@ public class FloorMap extends AppCompatActivity {
     private static final String PROFID_KEY = "ProfileIDKey";
     private String parkedSlotID;
 
+    private SharedPreferences pendingParkingData;
+    private SharedPreferences.Editor pendingParkingDataEditor;
+    private static final String PENDING_PARK_DATA_PREF_KEY = "PendingParkingData";
+    private static final String FAB_SELECTED_SLOT_ID_KEY = "fabSelectedSlotId";
+    private static final String FAB_SELECTED_SLOT_TITLE_KEY = "fabSelectedSlotTitle";
+
+    private FloatingActionButton occupySlotFAB;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,10 +91,10 @@ public class FloorMap extends AppCompatActivity {
         parkedSlotID = myIntent.getStringExtra("slot_id");
 
 //        // for testing purposes
-//        SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
-//        editor = floorIDSharedPreference.edit();
-//        editor.putString("currentFloorID", "3");
-//        editor.commit();
+        SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
+        editor = floorIDSharedPreference.edit();
+        editor.putString("currentFloorID", "3");
+        editor.commit();
 //
 //        editor = null;
 //        // for testing purposes
@@ -121,6 +130,7 @@ public class FloorMap extends AppCompatActivity {
         availableSlotsTextView = (TextView) findViewById(R.id.availableSlotsTextView);
         selectedSlotTextView = (TextView) findViewById(R.id.selectedSlotTextView);
 
+        occupySlotFAB = (FloatingActionButton) findViewById(R.id.occupySlotFAB);
 
         buildingFloorID = new String[0];
         buildingFloorTitle = new String[0];
@@ -275,6 +285,22 @@ public class FloorMap extends AppCompatActivity {
                 finish();
             }
         });
+
+        occupySlotFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pendingParkingData = getSharedPreferences(PENDING_PARK_DATA_PREF_KEY, Context.MODE_PRIVATE);
+
+                NotifyDriverConsequenceDialog notifyDriverConsequenceDialog = new NotifyDriverConsequenceDialog();
+                notifyDriverConsequenceDialog.setPurpose("select_slot_for_occupancy");
+                notifyDriverConsequenceDialog.setmContext(getApplicationContext());
+                notifyDriverConsequenceDialog.setmSupportFragmentManager(getSupportFragmentManager());
+                notifyDriverConsequenceDialog.setDialogTitle("Manual slot saving confirmation");
+                notifyDriverConsequenceDialog.setDialogBody("Do you want to save Slot " + pendingParkingData.getString(FAB_SELECTED_SLOT_TITLE_KEY, "") + " as your parked slot?");
+                notifyDriverConsequenceDialog.setDialogNote("NOTE: You may incur excessive fees if you select a slot occupied later than your time of entry. Only proceed if you are sure that this is the slot in which you parked");
+                notifyDriverConsequenceDialog.show(getSupportFragmentManager(), "ConfirmSlotOccupancy");
+            }
+        });
     }
 
     private BroadcastReceiver createBroadcastReceiver() {
@@ -319,8 +345,8 @@ public class FloorMap extends AppCompatActivity {
         if(intent.equals("park")) {
 
         } else if(intent.equals("view")) {
-            initResources(intent);
-            initEvents();
+//            initResources(intent);
+//            initEvents();
         }
 
         super.onDestroy();
@@ -354,7 +380,7 @@ public class FloorMap extends AppCompatActivity {
 
                         floorMapView.setIntent(intent);
                         floorMapView.setParkedSlot(parkedSlotID);
-                        floorMapView.setFloorMapInformation(floorObj, floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView, buildingFloorHierarchy);
+                        floorMapView.setFloorMapInformation(floorObj, floorID, parkingFeeTextView, availableSlotsTextView, selectedSlotTextView, buildingFloorHierarchy, occupySlotFAB);
                         floorMapView.setSupportFragmentManager(getSupportFragmentManager());
                     } else {
                         Toast.makeText(getApplicationContext(), responseObj.getString("message"), Toast.LENGTH_SHORT).show();

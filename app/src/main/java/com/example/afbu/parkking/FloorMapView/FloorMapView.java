@@ -13,7 +13,9 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.AsyncTask;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -31,6 +34,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.example.afbu.parkking.AStar.AStar;
 import com.example.afbu.parkking.AStar.Grid;
 import com.example.afbu.parkking.AppController;
+import com.example.afbu.parkking.NotifyDriverConsequenceDialog;
 import com.example.afbu.parkking.R;
 import com.example.afbu.parkking.SaveSlotPromptDialog;
 import com.example.afbu.parkking.SectionSlot;
@@ -91,7 +95,7 @@ public class FloorMapView extends View {
     private final static float MIN_ZOOM = 1f, MAX_ZOOM = 3.0f;
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference slotRef;
+    private List<DatabaseReference> slotRefs;
     private DatabaseReference userRef;
     private String floorID;
     private boolean isCurrentFloor;
@@ -116,6 +120,14 @@ public class FloorMapView extends View {
     private static final String SLOT_FIND_Y_KEY = "sectionSlotFindY";
     private static final String SLOT_FIND_FLOOR_ID_KEY = "sectionSlotFindFloorID";
 
+    private SharedPreferences pendingParkingData;
+    private SharedPreferences.Editor pendingParkingDataEditor;
+    private static final String PENDING_PARK_DATA_PREF_KEY = "PendingParkingData";
+    private static final String PENDING_PARKED_SLOT_ID_KEY = "pendingParkedSlotId";
+    private static final String PENDING_PARKED_SLOT_TITLE_KEY = "pendingParkedSlotTitle";
+    private static final String FAB_SELECTED_SLOT_ID_KEY = "fabSelectedSlotId";
+    private static final String FAB_SELECTED_SLOT_TITLE_KEY = "fabSelectedSlotTitle";
+
     private List<ValueEventListener> slotEventListener;
     private static final int INVALID_POINTER_ID = -1;
     private int mActivePointerID = INVALID_POINTER_ID;
@@ -129,6 +141,7 @@ public class FloorMapView extends View {
     private ArrayList<Integer> buildingFloorHierarchy;
     private String selectedSlotFloorID;
     private String currentFloorID;
+    private FloatingActionButton occupySlotFAB;
 
     public FloorMapView(Context context) {
         super(context);
@@ -322,12 +335,13 @@ public class FloorMapView extends View {
         }
     }
 
-    public void setFloorMapInformation(JSONObject floorObj, String floorID, TextView parkingFeeTextView, TextView availableSlotsTextView, TextView selectedSlotTextView, ArrayList<Integer> buildingFloorHierarchy) {
+    public void setFloorMapInformation(JSONObject floorObj, String floorID, TextView parkingFeeTextView, TextView availableSlotsTextView, TextView selectedSlotTextView, ArrayList<Integer> buildingFloorHierarchy, FloatingActionButton occupySlotFAB) {
         // reset values
         floorImagePosX = 0f;
         floorImagePosY = 0f;
 
         detatchValueEventListener();
+        slotRefs = new ArrayList<>();
 
         slotEventListener = new ArrayList<>();
         sectionSlotListArray = new ArrayList<>();
@@ -339,6 +353,8 @@ public class FloorMapView extends View {
         floorIndicatorCoords = new ArrayList<>();
 
         floorSlots = new ArrayList<>();
+
+        this.occupySlotFAB = occupySlotFAB;
 
         userBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.user_position);
         Matrix matrix = new Matrix();
@@ -493,7 +509,7 @@ public class FloorMapView extends View {
             final int slot_id = floorSlotObject.getSlotID();
             int section_id = floorSlotObject.getSectionID();
 
-            slotRef = database.getReference("section").child(String.valueOf(section_id)).child("slot").child(String.valueOf(slot_id)).child("status");
+            slotRefs.add(database.getReference("section").child(String.valueOf(section_id)).child("slot").child(String.valueOf(slot_id)).child("status"));
 
             final int finalI = i;
             slotEventListener.add(new ValueEventListener() {
@@ -521,11 +537,7 @@ public class FloorMapView extends View {
                                                 floorSlotObject.getPointC(),
                                                 floorSlotObject.getPointD(),
                                                 new LatLng(((userPositionX / floorImageWidth) * floor_map_width), ((userPositionY / floorImageHeight) * floor_map_height)))) {
-                                            SaveSlotPromptDialog saveSlotPromptDialog = new SaveSlotPromptDialog();
-                                            saveSlotPromptDialog.setSlotTitle(floorSlotObject.getSlotTitle());
-                                            saveSlotPromptDialog.show(supportFragmentManager, "Save Slot Prompt");
-
-                                            saveVehicleLog(floorSlotObject.getSlotID());
+                                            saveVehicleLog(floorSlotObject);
                                         }
                                     } else {
                                         if (destination_x == floorSlotObject.getGrid_coordinates()[1] && destination_y == floorSlotObject.getGrid_coordinates()[0]) {
@@ -559,11 +571,11 @@ public class FloorMapView extends View {
 
                 }
             });
-            slotRef.addValueEventListener(slotEventListener.get(i));
+            slotRefs.get(i).addValueEventListener(slotEventListener.get(i));
         }
     }
 
-    private void saveVehicleLog(final int slotID) {
+    private void saveVehicleLog(final SectionSlot slotObject) {
         StringRequest strRequest = new StringRequest(Request.Method.POST, mContext.getString(R.string.createVehicleLogURL), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -571,7 +583,30 @@ public class FloorMapView extends View {
                 try {
                     JSONObject requestObj = new JSONObject(response);
                     if (!requestObj.getBoolean("success")) {
-                        Toast.makeText(mContext, requestObj.getString("message"), Toast.LENGTH_SHORT).show();
+                        if(requestObj.has("error_type")) {
+                            NotifyDriverConsequenceDialog notifyDriverConsequenceDialog = new NotifyDriverConsequenceDialog();
+                            switch (requestObj.getString("error_type")) {
+                                case "no_car":
+                                case "car_already_parked":
+                                    notifyDriverConsequenceDialog.setmContext(mContext);
+                                    notifyDriverConsequenceDialog.setmSupportFragmentManager(supportFragmentManager);
+                                    notifyDriverConsequenceDialog.setPurpose(requestObj.getString("error_type"));
+                                    notifyDriverConsequenceDialog.setDialogTitle(requestObj.getString("message"));
+                                    notifyDriverConsequenceDialog.setDialogBody("Click \"Yes\" to proceed to Car List view and switch on the car that you are using");
+                                    notifyDriverConsequenceDialog.setDialogNote("NOTE: You may be penalized by the building administrator upon exit if you fail to update the car that you are using for the slot in which you parked. You may avoid this problem by going to the Car List page from the navigation tab to select the car that you are using.");
+                                    break;
+                            }
+                            notifyDriverConsequenceDialog.show(supportFragmentManager, "SlotSavingErrorPreventionDialog");
+                        } else {
+                            Toast.makeText(mContext, requestObj.getString("message"), Toast.LENGTH_SHORT).show();
+                        }
+                        pendingParkingData = mContext.getSharedPreferences(PENDING_PARK_DATA_PREF_KEY, Context.MODE_PRIVATE);
+                        pendingParkingDataEditor = pendingParkingData.edit();
+                        pendingParkingDataEditor.putString(PENDING_PARKED_SLOT_TITLE_KEY, slotObject.getSlotTitle());
+                        pendingParkingDataEditor.putInt(PENDING_PARKED_SLOT_ID_KEY, slotObject.getSlotID());
+                        pendingParkingDataEditor.commit();
+                    } else {
+                        showLogSuccessfulDialog(slotObject);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -590,11 +625,22 @@ public class FloorMapView extends View {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("vehicle_owner_profile_id", sharedPreferences.getString(PROFID_KEY, ""));
-                parameters.put("section_slot_id", String.valueOf(slotID));
+                parameters.put("section_slot_id", String.valueOf(slotObject.getSlotID()));
                 return parameters;
             }
         };
+        strRequest.setRetryPolicy(new DefaultRetryPolicy(
+                0,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
         AppController.getInstance().addToRequestQueue(strRequest);
+    }
+
+    private void showLogSuccessfulDialog(SectionSlot floorSlotObject) {
+        SaveSlotPromptDialog saveSlotPromptDialog = new SaveSlotPromptDialog();
+        saveSlotPromptDialog.setSlotTitle(floorSlotObject.getSlotTitle());
+        saveSlotPromptDialog.show(supportFragmentManager, "Save Slot Prompt");
     }
 
     private void changeSlotBitmapStatus(String slotURL, final int slotIndex) {
@@ -833,6 +879,13 @@ public class FloorMapView extends View {
             sectionSlotFinderEditor.remove(SLOT_FIND_Y_KEY);
             sectionSlotFinderEditor.remove(SLOT_FIND_FLOOR_ID_KEY);
             sectionSlotFinderEditor.commit();
+
+            pendingParkingData = mContext.getSharedPreferences(PENDING_PARK_DATA_PREF_KEY, Context.MODE_PRIVATE);
+            pendingParkingDataEditor = pendingParkingData.edit();
+            pendingParkingDataEditor.remove(FAB_SELECTED_SLOT_TITLE_KEY);
+            pendingParkingDataEditor.remove(FAB_SELECTED_SLOT_ID_KEY);
+            pendingParkingDataEditor.commit();
+            occupySlotFAB.setVisibility(View.INVISIBLE);
         } else {
             sectionSlotFinderEditor.putInt(SLOT_FIND_X_KEY, sectionSlotListArray.get(i).getGrid_coordinates()[1]);
             sectionSlotFinderEditor.putInt(SLOT_FIND_Y_KEY, sectionSlotListArray.get(i).getGrid_coordinates()[0]);
@@ -862,6 +915,23 @@ public class FloorMapView extends View {
 
                             selectedSlotTextView.setText(requestObj.getJSONObject("billing_info").getString("title"));
                             selectedSlotTextView.setTextColor(Color.parseColor("#3E55A4"));
+
+                            if(requestObj.getBoolean("is_occupiable")) {
+                                occupySlotFAB.setVisibility(View.VISIBLE);
+                                pendingParkingData = mContext.getSharedPreferences(PENDING_PARK_DATA_PREF_KEY, Context.MODE_PRIVATE);
+                                pendingParkingDataEditor = pendingParkingData.edit();
+                                pendingParkingDataEditor.putString(FAB_SELECTED_SLOT_TITLE_KEY, sectionSlotListArray.get(i).getSlotTitle());
+                                pendingParkingDataEditor.putInt(FAB_SELECTED_SLOT_ID_KEY, sectionSlotListArray.get(i).getSlotID());
+                                pendingParkingDataEditor.commit();
+                            } else {
+                                pendingParkingData = mContext.getSharedPreferences(PENDING_PARK_DATA_PREF_KEY, Context.MODE_PRIVATE);
+                                pendingParkingDataEditor = pendingParkingData.edit();
+                                pendingParkingDataEditor.remove(FAB_SELECTED_SLOT_TITLE_KEY);
+                                pendingParkingDataEditor.remove(FAB_SELECTED_SLOT_ID_KEY);
+                                pendingParkingDataEditor.commit();
+
+                                occupySlotFAB.setVisibility(View.INVISIBLE);
+                            }
                         } else {
                             parkingFeeTextView.setText("N/A");
                             parkingFeeTextView.setTextColor(Color.BLACK);
@@ -978,14 +1048,14 @@ public class FloorMapView extends View {
     }
 
     public void detatchValueEventListener() {
+//        Toast.makeText(mContext, "DetachValueEventListener is called", Toast.LENGTH_SHORT).show();
         if (slotEventListener.size() > 0 && sectionSlotListArray.size() > 0) {
             for (int i = 0; i < slotEventListener.size(); i++) {
                 final SectionSlot floorSlotObject = sectionSlotListArray.get(i);
                 final int slot_id = floorSlotObject.getSlotID();
                 int section_id = floorSlotObject.getSectionID();
 
-                slotRef = database.getReference("section").child(String.valueOf(section_id)).child("slot").child(String.valueOf(slot_id)).child("status");
-                slotRef.removeEventListener(slotEventListener.get(i));
+                slotRefs.get(i).removeEventListener(slotEventListener.get(i));
             }
         }
     }
@@ -993,10 +1063,6 @@ public class FloorMapView extends View {
     private void assessPathToTake() {
         if (blocked_grids.size() == 0) {
             Toast.makeText(mContext, "No path defined on this map", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (currentFloorID.equals("-1")) {
             return;
         }
 

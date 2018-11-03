@@ -7,6 +7,21 @@
     android:orientation="vertical"
     tools:context=".FloorMap">
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/occupySlotFAB"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="32dp"
+        android:clickable="true"
+        android:padding="2dp"
+        android:visibility="invisible"
+        app:backgroundTint="@color/colorWhite"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/linearLayout"
+        app:srcCompat="@drawable/logo" />
+
     <RelativeLayout
         android:id="@+id/relativeLayout2"
         android:layout_width="match_parent"
@@ -52,6 +67,7 @@
     </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
@@ -88,13 +104,15 @@
                 android:textAlignment="center"
                 android:textSize="25dp" />
         </LinearLayout>
+
         <Spinner
-            android:background="@color/colorWhite"
             android:id="@+id/FloorMap_floorSpinner"
             android:layout_width="match_parent"
             android:layout_height="45dp"
+            android:background="@color/colorWhite"
 
             />
+
         <com.example.afbu.parkking.FloorMapView.FloorMapView
             android:id="@+id/FloorMap_floorMapView"
             android:layout_width="match_parent"

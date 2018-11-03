@@ -60,7 +60,7 @@ public class CarProfile extends AppCompatActivity {
     private ImageButton btnBackHome, addImage;
     private EditText editTextPlateNumber1, editTextPlateNumber2;
     private AutoCompleteTextView CarBrandsSpinner, CarModelSpinner;
-    private LinearLayout mainLayout, carSharingLayout,removeCarSharingLayout,deactivateCarLayout;
+    private LinearLayout mainLayout, carSharingLayout, removeCarSharingLayout, deactivateCarLayout;
     private RelativeLayout loadingLayout;
     private View dividerView;
     private ArrayList<String> Brands, Models;
@@ -78,6 +78,13 @@ public class CarProfile extends AppCompatActivity {
     private Boolean originalActiveCar;
     private String originalPlateNumber;
 
+    private SharedPreferences pendingParkingData;
+    private SharedPreferences.Editor pendingParkingDataEditor;
+    private static final String PENDING_PARK_DATA_PREF_KEY = "PendingParkingData";
+    private static final String PENDING_PARKED_SLOT_ID_KEY = "pendingParkedSlotId";
+    private static final String PENDING_PARKED_SLOT_TITLE_KEY = "pendingParkedSlotTitle";
+    private static final String FAB_SELECTED_SLOT_ID_KEY = "fabSelectedSlotId";
+    private static final String FAB_SELECTED_SLOT_TITLE_KEY = "fabSelectedSlotTitle";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,8 +104,8 @@ public class CarProfile extends AppCompatActivity {
         } else {
             ProfileID = SharedPreference.getString(PROFID_KEY, "");
         }
-        deactivateCarLayout = (LinearLayout)findViewById(R.id.CarProfile_DeactivateCarLayout);
-        removeCarSharingLayout = (LinearLayout)findViewById(R.id.CarProfile_RemoveCarSharingLayout);
+        deactivateCarLayout = (LinearLayout) findViewById(R.id.CarProfile_DeactivateCarLayout);
+        removeCarSharingLayout = (LinearLayout) findViewById(R.id.CarProfile_RemoveCarSharingLayout);
         carSharingLayout = (LinearLayout) findViewById(R.id.CarProfile_CarSharingLayout);
         dividerView = (View) findViewById(R.id.CarProfile_DividerView);
         mainLayout = (LinearLayout) findViewById(R.id.CarProfile_mainLayout);
@@ -149,15 +156,16 @@ public class CarProfile extends AppCompatActivity {
                         .setPositiveButton("Deactivate", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 deactivateCar();
-                            }})
+                            }
+                        })
                         .setNegativeButton("Cancel", null).show();
             }
         });
         carSharingLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(),CarCoOwners.class);
-                intent.putExtra("car_id",carID);
+                Intent intent = new Intent(getApplicationContext(), CarCoOwners.class);
+                intent.putExtra("car_id", carID);
                 startActivity(intent);
             }
         });
@@ -221,7 +229,8 @@ public class CarProfile extends AppCompatActivity {
             }
         });
     }
-    public void deactivateCar(){
+
+    public void deactivateCar() {
         StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.deactivateCarURL), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -259,6 +268,7 @@ public class CarProfile extends AppCompatActivity {
         };
         AppController.getInstance().addToRequestQueue(strRequest);
     }
+
     public void saveChanges() {
         final String plate;
         final String model;
@@ -279,7 +289,7 @@ public class CarProfile extends AppCompatActivity {
         } else {
             picture = "";
         }
-        if (originalActiveCar!=this.activeCar) {
+        if (originalActiveCar != this.activeCar) {
             if (this.activeCar) {
                 activeCar = "true";
             } else {
@@ -333,10 +343,10 @@ public class CarProfile extends AppCompatActivity {
             };
             AppController.getInstance().addToRequestQueue(strRequest);
         }
-        if (originalActiveCar!=this.activeCar) {
+        if (originalActiveCar != this.activeCar) {
             changeCar(activeCar);
         }
-        if (originalActiveCar==this.activeCar && picture.isEmpty() && plate.isEmpty() && model.isEmpty()) {
+        if (originalActiveCar == this.activeCar && picture.isEmpty() && plate.isEmpty() && model.isEmpty()) {
             Toast.makeText(getApplicationContext(), "No Changes Made", Toast.LENGTH_SHORT).show();
         }
     }
@@ -356,7 +366,34 @@ public class CarProfile extends AppCompatActivity {
                         Log.d(TAG, message);
                         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                         if (jsonObject.getString("status").equals("success")) {
-                            finish();
+                            if (jsonObject.has("has_set_existing") && jsonObject.getBoolean("has_set_existing")) {
+                                pendingParkingData = getSharedPreferences(PENDING_PARK_DATA_PREF_KEY, Context.MODE_PRIVATE);
+
+                                // if there is a pending slot either occupied or selected
+                                if ((pendingParkingData.contains(PENDING_PARKED_SLOT_ID_KEY) && pendingParkingData.contains(PENDING_PARKED_SLOT_TITLE_KEY)) || (pendingParkingData.contains(FAB_SELECTED_SLOT_ID_KEY) && pendingParkingData.contains(FAB_SELECTED_SLOT_TITLE_KEY))) {
+                                    // create dialog
+                                    NotifyDriverConsequenceDialog notifyDriverConsequenceDialog = new NotifyDriverConsequenceDialog();
+                                    notifyDriverConsequenceDialog.setDialogTitle("Set car to parked slot");
+                                    notifyDriverConsequenceDialog.setDialogNote("NOTE: You may be penalized by the building administrator upon exit if you fail to update the car that you are using for the slot in which you parked.");
+
+                                    // if slot is pending
+                                    if (pendingParkingData.contains(PENDING_PARKED_SLOT_ID_KEY) && pendingParkingData.contains(PENDING_PARKED_SLOT_TITLE_KEY)) {
+                                        notifyDriverConsequenceDialog.setDialogBody("Is this the car that you have used to park in Slot " + pendingParkingData.getString(PENDING_PARKED_SLOT_TITLE_KEY, "") + "?");
+                                        notifyDriverConsequenceDialog.setPurpose("switch_car_with_pending_parking");
+                                    }
+                                    // if slot is selected
+                                    else if (pendingParkingData.contains(FAB_SELECTED_SLOT_ID_KEY) && pendingParkingData.contains(FAB_SELECTED_SLOT_TITLE_KEY)) {
+                                        notifyDriverConsequenceDialog.setDialogBody("Is this the car that you have used to park in the slot that you have selected? (Slot " + pendingParkingData.getString(FAB_SELECTED_SLOT_TITLE_KEY, "") + ")");
+                                        notifyDriverConsequenceDialog.setPurpose("select_slot_for_occupancy");
+                                    }
+
+                                    notifyDriverConsequenceDialog.setmContext(getApplicationContext());
+                                    notifyDriverConsequenceDialog.setmSupportFragmentManager(getSupportFragmentManager());
+                                    notifyDriverConsequenceDialog.show(getSupportFragmentManager(), "NotifyDiscretionForChangeCarDialog");
+                                }
+                            } else {
+                                finish();
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
