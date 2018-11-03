@@ -77,9 +77,6 @@ public class AddCoOwner extends AppCompatActivity {
                         Log.d(TAG, message);
                         Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
                         if(jsonObject.getString("status").equals("success")){
-                            Intent gotoCarCoOwners = new Intent(getApplicationContext(), CarCoOwners.class);
-                            gotoCarCoOwners.putExtra("car_id", carID);
-                            startActivity(gotoCarCoOwners);
                             finish();
                         }
                     } catch (JSONException e) {

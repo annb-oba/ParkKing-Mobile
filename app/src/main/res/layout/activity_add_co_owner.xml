@@ -52,19 +52,19 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:paddingTop="58dp">
+        android:padding="20dp">
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            >
             <TextView
                 android:id="@+id/AddCoOwner_txtEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:layout_marginLeft="25dp"
                 android:layout_marginTop="10dp"
                 android:text="Email:"
                 android:textSize="16sp"
@@ -72,22 +72,21 @@
                 app:fontFamily="@font/open_sans" />
             <EditText
                 android:id="@+id/AddCoOwner_edtEmail"
-                android:layout_width="335dp"
+                android:layout_width="match_parent"
                 android:layout_height="49dp"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_gravity="center"
                 android:background="@drawable/input_border"
                 android:ems="10"
-                android:hint="Vehicle Brand"
+                android:hint="Email"
                 android:inputType="textPersonName"
                 android:padding="10dp"
-                android:text="donmallare@ymail.com"
                 android:textStyle="bold"
                 android:typeface="sans" />
             <Button
                 android:id="@+id/AddCoOwner_btnAdd"
-                android:layout_width="335dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"

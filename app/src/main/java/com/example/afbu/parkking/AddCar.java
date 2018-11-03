@@ -1,5 +1,6 @@
 package com.example.afbu.parkking;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -54,6 +55,7 @@ public class AddCar extends AppCompatActivity {
     private Bitmap bitmap;
     private final int IMG_REQUEST = 1;
     private static final int RESULT_LOAD_IMAGE = 0, REQUEST_CAMERA = 1;
+    private static final int PIC_CROP = 2;
     private static String TAG = AddCar.class.getSimpleName();
     private String message;
     private ImageView carImage;
@@ -111,8 +113,8 @@ public class AddCar extends AppCompatActivity {
                 for(int i=0; i<Brands.size(); i++){
                     if(CarBrandsSpinner.getText().toString().equals(Brands.get(i))){
                         getModels(BrandID.get(i));
-                        Toast.makeText(getApplicationContext(),
-                                Integer.toString(BrandID.get(i)), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(),
+//                                Integer.toString(BrandID.get(i)), Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
@@ -126,8 +128,8 @@ public class AddCar extends AppCompatActivity {
                 for(int i=0; i<Models.size(); i++){
                     if(CarModelSpinner.getText().toString().equals(Models.get(i))){
                         ChosenModelId = ModelID.get(i);
-                        Toast.makeText(getApplicationContext(),
-                                Integer.toString(ChosenModelId), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(),
+//                                Integer.toString(ChosenModelId), Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
@@ -311,38 +313,64 @@ public class AddCar extends AppCompatActivity {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG,50,byteArrayOutputStream);
         byte[] imgBytes = byteArrayOutputStream.toByteArray();
-
         return Base64.encodeToString(imgBytes, Base64.DEFAULT);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if(resultCode == RESULT_OK && data != null){
-            if(requestCode == RESULT_LOAD_IMAGE){
+        if (resultCode == RESULT_OK && data != null) {
+            if (requestCode == RESULT_LOAD_IMAGE) {
                 Uri path = data.getData();
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),path);
+                performCrop(path);
+//                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),path);
+//                    carImage.setVisibility(View.VISIBLE);
+//                    carImage.setImageBitmap(bitmap);
+            } else if (requestCode == REQUEST_CAMERA) {
+                Uri picUri = data.getData();
+                performCrop(picUri);
+//                Bundle bundle = data.getExtras();
+//                bitmap = (Bitmap) bundle.get("data");
+//                carImage.setVisibility(View.VISIBLE);
+//                carImage.setImageBitmap(bitmap);
+            } else if (requestCode == PIC_CROP) {
+                if (data != null) {
+
+                    Bundle bundle = data.getExtras();
+//                    bitmap = (Bitmap) bundle.getParcelable("data");
+                    bitmap = (Bitmap) bundle.get("data");
                     carImage.setVisibility(View.VISIBLE);
                     carImage.setImageBitmap(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
-            }else if(requestCode == REQUEST_CAMERA){
-                Bundle bundle = data.getExtras();
-                bitmap = (Bitmap) bundle.get("data");
-                carImage.setVisibility(View.VISIBLE);
-                carImage.setImageBitmap(bitmap);
             }
         }
     }
 
-    /*@Override
-    public void finish() {
-        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
-        startActivity(gotoCarList);
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-    }*/
+    private void performCrop(Uri picUri) {
+        try {
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            // indicate image type and Uri
+            cropIntent.setDataAndType(picUri, "image/*");
+            // set crop properties here
+            cropIntent.putExtra("crop", true);
+            // indicate aspect of desired crop
+            cropIntent.putExtra("aspectX", 1);
+            cropIntent.putExtra("aspectY", 1);
+            // indicate output X and Y
+            cropIntent.putExtra("outputX", 256);
+            cropIntent.putExtra("outputY", 256);
+            // retrieve data on return
+            cropIntent.putExtra("return-data", true);
+            // start the activity - we handle returning in onActivityResult
+            startActivityForResult(cropIntent, PIC_CROP);
+        }
+        // respond to users whose devices do not support the crop action
+        catch (ActivityNotFoundException anfe) {
+            // display an error message
+            String errorMessage = "Whoops - your device doesn't support the crop action!";
+            Toast toast = Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
 }
 

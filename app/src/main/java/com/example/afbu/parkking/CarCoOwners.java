@@ -1,6 +1,7 @@
 package com.example.afbu.parkking;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
@@ -51,6 +52,13 @@ public class CarCoOwners extends AppCompatActivity {
         initEvents();
         getCarCoOwners();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getCarCoOwners();
+    }
+
     public void initResources(){
         Intent intent = getIntent();
         carID = intent.getStringExtra("car_id");
@@ -94,7 +102,7 @@ public class CarCoOwners extends AppCompatActivity {
                         for (int i = 0; i < result.length(); i++) {
                             JSONObject c = result.getJSONObject(i);
                             String name = c.getString("first_name")+" "+c.getString("middle_name")+" "+c.getString("last_name");
-                            CarCoOwner carCoOwner = new CarCoOwner(name,c.getString("email"),c.getString("profile_picture"));
+                            CarCoOwner carCoOwner = new CarCoOwner(c.getString("co_owner_id"),name,c.getString("email"),c.getString("profile_picture"));
                             CoOwnerList.add(carCoOwner);
                         }
 
@@ -132,8 +140,54 @@ public class CarCoOwners extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
         RecyclerView recyclerView = findViewById(R.id.CarCoOwners_recyclerView);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new CarOwnerRecyclerViewAdapter(getApplication(),CoOwnerList);
+        adapter = new CarOwnerRecyclerViewAdapter(getApplication(),CoOwnerList,this);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
     }
+    public void removeCarCoOwner(final String co_owner_id){
+        new android.app.AlertDialog.Builder(CarCoOwners.this)
+                .setTitle("Revoke Co-Ownership")
+                .setMessage("Are you sure want to stop sharing this car to this user?")
+                .setPositiveButton("Revoke", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        StringRequest strRequest = new StringRequest(Request.Method.POST,  getString(R.string.revokeCoOwnershipURL), new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                Log.d(TAG, response.toString());
+                                JSONObject jsonObject = null;
+
+                                try {
+                                    jsonObject = new JSONObject(response);
+                                    String message = jsonObject.getString("message");
+                                    Log.d(TAG, message);
+                                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                                    if (jsonObject.getString("status").equals("success")) {
+                                        getCarCoOwners();
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                                Toast.makeText(getApplicationContext(),
+                                        "Unable to connect to Park King Servers", Toast.LENGTH_SHORT).show();
+                            }
+                        }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String, String> parameters = new HashMap<String, String>();
+                                parameters.put("car_id", carID);
+                                parameters.put("co_owner_id", co_owner_id);
+                                return parameters;
+                            }
+                        };
+                        AppController.getInstance().addToRequestQueue(strRequest);
+                    }})
+                .setNegativeButton("Cancel", null).show();
+    }
+
 }

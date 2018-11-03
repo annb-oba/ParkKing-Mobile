@@ -24,10 +24,12 @@ public class CarOwnerRecyclerViewAdapter extends RecyclerView.Adapter<CarOwnerRe
 
     private Context mContext;
     private ArrayList<CarCoOwner> carCoOwnerArrayList;
+    private CarCoOwners carCoOwners;
 
-    public CarOwnerRecyclerViewAdapter(Context mContext, ArrayList<CarCoOwner> carCoOwnerArrayList) {
+    public CarOwnerRecyclerViewAdapter(Context mContext, ArrayList<CarCoOwner> carCoOwnerArrayList, CarCoOwners carCoOwners) {
         this.mContext = mContext;
         this.carCoOwnerArrayList = carCoOwnerArrayList;
+        this.carCoOwners = carCoOwners;
     }
 
     @NonNull
@@ -39,9 +41,16 @@ public class CarOwnerRecyclerViewAdapter extends RecyclerView.Adapter<CarOwnerRe
 
     @Override
     public void onBindViewHolder(@NonNull CarOwnerRecyclerViewAdapter.ViewHolder holder, int position) {
+        final int tempPosition = position;
         holder.nameText.setText(carCoOwnerArrayList.get(position).getName());
         holder.emailText.setText(carCoOwnerArrayList.get(position).getEmail());
         Glide.with(mContext).asBitmap().load(mContext.getString(R.string.profilepictureURL)+carCoOwnerArrayList.get(position).getPicture()).into(holder.profilePic);
+        holder.linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                carCoOwners.removeCarCoOwner(carCoOwnerArrayList.get(tempPosition).getCo_owner_id());
+            }
+        });
     }
 
     @Override
@@ -52,9 +61,11 @@ public class CarOwnerRecyclerViewAdapter extends RecyclerView.Adapter<CarOwnerRe
         TextView nameText;
         TextView emailText;
         ImageView profilePic;
+        LinearLayout linearLayout;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            linearLayout=itemView.findViewById(R.id.CoOwner_linear_layout);
             nameText=itemView.findViewById(R.id.CoOwner_name);
             emailText=itemView.findViewById(R.id.CoOwner_email);
             profilePic=itemView.findViewById(R.id.CoOwner_picture);
