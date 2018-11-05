@@ -91,10 +91,10 @@ public class FloorMap extends AppCompatActivity {
         parkedSlotID = myIntent.getStringExtra("slot_id");
 
 //        // for testing purposes
-        SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
-        editor = floorIDSharedPreference.edit();
-        editor.putString("currentFloorID", "3");
-        editor.commit();
+//        SharedPreferences floorIDSharedPreference = getSharedPreferences(CURRENT_FLOOR_ID, MODE_PRIVATE);
+//        editor = floorIDSharedPreference.edit();
+//        editor.putString("currentFloorID", "1");
+//        editor.commit();
 //
 //        editor = null;
 //        // for testing purposes
@@ -341,6 +341,10 @@ public class FloorMap extends AppCompatActivity {
         floorMapView.detatchValueEventListener();
         floorMapView.destroyDrawingCache();
         floorMapView.destroySlotSharedPreference();
+
+        editor = getSharedPreferences(CURRENT_FLOOR_ID, Context.MODE_PRIVATE).edit();
+        editor.clear();
+        editor.commit();
 
         if(intent.equals("park")) {
 
