@@ -1,55 +1,90 @@
 package com.example.afbu.parkking;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 class HistoryObject {
-    private String building_name;
-    private String slot_id;
-    private String time_in, time_out, amount_incurred;
+    String buildingTitle;
+    String slotDirectory;
+    String plateNumber;
+    String carMake;
+    String timeIn;
+    String timeOut;
+    String parkingDuration;
 
-    public HistoryObject() {
-        this.building_name = "";
-        this.slot_id = "";
-        this.time_in = "";
-        this.time_out = "";
-        this.amount_incurred = "";
+    String amountTendered;
+    String amountIncurred;
+    String billingType;
+    boolean hasTransaction;
+
+    public HistoryObject(JSONObject historyObject) {
+        this.amountTendered = "P 00.00";
+        this.amountIncurred = "P 00.00";
+        this.billingType = "N/A";
+        this.hasTransaction = false;
+
+        try {
+            this.buildingTitle = historyObject.getString("building");
+            this.slotDirectory = historyObject.getString("slot_directory");
+            this.plateNumber = historyObject.getString("plate_number");
+            this.carMake = historyObject.getString("car_make");
+            this.timeIn = historyObject.getString("time_in");
+            this.timeOut = historyObject.getString("time_out");
+            this.parkingDuration = historyObject.getString("parking_duration");
+
+            if (historyObject.has("parking_transaction")) {
+                JSONObject parkingTransaction = historyObject.getJSONObject("parking_transaction");
+                this.amountIncurred = parkingTransaction.getString("amount_incurred");
+                this.amountTendered = parkingTransaction.getString("amount_tendered");
+                this.billingType = parkingTransaction.getString("billing_type");
+                this.hasTransaction = true;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
-    public String getAmount_incurred() {
-        return amount_incurred;
+    public String getBuildingTitle() {
+        return buildingTitle;
     }
 
-    public void setAmount_incurred(String amount_incurred) {
-        this.amount_incurred = amount_incurred;
+    public String getSlotDirectory() {
+        return slotDirectory;
     }
 
-    public String getBuilding_name() {
-        return building_name;
+    public String getPlateNumber() {
+        return plateNumber;
     }
 
-    public void setBuilding_name(String building_name) {
-        this.building_name = building_name;
+    public String getCarMake() {
+        return carMake;
     }
 
-    public String getSlot_id() {
-        return slot_id;
+    public String getTimeIn() {
+        return "In: " + timeIn;
     }
 
-    public void setSlot_id(String slot_id) {
-        this.slot_id = slot_id;
+    public String getTimeOut() {
+        return "Out: " + timeOut;
     }
 
-    public String getTime_in() {
-        return time_in;
+    public String getAmountTendered() {
+        return amountTendered;
     }
 
-    public void setTime_in(String time_in) {
-        this.time_in = time_in;
+    public String getAmountIncurred() {
+        return amountIncurred;
     }
 
-    public String getTime_out() {
-        return time_out;
+    public String getBillingType() {
+        return billingType;
     }
 
-    public void setTime_out(String time_out) {
-        this.time_out = time_out;
+    public String getParkingDuration() {
+        return parkingDuration;
+    }
+
+    public boolean hasTransaction() {
+        return hasTransaction;
     }
 }

@@ -2,8 +2,11 @@ package com.example.afbu.parkking;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -28,9 +31,10 @@ import org.w3c.dom.Text;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class ParkingHistory extends AppCompatActivity {
+public class ParkingHistory extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     SharedPreferences SharedPreference;
     SharedPreferences.Editor editor;
@@ -40,15 +44,11 @@ public class ParkingHistory extends AppCompatActivity {
 
     private static String TAG = ParkingHistory.class.getSimpleName();
 
-
-    private ListView list_History;
     private ImageButton backButton;
-    private ArrayList<String> BuildingNames;
-    private ArrayList<String> SlotIDs;
-    private ArrayList<String> TimeIn;
-    private ArrayList<String> TimeOut;
-    private ArrayList<HistoryObject> historyObjects;
 
+    private SwipeRefreshLayout parkingHistoryContainer;
+    private RecyclerView parkingHistoryRecyclerView;
+    private List<HistoryObject> historyObjects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,6 @@ public class ParkingHistory extends AppCompatActivity {
     }
 
     private void initEvents() {
-        getParkingHistory();
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,61 +69,35 @@ public class ParkingHistory extends AppCompatActivity {
     }
 
     private void getParkingHistory() {
-
+        parkingHistoryContainer.setRefreshing(true);
         StringRequest strRequest = new StringRequest(Request.Method.GET,
                 getString(R.string.apiURL) + "getHistory/" + ProfileID,                                //ID
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        try {
+                        Log.d(TAG, "onResponse: " + response);
 
-                            JSONObject object = new JSONObject(response);
-                            historyObjects = new ArrayList<>();
-                            JSONObject main_array = object.getJSONObject("data");
-                            //for (int x = 0; x < main_array.length(); x++) {
-                                //JSONObject main_Sect = main_array.getJSONObject(x);
-                                if((main_array.getString("status")).equals("success") &&
-                                        (main_array.getString("message")).equals("You have parking history.")){
-                                    Log.w("LOG", "YEY");
-                                    Toast.makeText(getApplicationContext(),
-                                            "HEREEEEEEEE", Toast.LENGTH_SHORT).show();
-                                    JSONArray result = main_array.getJSONArray("history");
-                                    for (int i = 0; i < result.length(); i++) {
-                                        HistoryObject historyAdapter = new HistoryObject();
-                                        JSONObject c = result.getJSONObject(i);
-                                        historyAdapter.setBuilding_name(c.getString("building_name"));
-                                        historyAdapter.setSlot_id(c.getString("slot_id"));
-                                        historyAdapter.setTime_in(c.getString("time_in"));
-                                        historyAdapter.setTime_out(c.getString("time_out"));
-                                        historyAdapter.setAmount_incurred(c.getString("amount_incurred"));
-                                        historyObjects.add(historyAdapter);
-                                    }
-                                }else if((object.getString("status")).equals("success") &&
-                                        (object.getString("message")).equals("You have no parking history.")){
-                                    HistoryObject historyAdapter = new HistoryObject();
-                                    historyAdapter.setBuilding_name("You have no parking history.");
-                                    historyAdapter.setSlot_id("");
-                                    historyAdapter.setTime_in("");
-                                    historyAdapter.setTime_out("");
-                                    historyAdapter.setAmount_incurred("");
-                                    historyObjects.add(historyAdapter);
-                                }else{
-                                    HistoryObject historyAdapter = new HistoryObject();
-                                    historyAdapter.setBuilding_name("Failed to get your parking history.");
-                                    historyAdapter.setSlot_id("");
-                                    historyAdapter.setTime_in("");
-                                    historyAdapter.setTime_out("");
-                                    historyAdapter.setAmount_incurred("");
-                                    historyObjects.add(historyAdapter);
+                        try {
+                            JSONObject responseObj = new JSONObject(response);
+                            if (responseObj.getBoolean("success")) {
+                                historyObjects = new ArrayList<>();
+                                JSONArray parkingHistoriesJSONArray = responseObj.getJSONArray("histories");
+                                for (int i = 0; i < parkingHistoriesJSONArray.length(); i++) {
+                                    HistoryObject historyObject = new HistoryObject(parkingHistoriesJSONArray.getJSONObject(i));
+                                    historyObjects.add(historyObject);
                                 }
 
-                                HistoryObjectAdapter adapter = new HistoryObjectAdapter(getApplicationContext(),R.layout.row_layout_history,historyObjects);
-                                list_History.setAdapter(adapter);
-
-                            //}
+                                Log.d(TAG, "historyObjects: " + String.valueOf(historyObjects.size()));
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+
+                        parkingHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                        HistoryObjectAdapter historyObjectAdapter = new HistoryObjectAdapter(historyObjects, getApplicationContext(), getSupportFragmentManager());
+                        parkingHistoryRecyclerView.setAdapter(historyObjectAdapter);
+
+                        parkingHistoryContainer.setRefreshing(false);
                     }
                 }, new Response.ErrorListener() {
 
@@ -145,14 +118,29 @@ public class ParkingHistory extends AppCompatActivity {
     }
 
     private void initResources() {
-        list_History = (ListView) findViewById(R.id.ParkingHistory_lstHistory);
+        parkingHistoryRecyclerView = (RecyclerView) findViewById(R.id.parkingHistoryRecyclerView);
+        parkingHistoryContainer = (SwipeRefreshLayout) findViewById(R.id.parkingHistoryContainer);
+
         backButton = (ImageButton) findViewById(R.id.ParkingHistory_btnBack);
         SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-        if(!SharedPreference.contains(PROFID_KEY)){
+        if (!SharedPreference.contains(PROFID_KEY)) {
             finish();
-        }else{
+        } else {
             ProfileID = SharedPreference.getString(PROFID_KEY, "");
+
+            parkingHistoryContainer.setOnRefreshListener(this);
+            parkingHistoryContainer.post(new Runnable() {
+                @Override
+                public void run() {
+                    parkingHistoryContainer.setRefreshing(true);
+                    getParkingHistory();
+                }
+            });
         }
     }
 
+    @Override
+    public void onRefresh() {
+        getParkingHistory();
+    }
 }

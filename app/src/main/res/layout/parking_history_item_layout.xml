@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:weightSum="100">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="33.3"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/plateNumberTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center|bottom"
+            android:text="ABC-123"
+            android:textAlignment="center"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            app:fontFamily="@font/open_sans" />
+
+        <TextView
+            android:id="@+id/carMakeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center|top"
+            android:text="Volkswagen Beetle"
+            android:textColor="@color/colorBlack" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="23.3"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/buildingParkedTextView"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:gravity="end"
+            android:text="Park King Building 1"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/slotDirectoryTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:text="Floor 1F"
+            android:textColor="@color/colorBlack" />
+
+        <TextView
+            android:id="@+id/timeInTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="October 11, 2018 02:12 PM"
+            android:textColor="@color/colorBlack"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/timeOutTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="October 11, 2018 05:00 PM"
+            android:textColor="@color/colorBlack"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/amountIncurredTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="100.00php"
+            android:textColor="@color/colorBlack"
+            android:textSize="12dp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/hasTransactionImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="43.3"
+        android:padding="10dp"
+        android:src="@drawable/notif_icon_parking_transaction" />
+</LinearLayout>
