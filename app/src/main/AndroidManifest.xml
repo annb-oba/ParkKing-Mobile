@@ -61,7 +61,9 @@
         <activity android:name=".CarList" />
         <activity android:name=".AddCar" />
         <activity android:name=".ChangePassword" />
-        <activity android:name=".ParkingListings" />
+        <activity
+            android:name=".ParkingListings"
+            android:windowSoftInputMode="adjustPan"/>
         <activity android:name=".DeactivateAccount" />
         <activity android:name=".CarProfile" />
         <activity android:name=".CarCoOwners" />

@@ -125,28 +125,12 @@ public class CarProfile extends AppCompatActivity {
     }
 
     public void initEvents() {
-//       btnSwitchCar.setOnClickListener(new View.OnClickListener() {
-//           @Override
-//           public void onClick(View view) {
-//               new AlertDialog.Builder(CarProfile.this)
-//                       .setTitle("Change Current Car")
-//                       .setMessage("Change car to this one?")
-//                       .setPositiveButton("Go", new DialogInterface.OnClickListener() {
-//                           public void onClick(DialogInterface dialog, int whichButton) {
-//                               changeCar();
-//                           }})
-//                       .setNegativeButton("Cancel", null).show();
-//           }
-//       });
-//       btnCoOwners.setOnClickListener(new View.OnClickListener() {
-//           @Override
-//           public void onClick(View view) {
-//               Intent goToCarCoOwners = new Intent(getApplicationContext(), CarCoOwners.class);
-//               goToCarCoOwners.putExtra("car_id", carID);
-//               startActivity(goToCarCoOwners);
-//
-//           }
-//       });
+        removeCarSharingLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeCarSharing();
+            }
+        });
         deactivateCarLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -229,7 +213,51 @@ public class CarProfile extends AppCompatActivity {
             }
         });
     }
+    public void removeCarSharing(){
+        new android.app.AlertDialog.Builder(CarProfile.this)
+                .setTitle("Revoke Co-Ownership")
+                .setMessage("Are you sure want to revoke your co ownership of this car?")
+                .setPositiveButton("Revoke", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        StringRequest strRequest = new StringRequest(Request.Method.POST,  getString(R.string.revokeCoOwnershipURL), new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                Log.d(TAG, response.toString());
+                                JSONObject jsonObject = null;
 
+                                try {
+                                    jsonObject = new JSONObject(response);
+                                    String message = jsonObject.getString("message");
+                                    Log.d(TAG, message);
+                                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                                    if (jsonObject.getString("status").equals("success")) {
+                                        finish();
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                                Toast.makeText(getApplicationContext(),
+                                        "Unable to connect to Park King Servers", Toast.LENGTH_SHORT).show();
+                            }
+                        }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String, String> parameters = new HashMap<String, String>();
+                                parameters.put("car_id", carID);
+                                parameters.put("co_owner_id", ProfileID);
+                                return parameters;
+                            }
+                        };
+                        AppController.getInstance().addToRequestQueue(strRequest);
+                    }})
+                .setNegativeButton("Cancel", null).show();
+    }
     public void deactivateCar() {
         StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.deactivateCarURL), new Response.Listener<String>() {
             @Override
@@ -315,6 +343,11 @@ public class CarProfile extends AppCompatActivity {
                             //finish();
                             bitmap = null;
                             ChosenModelId = null;
+                            if (!editTextPlateNumber1.getText().toString().equals("") && !editTextPlateNumber2.getText().toString().equals("")) {
+                                originalPlateNumber = editTextPlateNumber1.getText().toString() + "-" + editTextPlateNumber2.getText().toString();
+                            } else {
+                                originalPlateNumber = null;
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -391,8 +424,13 @@ public class CarProfile extends AppCompatActivity {
                                     notifyDriverConsequenceDialog.setmSupportFragmentManager(getSupportFragmentManager());
                                     notifyDriverConsequenceDialog.show(getSupportFragmentManager(), "NotifyDiscretionForChangeCarDialog");
                                 }
+                            }
+                            if (switchActiveCar.isChecked()) {
+                                switchActiveCar.setChecked(true);
+                                originalActiveCar = true;
                             } else {
-                                finish();
+                                switchActiveCar.setChecked(false);
+                                originalActiveCar = false;
                             }
                         }
                     } catch (JSONException e) {
@@ -489,7 +527,8 @@ public class CarProfile extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Server Error", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }) {
             @Override
@@ -532,7 +571,8 @@ public class CarProfile extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Server Error", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }) {
             @Override
@@ -575,7 +615,8 @@ public class CarProfile extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Server Error", Toast.LENGTH_SHORT).show();
+                finish();
             }
         }) {
             @Override

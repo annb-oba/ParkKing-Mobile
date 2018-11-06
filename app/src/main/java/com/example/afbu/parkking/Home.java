@@ -82,15 +82,13 @@ import java.util.List;
 import java.util.Map;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback , DirectionFinderListener {
-
-
     SharedPreferences SharedPreference;
     SharedPreferences.Editor editor;
     private static final String PreferenceName = "UserPreference";
     private static final String PROFID_KEY = "ProfileIDKey";
     private static final String CAR_ID_KEY = "CarIDKey";
     private static final String ON_FLOOR_KEY = "OnFloorKey";
-    private String ProfileID = "",activeCarID;
+    private String ProfileID = "";
 
     private static String TAG = Home.class.getSimpleName();
 
@@ -149,6 +147,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     private Marker chosenMarker;
     private String string_ToPlace = "";
     private int chosenBldgID;
+    private Boolean onCreateCalled=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,6 +160,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         initEvents();
         if(ProfileID != "") {
             getVehicleOwnerInformation();
+            Log.d("TAG","ONCREATE");
         }
     }
     @Override
@@ -169,8 +169,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 //        initResources();
 //        initEvents();
         if(ProfileID != "") {
-            getVehicleOwnerInformation();
+            if(onCreateCalled){
+                getVehicleOwnerInformation();
+                Log.d("TAG","RESUME");
+            }
         }
+        onCreateCalled=true;
     }
 
     @Override
@@ -436,12 +440,27 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                         Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
                                 Double.parseDouble(LatLng[0]), Double.parseDouble(LatLng[1]),
                                 results);
+//                        Math.round(results[0]);
                         int temp = Math.round(results[0]);
-                        if(temp>100){
+                        Double doubleTemp = temp/1000d;
+                        if(temp>=1000){
                             temp = Math.round(temp/1000);
-                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"km");
+                            if(temp < 10) {
+                                if((doubleTemp%1)==0){
+                                    txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
+                                }else{
+                                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                                }
+                            } else {
+                                txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
+                            }
                         }else{
-                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                            if(temp<=100){
+                                txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                            }else{
+                                doubleTemp=temp/1000d;
+                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                            }
                         }
 
                         String string_FromPlace = fromlat+","+fromlng;
@@ -490,11 +509,25 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 Double.parseDouble(LatLng[0]), Double.parseDouble(LatLng[1]),
                                 results);
                         int temp = Math.round(results[0]);
-                        if(temp>100){
+                        Double doubleTemp = temp/1000d;
+                        if(temp>=1000){
                             temp = Math.round(temp/1000);
-                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"km");
+                            if(temp < 10) {
+                                if((doubleTemp%1)==0){
+                                    txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
+                                }else{
+                                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                                }
+                            } else {
+                                txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
+                            }
                         }else{
-                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                            if(temp<=100){
+                                txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                            }else{
+                                doubleTemp=temp/1000d;
+                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                            }
                         }
 
                         String string_FromPlace = fromlat+","+fromlng;
@@ -657,7 +690,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 }
             }
         });
-
+        NavMenu.setItemIconTintList(null);
         NavMenu.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -763,6 +796,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 putParkKingMarker();
                 if(ProfileID != "") {
                     getVehicleOwnerInformation();
+                    Log.d("TAG","REFRESH");
                 }
             }
         });
@@ -783,6 +817,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                             String status = object.getString("status");
                             if (status.equals("success")) {
                                 JSONObject userinfo = new JSONObject(object.getString("data"));
+                                String hasCar,hasActiveCar;
+                                hasCar = object.getString("has_car");
+                                hasActiveCar = object.getString("has_active_car");
+//                                Toast.makeText(getApplicationContext(), hasCar + hasActiveCar, Toast.LENGTH_SHORT).show();
                                 Firstname = userinfo.getString("first_name");
                                 Lastname = userinfo.getString("last_name");
                                 Middlename = userinfo.getString("middle_name");
@@ -792,12 +830,24 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 Name.setText(Firstname+" "+Middlename+" "+Lastname);
                                 Email.setText(Emailtxt);
                                 Glide.with(getApplicationContext()).asBitmap().load(getString(R.string.profilepictureURL)+ProfilePicture).into(NavImgUser);
-                                if(!object.getString("car_id").equals("")){
-                                    activeCarID = object.getString("car_id");
-                                    editor = SharedPreference.edit();
-                                    editor.putString(CAR_ID_KEY, activeCarID);
-                                    editor.commit();
+                                if(hasCar.trim().equals("true")){
+                                    if(hasActiveCar.trim().equals("false")){
+                                        Toast.makeText(getApplicationContext(), "You currently have no active car linked to your account. Please add one to use Park King's features", Toast.LENGTH_LONG).show();
+                                        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+                                        startActivity(gotoCarList);
+                                    }
+                                }else{
+                                    Toast.makeText(getApplicationContext(), "You currently have no cars linked to your account. Please add one to use Park King's features", Toast.LENGTH_LONG).show();
+                                    Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+                                    startActivity(gotoCarList);
                                 }
+//                                if(!object.getString("car_id").equals("")){
+//                                    activeCarID = object.getString("car_id");
+//                                    editor = SharedPreference.edit();
+//                                    editor.putString(CAR_ID_KEY, activeCarID);
+//                                    editor.commit();
+//                                }
+
                             } else if (status.equals("failed")) {
                                 String message = object.getString("message");
                                 Toast.makeText(getApplicationContext(),
@@ -813,7 +863,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             public void onErrorResponse(VolleyError error) {
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Error Connecting to Park King Servers", Toast.LENGTH_SHORT).show();
             }
         }) {
             @Override
@@ -970,11 +1020,25 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                             toPlace.latitude, toPlace.longitude,
                             results);
                     int temp = Math.round(results[0]);
-                    if(temp>100){
+                    Double doubleTemp = temp/1000d;
+                    if(temp>=1000){
                         temp = Math.round(temp/1000);
-                        txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"km");
+                        if(temp < 10) {
+                            if((doubleTemp%1)==0){
+                                txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
+                            }else{
+                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                            }
+                        } else {
+                            txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
+                        }
                     }else{
-                        txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                        if(temp<=100){
+                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                        }else{
+                            doubleTemp=temp/1000d;
+                            txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                        }
                     }
 
 
@@ -1133,11 +1197,25 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 polylinePaths.add(gMap.addPolyline(polylineOptions));
             }
             int temp = Math.round(results[0]);
-            if(temp>100){
+            Double doubleTemp = temp/1000d;
+            if(temp>=1000){
                 temp = Math.round(temp/1000);
-                txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"km");
+                if(temp < 10) {
+                    if((doubleTemp%1)==0){
+                        txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
+                    }else{
+                        txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                    }
+                } else {
+                    txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
+                }
             }else{
-                txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                if(temp<=100){
+                    txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
+                }else{
+                    doubleTemp=temp/1000d;
+                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                }
             }
         }
     }

@@ -5,12 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ParkingListings"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/colorGrayBG">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:background="@color/colorPrimary"
         android:elevation="15dp">
@@ -20,9 +21,9 @@
             android:id="@+id/ParkingListings_btnBack"
             android:layout_width="37dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="11dp"
+            android:layout_marginLeft="11dp"
             android:background="#0000"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/arrow_back_white" />
@@ -31,9 +32,9 @@
             android:id="@+id/ParkingListings_txtActivityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginStart="62dp"
+            android:layout_marginLeft="62dp"
             android:text="Parking Listings"
             android:textColor="@color/colorWhite"
             android:textSize="23sp"
@@ -41,13 +42,14 @@
 
     </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            >
-
-            <EditText
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <EditText
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="10dp"
                 android:id="@+id/ParkingListings_edtSearch"
                 android:layout_width="match_parent"
                 android:layout_height="49dp"
@@ -55,30 +57,35 @@
                 android:inputType="textPersonName"
                 android:hint="Search"
                 android:padding="10dp"
-                android:textStyle="bold"
-                android:typeface="sans"
-                android:background="@drawable/signup_btnborder"
-                android:layout_marginTop="20dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                />
-
+                android:background="@color/colorWhite"
+                android:textColor="@color/colorOffBlack"
+                android:textColorHint="@color/colorOffBlack"
+                android:textSize="17sp"
+                app:fontFamily="@font/open_sans"
+                android:textStyle="bold"/>
+        <LinearLayout
+            android:layout_below="@+id/ParkingListings_edtSearch"
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:background="@color/colorWhite"
+            android:layout_above="@+id/asd">
             <ListView
+                android:backgroundTint="@color/colorWhite"
                 android:id="@+id/ParkingListings_lstListings"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="5"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginTop="15dp"
-                android:divider="@color/colorBlack"
-                android:dividerHeight="2px" />
-
-            <LinearLayout
+                android:layout_height="match_parent"
+                android:divider="@color/colorGrayBG"
+                android:dividerHeight="1dp" />
+        </LinearLayout>
+        <LinearLayout
+                android:id="@+id/asd"
+                android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+                android:layout_height="65dp"
+                android:orientation="horizontal"
+                android:background="@color/colorWhite">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -111,7 +118,8 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    >
                     <TextView
                         android:id="@+id/ParkingListings_noOfFloors"
                         android:layout_width="match_parent"
@@ -136,7 +144,9 @@
 
             </LinearLayout>
 
-        </LinearLayout>
+    </RelativeLayout>
+
+
 
 
 
