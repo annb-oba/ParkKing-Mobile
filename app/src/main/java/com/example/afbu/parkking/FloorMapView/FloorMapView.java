@@ -309,7 +309,7 @@ public class FloorMapView extends View {
             }
 
             for (int i = 0; i < floorSlots.size(); i++) {
-                if(sectionSlotListArray.get(i).getCurr_stat() == 2) {
+                if (sectionSlotListArray.get(i).getCurr_stat() == 2) {
                     continue;
                 }
 
@@ -583,7 +583,7 @@ public class FloorMapView extends View {
                 try {
                     JSONObject requestObj = new JSONObject(response);
                     if (!requestObj.getBoolean("success")) {
-                        if(requestObj.has("error_type")) {
+                        if (requestObj.has("error_type")) {
                             NotifyDriverConsequenceDialog notifyDriverConsequenceDialog = new NotifyDriverConsequenceDialog();
                             switch (requestObj.getString("error_type")) {
                                 case "no_car":
@@ -814,7 +814,7 @@ public class FloorMapView extends View {
                     float bitmapYPosition = ((float) sectionSlotListArray.get(i).getIndicatorCoordinate().longitude * floorImageHeight - 150) + floorImagePosY;
 
                     if (x > (bitmapXPosition) * mScaleFactor && x < (bitmapXPosition + floorSlots.get(i).getWidth()) * mScaleFactor && y > (bitmapYPosition) * mScaleFactor && y < (bitmapYPosition + floorSlots.get(i).getHeight()) * mScaleFactor) {
-                        if(sectionSlotListArray.get(i).getCurr_stat() != 2) {
+                        if (sectionSlotListArray.get(i).getCurr_stat() != 2) {
                             getSlotInformation(i);
                         }
                         break;
@@ -869,7 +869,7 @@ public class FloorMapView extends View {
     }
 
     private void getSlotInformation(int i) {
-        if (destination_x == sectionSlotListArray.get(i).getGrid_coordinates()[1] && destination_y == sectionSlotListArray.get(i).getGrid_coordinates()[0]) {
+        if (sectionSlotListArray.get(i).getGrid_coordinates() != null && destination_x == sectionSlotListArray.get(i).getGrid_coordinates()[1] && destination_y == sectionSlotListArray.get(i).getGrid_coordinates()[0]) {
             routePaint = null;
             routeStrokePaint = null;
             routePath = null;
@@ -887,10 +887,12 @@ public class FloorMapView extends View {
             pendingParkingDataEditor.commit();
             occupySlotFAB.setVisibility(View.INVISIBLE);
         } else {
-            sectionSlotFinderEditor.putInt(SLOT_FIND_X_KEY, sectionSlotListArray.get(i).getGrid_coordinates()[1]);
-            sectionSlotFinderEditor.putInt(SLOT_FIND_Y_KEY, sectionSlotListArray.get(i).getGrid_coordinates()[0]);
-            sectionSlotFinderEditor.putString(SLOT_FIND_FLOOR_ID_KEY, floorID);
-            sectionSlotFinderEditor.commit();
+            if (sectionSlotListArray.get(i).getGrid_coordinates() != null) {
+                sectionSlotFinderEditor.putInt(SLOT_FIND_X_KEY, sectionSlotListArray.get(i).getGrid_coordinates()[1]);
+                sectionSlotFinderEditor.putInt(SLOT_FIND_Y_KEY, sectionSlotListArray.get(i).getGrid_coordinates()[0]);
+                sectionSlotFinderEditor.putString(SLOT_FIND_FLOOR_ID_KEY, floorID);
+                sectionSlotFinderEditor.commit();
+            }
         }
 
         destination_x = sectionSlotFinder.getInt(SLOT_FIND_X_KEY, -1);
@@ -904,19 +906,32 @@ public class FloorMapView extends View {
                 try {
                     JSONObject requestObj = new JSONObject(response);
                     if (requestObj.getBoolean("success")) {
-                        parkingFeeInformationList = new ArrayList<>();
-                        if (requestObj.getJSONObject("billing_info") != null && destination_x != -1 && destination_y != -1) {
-                            parkingFeeInformationList.add(requestObj.getJSONObject("billing_info").getString("rate"));
-                            parkingFeeInformationList.add(requestObj.getJSONObject("billing_info").getString("overnight_fee"));
-                            parkingFeeInformationList.add(requestObj.getJSONObject("billing_info").getString("title"));
+                        if (requestObj.getJSONObject("billing_info") != null) {
+                            if(parkingFeeInformationList.size() > 0
+                                    && parkingFeeInformationList.get(0).equals(requestObj.getJSONObject("billing_info").getString("rate"))
+                                    && parkingFeeInformationList.get(1).equals(requestObj.getJSONObject("billing_info").getString("overnight_fee"))
+                                    && parkingFeeInformationList.get(2).equals(requestObj.getJSONObject("billing_info").getString("title"))) {
+                                parkingFeeInformationList = new ArrayList<>();
+                                parkingFeeTextView.setText("N/A");
+                                parkingFeeTextView.setTextColor(Color.BLACK);
 
-                            parkingFeeTextView.setText("View");
-                            parkingFeeTextView.setTextColor(Color.parseColor("#3E55A4"));
+                                selectedSlotTextView.setText("None");
+                                selectedSlotTextView.setTextColor(Color.BLACK);
+                            } else {
+                                parkingFeeInformationList = new ArrayList<>();
 
-                            selectedSlotTextView.setText(requestObj.getJSONObject("billing_info").getString("title"));
-                            selectedSlotTextView.setTextColor(Color.parseColor("#3E55A4"));
+                                parkingFeeInformationList.add(requestObj.getJSONObject("billing_info").getString("rate"));
+                                parkingFeeInformationList.add(requestObj.getJSONObject("billing_info").getString("overnight_fee"));
+                                parkingFeeInformationList.add(requestObj.getJSONObject("billing_info").getString("title"));
+                                parkingFeeTextView.setText("View");
+                                parkingFeeTextView.setTextColor(Color.parseColor("#3E55A4"));
 
-                            if(requestObj.getBoolean("is_occupiable")) {
+                                selectedSlotTextView.setText(requestObj.getJSONObject("billing_info").getString("title"));
+                                selectedSlotTextView.setTextColor(Color.parseColor("#3E55A4"));
+                            }
+
+
+                            if (requestObj.getBoolean("is_occupiable")) {
                                 occupySlotFAB.setVisibility(View.VISIBLE);
                                 pendingParkingData = mContext.getSharedPreferences(PENDING_PARK_DATA_PREF_KEY, Context.MODE_PRIVATE);
                                 pendingParkingDataEditor = pendingParkingData.edit();
@@ -1076,7 +1091,7 @@ public class FloorMapView extends View {
                 // draw path from entrance to slot
                 if (buildingFloorHierarchy.indexOf(Integer.valueOf(floorID)) < buildingFloorHierarchy.indexOf(Integer.valueOf(currentFloorID))) {
                     getPath(previous_floor_x, previous_floor_y, destination_x, destination_y);
-                } else if (buildingFloorHierarchy.indexOf(Integer.valueOf(floorID)) > buildingFloorHierarchy.indexOf(Integer.valueOf(currentFloorID))){
+                } else if (buildingFloorHierarchy.indexOf(Integer.valueOf(floorID)) > buildingFloorHierarchy.indexOf(Integer.valueOf(currentFloorID))) {
                     getPath(entrance_x, entrance_y, destination_x, destination_y);
                 }
             }
@@ -1088,7 +1103,7 @@ public class FloorMapView extends View {
                         next_floor_x, next_floor_y);
             } else if (buildingFloorHierarchy.indexOf(Integer.valueOf(currentFloorID)) < buildingFloorHierarchy.indexOf(Integer.valueOf(floorID))) {
                 // draw path from entrance to next floor block
-                if(next_floor_x >= 0 && next_floor_y >= 0) {
+                if (next_floor_x >= 0 && next_floor_y >= 0) {
                     getPath(entrance_x, entrance_y, next_floor_x, next_floor_y);
                 } else {
                     Toast.makeText(mContext, "No path found from entrance to next floor", Toast.LENGTH_SHORT).show();

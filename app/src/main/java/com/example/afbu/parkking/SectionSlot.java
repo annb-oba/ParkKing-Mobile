@@ -41,7 +41,7 @@ public class SectionSlot {
             this.slotTitle = slotObject.getString("slot_tag");
             this.is_pwd = slotObject.getBoolean("is_pwd");
             this.first_read = true;
-            this.grid_coordinates = new int[]{slotObject.getInt("grid_x"), slotObject.getInt("grid_y")};
+            this.grid_coordinates = slotObject.getString("grid_x") != null && slotObject.getString("grid_y") != null ? new int[]{slotObject.getInt("grid_x"), slotObject.getInt("grid_y")} : null;
 
             JSONArray slotPoints = slotObject.getJSONArray("points");
             if (slotPoints.length() == 4) {
