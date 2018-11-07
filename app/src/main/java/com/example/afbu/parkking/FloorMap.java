@@ -369,7 +369,7 @@ public class FloorMap extends AppCompatActivity {
         if(floorID.equals("")){
             return;
         }//BUG FIX FOR FLOOR MAP LOADING WHEN SPINNER IS INITIALIZED
-        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.get_floor_url_with_tenant) + floorID + "/" + sharedPreferences.getString(PROFID_KEY, ""), new Response.Listener<String>() {
+        StringRequest strRequest = new StringRequest(Request.Method.GET, getString(R.string.get_floor_url_with_tenant) + floorID + "/" + (!sharedPreferences.getString(PROFID_KEY, "").trim().isEmpty() ? sharedPreferences.getString(PROFID_KEY, "") :  "0"), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, response.toString());

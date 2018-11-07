@@ -1049,10 +1049,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     tolat = marker.getPosition().latitude;
                     tolng = marker.getPosition().longitude;
                     toPlace = new LatLng(tolat, tolng);
+                btnBuilding.setVisibility(View.VISIBLE);
 
                 try{
                     btnDirect.setVisibility(View.VISIBLE);
-                    btnBuilding.setVisibility(View.VISIBLE);
                     float[] results = new float[1];
                     Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
                             toPlace.latitude, toPlace.longitude,
@@ -1082,7 +1082,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
                 }catch(Exception e){
                     btnDirect.setVisibility(View.INVISIBLE);
-                    btnBuilding.setVisibility(View.INVISIBLE);
                     new android.app.AlertDialog.Builder(Home.this)
                             .setTitle("GPS Error")
                             .setMessage("Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings")
