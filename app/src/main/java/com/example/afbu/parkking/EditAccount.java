@@ -1,5 +1,6 @@
 package com.example.afbu.parkking;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -53,7 +54,7 @@ public class EditAccount extends AppCompatActivity {
     private static String TAG = EditAccount.class.getSimpleName();
 
     private static final int RESULT_LOAD_IMAGE = 0, REQUEST_CAMERA = 1;
-
+    private static final int PIC_CROP = 2;
     private ImageButton btnBackHome, btnEditImage;
     private Button btnUpdateAccount;
     private ImageView imgUser;
@@ -159,20 +160,19 @@ public class EditAccount extends AppCompatActivity {
 
         if(resultCode == RESULT_OK && data != null){
             if(requestCode == RESULT_LOAD_IMAGE){
-                selectedImage = data.getData();
-                try{
-                    usrimg = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
-                    imgUser.setImageBitmap(usrimg);
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                imgUser.setImageURI(selectedImage);
-                ProfilePicture = imageToString(usrimg);
+                Uri path = data.getData();
+                performCrop(path);
             }else if(requestCode == REQUEST_CAMERA){
-                Bundle bundle = data.getExtras();
-                usrimg = (Bitmap) bundle.get("data");
-                imgUser.setImageBitmap(usrimg);
-                ProfilePicture = imageToString(usrimg);
+                Uri path = data.getData();
+                performCrop(path);
+            }else if (requestCode == PIC_CROP) {
+                if (data != null) {
+                    Bundle bundle = data.getExtras();
+                    Bitmap bitmap = (Bitmap) bundle.get("data");
+                    usrimg = bitmap;
+                    imgUser.setImageBitmap(usrimg);
+                    ProfilePicture = imageToString(usrimg);
+                }
             }
         }
     }
@@ -297,5 +297,32 @@ public class EditAccount extends AppCompatActivity {
             }
         };
         AppController.getInstance().addToRequestQueue(strRequest);
+    }
+
+    private void performCrop(Uri picUri) {
+        try {
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            // indicate image type and Uri
+            cropIntent.setDataAndType(picUri, "image/*");
+            // set crop properties here
+            cropIntent.putExtra("crop", true);
+            // indicate aspect of desired crop
+            cropIntent.putExtra("aspectX", 1);
+            cropIntent.putExtra("aspectY", 1);
+            // indicate output X and Y
+            cropIntent.putExtra("outputX", 256);
+            cropIntent.putExtra("outputY", 256);
+            // retrieve data on return
+            cropIntent.putExtra("return-data", true);
+            // start the activity - we handle returning in onActivityResult
+            startActivityForResult(cropIntent, PIC_CROP);
+        }
+        // respond to users whose devices do not support the crop action
+        catch (ActivityNotFoundException anfe) {
+            // display an error message
+            String errorMessage = "Whoops - your device doesn't support the crop action!";
+            Toast toast = Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 }

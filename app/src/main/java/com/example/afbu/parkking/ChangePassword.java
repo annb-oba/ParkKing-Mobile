@@ -93,8 +93,7 @@ public class ChangePassword extends AppCompatActivity {
                         String message = object.getString("message");
                         Toast.makeText(getApplicationContext(),
                                 message, Toast.LENGTH_SHORT).show();
-                        Intent gotoHome = new Intent(ChangePassword.this, Home.class);
-                        startActivity(gotoHome);
+                        finish();
                     }else if(status.equals("failed")){
                         String message = object.getString("message");
                         Toast.makeText(getApplicationContext(),
