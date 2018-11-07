@@ -148,7 +148,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     private String string_ToPlace = "";
     private int chosenBldgID;
     private Boolean onCreateCalled=false;
-
+    private String has_active_car;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -653,26 +653,55 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         btnDirect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (polylinePaths != null) {
-                    for (Polyline polyline:polylinePaths ) {
-                        polyline.remove();
+                if(ProfileID!=""){
+                    if(has_active_car.trim().equals("false")){
+                        Toast.makeText(getApplicationContext(), "You currently have no active car linked to your account. Please add one to use Park King's features", Toast.LENGTH_LONG).show();
+                        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+                        startActivity(gotoCarList);
+                    }else{
+                        if (polylinePaths != null) {
+                            for (Polyline polyline:polylinePaths ) {
+                                polyline.remove();
+                            }
+                        }
+                        haveArrived = false;
+                        onRouting = true;
+                        try{
+                            Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
+                            makeDirections();
+                        }catch(Exception e){
+                            new android.app.AlertDialog.Builder(Home.this)
+                                    .setTitle("GPS Error")
+                                    .setMessage("Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings")
+                                    .setPositiveButton("Go", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            //Redirect to GPS settings
+                                        }})
+                                    .setNegativeButton("Cancel", null).show();
+                        }
+                    }
+                }else{
+                    if (polylinePaths != null) {
+                        for (Polyline polyline:polylinePaths ) {
+                            polyline.remove();
+                        }
+                    }
+                    haveArrived = false;
+                    onRouting = true;
+                    try{
+                        Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
+                        makeDirections();
+                    }catch(Exception e){
+                        new android.app.AlertDialog.Builder(Home.this)
+                                .setTitle("GPS Error")
+                                .setMessage("Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings")
+                                .setPositiveButton("Go", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        //Redirect to GPS settings
+                                    }})
+                                .setNegativeButton("Cancel", null).show();
                     }
                 }
-                haveArrived = false;
-                onRouting = true;
-               try{
-                   Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
-                   makeDirections();
-               }catch(Exception e){
-                   new android.app.AlertDialog.Builder(Home.this)
-                           .setTitle("GPS Error")
-                           .setMessage("Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings")
-                           .setPositiveButton("Go", new DialogInterface.OnClickListener() {
-                               public void onClick(DialogInterface dialog, int whichButton) {
-                                   //Redirect to GPS settings
-                               }})
-                           .setNegativeButton("Cancel", null).show();
-               }
             }
         });
 
@@ -790,7 +819,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         searchPlace.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                LatLng gotoChosenBldg = new LatLng(ParkKingLat.get(position), ParkKingLong.get(position));
+                TextView buildingTitleFromSpinner = view.findViewById(R.id.row_buildingname);
+                Log.d(TAG, "onItemClick: " + buildingTitleFromSpinner.getText());
+
+                int bldg_index = ParkKingPlaces.indexOf(buildingTitleFromSpinner.getText());
+                LatLng gotoChosenBldg = new LatLng(ParkKingLat.get(bldg_index), ParkKingLong.get(bldg_index));
                 gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(gotoChosenBldg, 16));
             }
         });
@@ -825,7 +858,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 String hasCar,hasActiveCar;
                                 hasCar = object.getString("has_car");
                                 hasActiveCar = object.getString("has_active_car");
-//                                Toast.makeText(getApplicationContext(), hasCar + hasActiveCar, Toast.LENGTH_SHORT).show();
+                                has_active_car = hasActiveCar;
                                 Firstname = userinfo.getString("first_name");
                                 Lastname = userinfo.getString("last_name");
                                 Middlename = userinfo.getString("middle_name");
@@ -838,13 +871,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 if(hasCar.trim().equals("true")){
                                     if(hasActiveCar.trim().equals("false")){
                                         Toast.makeText(getApplicationContext(), "You currently have no active car linked to your account. Please add one to use Park King's features", Toast.LENGTH_LONG).show();
-                                        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
-                                        startActivity(gotoCarList);
+//                                        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+//                                        startActivity(gotoCarList);
                                     }
                                 }else{
                                     Toast.makeText(getApplicationContext(), "You currently have no cars linked to your account. Please add one to use Park King's features", Toast.LENGTH_LONG).show();
-                                    Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
-                                    startActivity(gotoCarList);
+//                                    Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+//                                    startActivity(gotoCarList);
                                 }
 //                                if(!object.getString("car_id").equals("")){
 //                                    activeCarID = object.getString("car_id");
