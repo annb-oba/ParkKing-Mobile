@@ -186,17 +186,22 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     @Override
     public void onBackPressed() {
        // super.onBackPressed();
-        new android.app.AlertDialog.Builder(Home.this)
-                .setTitle("Confirm Logout")
-                .setMessage("Are you sure want to Logout of Park King?")
-                .setPositiveButton("Go", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        editor = SharedPreference.edit();
-                        editor.clear();
-                        editor.commit();
-                        finish();
-                    }})
-                .setNegativeButton("Cancel", null).show();
+        if (ProfileID != "") {
+            new android.app.AlertDialog.Builder(Home.this)
+                    .setTitle("Confirm Logout")
+                    .setMessage("Are you sure want to Logout of Park King?")
+                    .setPositiveButton("Go", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            editor = SharedPreference.edit();
+                            editor.clear();
+                            editor.commit();
+                            finish();
+                        }})
+                    .setNegativeButton("Cancel", null).show();
+        }else{
+            finish();
+        }
+
     }
 
     public void setNotificationListener(){

@@ -123,4 +123,11 @@ public class SignIn extends AppCompatActivity {
         btnSignIn = (Button) findViewById(R.id.SignIn_btnSignIn);
         forgetPassword = (TextView) findViewById(R.id.SignIn_txtForgotPassword);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Email.setText("");
+        Password.setText("");
+    }
 }
