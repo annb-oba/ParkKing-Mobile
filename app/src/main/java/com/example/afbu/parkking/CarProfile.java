@@ -182,8 +182,8 @@ public class CarProfile extends AppCompatActivity {
                         getModels(BrandID.get(i));
                         ChosenModelId = null;
                         CarModelSpinner.setText("");
-                        Toast.makeText(getApplicationContext(),
-                                Integer.toString(BrandID.get(i)), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(),
+//                                Integer.toString(BrandID.get(i)), Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
@@ -197,8 +197,8 @@ public class CarProfile extends AppCompatActivity {
                 for (int i = 0; i < Models.size(); i++) {
                     if (CarModelSpinner.getText().toString().equals(Models.get(i))) {
                         ChosenModelId = ModelID.get(i);
-                        Toast.makeText(getApplicationContext(),
-                                Integer.toString(ChosenModelId), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(),
+//                                Integer.toString(ChosenModelId), Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
