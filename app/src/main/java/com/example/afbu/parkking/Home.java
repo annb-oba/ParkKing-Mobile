@@ -81,7 +81,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Home extends AppCompatActivity implements OnMapReadyCallback , DirectionFinderListener {
+public class Home extends AppCompatActivity implements OnMapReadyCallback, DirectionFinderListener {
+    private static final char GO_TO_CAR_LIST = 'A';
+    private static final char NO_ERROR_ACTION = '0';
     SharedPreferences SharedPreference;
     SharedPreferences.Editor editor;
     private static final String PreferenceName = "UserPreference";
@@ -107,11 +109,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
     private Object mLastKnownLocation;
     private DrawerLayout mDrawer;
-    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition,btnBuilding,btnRefresh;
+    private ImageButton btnMenu, btnNotif, btnDirect, btnPosition, btnBuilding, btnRefresh;
     private NavigationView NavMenu;
     private View headerView;
     private ImageView NavImgUser;
-    private TextView Name, Email, AvailSlot,txtNoOfFloors;
+    private TextView Name, Email, AvailSlot, txtNoOfFloors;
     private String Firstname, Lastname, Middlename, Emailtxt, ProfilePicture;
 
     private String BuildingID, name;
@@ -147,8 +149,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     private Marker chosenMarker;
     private String string_ToPlace = "";
     private int chosenBldgID;
-    private Boolean onCreateCalled=false;
+    private Boolean onCreateCalled = false;
     private String has_active_car;
+    private String active_car_available;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,23 +162,24 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
         initResources();
         initEvents();
-        if(ProfileID != "") {
+        if (ProfileID != "") {
             getVehicleOwnerInformation();
-            Log.d("TAG","ONCREATE");
+            Log.d("TAG", "ONCREATE");
         }
     }
+
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
 //        initResources();
 //        initEvents();
-        if(ProfileID != "") {
-            if(onCreateCalled){
+        if (ProfileID != "") {
+            if (onCreateCalled) {
                 getVehicleOwnerInformation();
-                Log.d("TAG","RESUME");
+                Log.d("TAG", "RESUME");
             }
         }
-        onCreateCalled=true;
+        onCreateCalled = true;
     }
 
     @Override
@@ -185,7 +190,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
 
     @Override
     public void onBackPressed() {
-       // super.onBackPressed();
+        // super.onBackPressed();
         if (ProfileID != "") {
             new android.app.AlertDialog.Builder(Home.this)
                     .setTitle("Confirm Logout")
@@ -196,15 +201,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                             editor.clear();
                             editor.commit();
                             finish();
-                        }})
+                        }
+                    })
                     .setNegativeButton("Cancel", null).show();
-        }else{
+        } else {
             finish();
         }
 
     }
 
-    public void setNotificationListener(){
+    public void setNotificationListener() {
         notif_ref = database.getReference().child("notif_individual").child(ProfileID).orderByChild("timestamp");
         notif_ref.addValueEventListener(new ValueEventListener() {
             @Override
@@ -214,9 +220,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         btnNotif.setImageDrawable(getDrawable(R.drawable.bell2));
                     }
-                    for (DataSnapshot notifData:dataSnapshot.getChildren()){
+                    for (DataSnapshot notifData : dataSnapshot.getChildren()) {
                         String tempIs_read = notifData.child("is_read").getValue().toString();
-                        if(tempIs_read.equals("false")){
+                        if (tempIs_read.equals("false")) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                 btnNotif.setImageDrawable(getDrawable(R.drawable.bell3));
                             }
@@ -246,9 +252,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 Intent myIntent = new Intent(Home.this, FloorMap.class);
                                 myIntent.putExtra("floor_info", tempResponse);
                                 myIntent.putExtra("building_id", building_id);
-                                myIntent.putExtra("intent","park");
+                                myIntent.putExtra("intent", "park");
                                 startActivity(myIntent);
-                            }})
+                            }
+                        })
                         .setNegativeButton("Cancel", null).show();
             }
         }, new Response.ErrorListener() {
@@ -287,7 +294,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     }
 
     private void putParkKingMarker() {
-        if(ProfileID != "") {
+        if (ProfileID != "") {
             StringRequest strRequest = new StringRequest(Request.Method.GET,
                     getString(R.string.apiURL) + "get_parking_markers/",
                     new Response.Listener<String>() {
@@ -342,7 +349,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 }
             };
             AppController.getInstance().addToRequestQueue(strRequest);
-        }else{
+        } else {
             StringRequest strRequest = new StringRequest(Request.Method.GET,
                     getString(R.string.apiURL) + "get_parking_markers_partial/",
                     new Response.Listener<String>() {
@@ -353,10 +360,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 ParkKingLat = new ArrayList<Double>();
                                 ParkKingLong = new ArrayList<Double>();
                                 JSONObject object = new JSONObject(response);
-                                if(object.getString("status").equals("failed")){
+                                if (object.getString("status").equals("failed")) {
                                     Toast.makeText(getApplicationContext(),
                                             object.getString("message"), Toast.LENGTH_SHORT).show();
-                                }else{
+                                } else {
                                     JSONArray result = object.getJSONArray("buildings");
                                     for (int i = 0; i < result.length(); i++) {
                                         JSONArray a = result.getJSONArray(i);
@@ -447,28 +454,28 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 results);
 //                        Math.round(results[0]);
                         int temp = Math.round(results[0]);
-                        Double doubleTemp = temp/1000d;
-                        if(temp>=1000){
-                            temp = Math.round(temp/1000);
-                            if(temp < 10) {
-                                if((doubleTemp%1)==0){
+                        Double doubleTemp = temp / 1000d;
+                        if (temp >= 1000) {
+                            temp = Math.round(temp / 1000);
+                            if (temp < 10) {
+                                if ((doubleTemp % 1) == 0) {
                                     txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
-                                }else{
-                                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                                } else {
+                                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm", doubleTemp));
                                 }
                             } else {
                                 txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
                             }
-                        }else{
-                            if(temp<=100){
-                                txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
-                            }else{
-                                doubleTemp=temp/1000d;
-                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                        } else {
+                            if (temp <= 100) {
+                                txtdistanceFromChosenBldg.setText(Integer.toString(temp) + "m");
+                            } else {
+                                doubleTemp = temp / 1000d;
+                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm", doubleTemp));
                             }
                         }
 
-                        String string_FromPlace = fromlat+","+fromlng;
+                        String string_FromPlace = fromlat + "," + fromlng;
                         try {
                             new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
                         } catch (UnsupportedEncodingException e) {
@@ -514,28 +521,28 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                 Double.parseDouble(LatLng[0]), Double.parseDouble(LatLng[1]),
                                 results);
                         int temp = Math.round(results[0]);
-                        Double doubleTemp = temp/1000d;
-                        if(temp>=1000){
-                            temp = Math.round(temp/1000);
-                            if(temp < 10) {
-                                if((doubleTemp%1)==0){
+                        Double doubleTemp = temp / 1000d;
+                        if (temp >= 1000) {
+                            temp = Math.round(temp / 1000);
+                            if (temp < 10) {
+                                if ((doubleTemp % 1) == 0) {
                                     txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
-                                }else{
-                                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                                } else {
+                                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm", doubleTemp));
                                 }
                             } else {
                                 txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
                             }
-                        }else{
-                            if(temp<=100){
-                                txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
-                            }else{
-                                doubleTemp=temp/1000d;
-                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                        } else {
+                            if (temp <= 100) {
+                                txtdistanceFromChosenBldg.setText(Integer.toString(temp) + "m");
+                            } else {
+                                doubleTemp = temp / 1000d;
+                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm", doubleTemp));
                             }
                         }
 
-                        String string_FromPlace = fromlat+","+fromlng;
+                        String string_FromPlace = fromlat + "," + fromlng;
                         try {
                             new DirectionFinder(Home.this, string_FromPlace, string_ToPlace).execute();
                         } catch (UnsupportedEncodingException e) {
@@ -631,7 +638,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         btnPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(fromPlace != null){
+                if (fromPlace != null) {
                     gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fromPlace, 18));
                 }
                 Log.w("LOG", "BTN POSITION CLICKED");
@@ -641,10 +648,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         btnBuilding.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(onClickBuilding!=null){
+                if (onClickBuilding != null) {
                     Intent myIntent = new Intent(Home.this, FloorMap.class);
                     myIntent.putExtra("building_id", onClickBuilding);
-                    myIntent.putExtra("intent","view");
+                    myIntent.putExtra("intent", "view");
                     startActivity(myIntent);
                 }
             }
@@ -653,53 +660,39 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         btnDirect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ProfileID!=""){
-                    if(has_active_car.trim().equals("false")){
-                        Toast.makeText(getApplicationContext(), "You currently have no active car linked to your account. Please add one to use Park King's features", Toast.LENGTH_LONG).show();
-                        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
-                        startActivity(gotoCarList);
-                    }else{
+                if (ProfileID != "") {
+                    if (has_active_car.trim().equals("false")) {
+                        showErrorMessage("No car set", "You currently have no active car linked to your account. Please add one to use Park King's features", "Add Car", GO_TO_CAR_LIST);
+                    } else if (active_car_available.trim().equals("false")) {
+                        showErrorMessage("Current car used", "The car that you are currently using is either parked or already inside another building. Please select or add another to use Park King's features", "Switch Car", GO_TO_CAR_LIST);
+                    } else {
                         if (polylinePaths != null) {
-                            for (Polyline polyline:polylinePaths ) {
+                            for (Polyline polyline : polylinePaths) {
                                 polyline.remove();
                             }
                         }
                         haveArrived = false;
                         onRouting = true;
-                        try{
-                            Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
+                        try {
+                            Log.w("LOG", Double.toString(fromPlace.latitude) + ", " + Double.toString(fromPlace.longitude));
                             makeDirections();
-                        }catch(Exception e){
-                            new android.app.AlertDialog.Builder(Home.this)
-                                    .setTitle("GPS Error")
-                                    .setMessage("Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings")
-                                    .setPositiveButton("Go", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                            //Redirect to GPS settings
-                                        }})
-                                    .setNegativeButton("Cancel", null).show();
+                        } catch (Exception e) {
+                            showErrorMessage("GPS Error", "Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings", "Go", NO_ERROR_ACTION);
                         }
                     }
-                }else{
+                } else {
                     if (polylinePaths != null) {
-                        for (Polyline polyline:polylinePaths ) {
+                        for (Polyline polyline : polylinePaths) {
                             polyline.remove();
                         }
                     }
                     haveArrived = false;
                     onRouting = true;
-                    try{
-                        Log.w("LOG",Double.toString(fromPlace.latitude)+", "+Double.toString(fromPlace.longitude));
+                    try {
+                        Log.w("LOG", Double.toString(fromPlace.latitude) + ", " + Double.toString(fromPlace.longitude));
                         makeDirections();
-                    }catch(Exception e){
-                        new android.app.AlertDialog.Builder(Home.this)
-                                .setTitle("GPS Error")
-                                .setMessage("Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings")
-                                .setPositiveButton("Go", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        //Redirect to GPS settings
-                                    }})
-                                .setNegativeButton("Cancel", null).show();
+                    } catch (Exception e) {
+                        showErrorMessage("GPS Error", "Error getting phone location. Please turn on High Accuracy GPS on your Phone's Location Settings", "Go", NO_ERROR_ACTION);
                     }
                 }
             }
@@ -715,12 +708,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         btnNotif.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ProfileID != "") {
+                if (ProfileID != "") {
                     Intent gotoNotif = new Intent(getApplicationContext(), Notifications.class);
                     startActivity(gotoNotif);
-                }else{
-                    Toast.makeText(getApplicationContext(),
-                            "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                } else {
+                    showErrorMessage("Feature Unavailable", "Please register as a user to access this feature.", "Confirm", NO_ERROR_ACTION);
                 }
             }
         });
@@ -731,13 +723,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 int id = item.getItemId();
                 switch (id) {
                     case R.id.nav_account:
-                        if(ProfileID != ""){
+                        if (ProfileID != "") {
                             Intent gotoEditAcc = new Intent(getApplicationContext(), EditAccount.class);
                             startActivity(gotoEditAcc);
                             mDrawer.closeDrawer(NavMenu);
-                        }else {
-                            Toast.makeText(getApplicationContext(),
-                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        } else {
+                            showErrorMessage("Feature Unavailable", "Please register as a user to access this feature.", "Confirm", NO_ERROR_ACTION);
                         }
                         //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                         break;
@@ -749,29 +740,27 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                         break;
 
                     case R.id.nav_parkinghistory:
-                        if(ProfileID != "") {
+                        if (ProfileID != "") {
                             Intent gotoParkingHistory = new Intent(getApplicationContext(), ParkingHistory.class);
                             startActivity(gotoParkingHistory);
                             mDrawer.closeDrawer(NavMenu);
-                        }else{
-                            Toast.makeText(getApplicationContext(),
-                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        } else {
+                            showErrorMessage("Feature Unavailable", "Please register as a user to access this feature.", "Confirm", NO_ERROR_ACTION);
                         }
                         break;
 
                     case R.id.nav_mycarlist:
-                        if(ProfileID != "") {
+                        if (ProfileID != "") {
                             Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
                             startActivity(gotoCarList);
                             mDrawer.closeDrawer(NavMenu);
-                        }else {
-                            Toast.makeText(getApplicationContext(),
-                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        } else {
+                            showErrorMessage("Feature Unavailable", "Please register as a user to access this feature.", "Confirm", NO_ERROR_ACTION);
                         }
                         break;
 
                     case R.id.nav_logout:
-                        if(ProfileID != "") {
+                        if (ProfileID != "") {
                             new android.app.AlertDialog.Builder(Home.this)
                                     .setTitle("Confirm Logout")
                                     .setMessage("Are you sure want to Logout of Park King?")
@@ -784,31 +773,28 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                                         }
                                     })
                                     .setNegativeButton("Cancel", null).show();
-                        }else {
-                            Toast.makeText(getApplicationContext(),
-                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        } else {
+                            showErrorMessage("Feature Unavailable", "Please register as a user to access this feature.", "Confirm", NO_ERROR_ACTION);
                         }
                         break;
 
                     case R.id.nav_parked_cars:
-                        if(ProfileID != "") {
+                        if (ProfileID != "") {
                             Intent gotoParkedCars = new Intent(getApplicationContext(), ParkedCars.class);
                             startActivity(gotoParkedCars);
                             mDrawer.closeDrawer(NavMenu);
-                        }else {
-                            Toast.makeText(getApplicationContext(),
-                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        } else {
+                            showErrorMessage("Feature Unavailable", "Please register as a user to access this feature.", "Confirm", NO_ERROR_ACTION);
                         }
                         break;
 
                     case R.id.nav_change_password:
-                        if(ProfileID != "") {
+                        if (ProfileID != "") {
                             Intent gotoChangPassword = new Intent(getApplicationContext(), ChangePassword.class);
                             startActivity(gotoChangPassword);
                             mDrawer.closeDrawer(NavMenu);
-                        }else {
-                            Toast.makeText(getApplicationContext(),
-                                    "Please register as a user to access this feature.", Toast.LENGTH_LONG).show();
+                        } else {
+                            showErrorMessage("Feature Unavailable", "Please register as a user to access this feature.", "Confirm", NO_ERROR_ACTION);
                         }
                         break;
                 }
@@ -832,14 +818,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
             @Override
             public void onClick(View v) {
                 putParkKingMarker();
-                if(ProfileID != "") {
+                if (ProfileID != "") {
                     getVehicleOwnerInformation();
-                    Log.d("TAG","REFRESH");
+                    Log.d("TAG", "REFRESH");
                 }
             }
         });
 
-        if(ProfileID != ""){
+        if (ProfileID != "") {
             setNotificationListener();
         }
     }
@@ -850,32 +836,35 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        Log.d(TAG, "onResponse: " + response);
                         try {
                             JSONObject object = new JSONObject(response);
                             String status = object.getString("status");
                             if (status.equals("success")) {
                                 JSONObject userinfo = new JSONObject(object.getString("data"));
-                                String hasCar,hasActiveCar;
+                                String hasCar, hasActiveCar, activeCarAvailable;
                                 hasCar = object.getString("has_car");
                                 hasActiveCar = object.getString("has_active_car");
                                 has_active_car = hasActiveCar;
+                                activeCarAvailable = object.getString("active_car_available");
+                                active_car_available = activeCarAvailable;
                                 Firstname = userinfo.getString("first_name");
                                 Lastname = userinfo.getString("last_name");
                                 Middlename = userinfo.getString("middle_name");
                                 Emailtxt = object.getString("email");
                                 ProfilePicture = userinfo.getString("profile_picture");
-                               // Toast.makeText(getApplicationContext(), Lastname, Toast.LENGTH_SHORT).show();
-                                Name.setText(Firstname+" "+Middlename+" "+Lastname);
+                                // Toast.makeText(getApplicationContext(), Lastname, Toast.LENGTH_SHORT).show();
+                                Name.setText(Firstname + " " + Middlename + " " + Lastname);
                                 Email.setText(Emailtxt);
-                                Glide.with(getApplicationContext()).asBitmap().load(getString(R.string.profilepictureURL)+ProfilePicture).into(NavImgUser);
-                                if(hasCar.trim().equals("true")){
-                                    if(hasActiveCar.trim().equals("false")){
-                                        Toast.makeText(getApplicationContext(), "You currently have no active car linked to your account. Please add one to use Park King's features", Toast.LENGTH_LONG).show();
+                                Glide.with(getApplicationContext()).asBitmap().load(getString(R.string.profilepictureURL) + ProfilePicture).into(NavImgUser);
+                                if (hasCar.trim().equals("true")) {
+                                    if (hasActiveCar.trim().equals("false")) {
+                                        showErrorMessage("No car set", "You currently have no active car linked to your account. Please add one to use Park King's features", "Add Car", GO_TO_CAR_LIST);
 //                                        Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
 //                                        startActivity(gotoCarList);
                                     }
-                                }else{
-                                    Toast.makeText(getApplicationContext(), "You currently have no cars linked to your account. Please add one to use Park King's features", Toast.LENGTH_LONG).show();
+                                } else {
+                                    showErrorMessage("No car set", "You currently have no active car linked to your account. Please add one to use Park King's features", "Add Car", GO_TO_CAR_LIST);
 //                                    Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
 //                                    startActivity(gotoCarList);
                                 }
@@ -955,7 +944,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         polylines = new ArrayList<>();
         AvailSlot = (TextView) findViewById(R.id.Home_txtNoOfAvailSlot);
         SharedPreference = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
-        if(SharedPreference.contains(PROFID_KEY)){
+        if (SharedPreference.contains(PROFID_KEY)) {
             ProfileID = SharedPreference.getString(PROFID_KEY, "");
         }
     }
@@ -1046,41 +1035,41 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 };
                 AppController.getInstance().addToRequestQueue(strRequest1);
 
-                    tolat = marker.getPosition().latitude;
-                    tolng = marker.getPosition().longitude;
-                    toPlace = new LatLng(tolat, tolng);
+                tolat = marker.getPosition().latitude;
+                tolng = marker.getPosition().longitude;
+                toPlace = new LatLng(tolat, tolng);
                 btnBuilding.setVisibility(View.VISIBLE);
 
-                try{
+                try {
                     btnDirect.setVisibility(View.VISIBLE);
                     float[] results = new float[1];
                     Location.distanceBetween(fromPlace.latitude, fromPlace.longitude,
                             toPlace.latitude, toPlace.longitude,
                             results);
                     int temp = Math.round(results[0]);
-                    Double doubleTemp = temp/1000d;
-                    if(temp>=1000){
-                        temp = Math.round(temp/1000);
-                        if(temp < 10) {
-                            if((doubleTemp%1)==0){
+                    Double doubleTemp = temp / 1000d;
+                    if (temp >= 1000) {
+                        temp = Math.round(temp / 1000);
+                        if (temp < 10) {
+                            if ((doubleTemp % 1) == 0) {
                                 txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
-                            }else{
-                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                            } else {
+                                txtdistanceFromChosenBldg.setText(String.format("%.1fkm", doubleTemp));
                             }
                         } else {
                             txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
                         }
-                    }else{
-                        if(temp<=100){
-                            txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
-                        }else{
-                            doubleTemp=temp/1000d;
-                            txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                    } else {
+                        if (temp <= 100) {
+                            txtdistanceFromChosenBldg.setText(Integer.toString(temp) + "m");
+                        } else {
+                            doubleTemp = temp / 1000d;
+                            txtdistanceFromChosenBldg.setText(String.format("%.1fkm", doubleTemp));
                         }
                     }
 
 
-                }catch(Exception e){
+                } catch (Exception e) {
                     btnDirect.setVisibility(View.INVISIBLE);
                     new android.app.AlertDialog.Builder(Home.this)
                             .setTitle("GPS Error")
@@ -1088,7 +1077,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                             .setPositiveButton("Go", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
                                     //Redirect to GPS settings
-                                }})
+                                }
+                            })
                             .setNegativeButton("Cancel", null).show();
                 }
 
@@ -1124,7 +1114,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 for (Polyline polyline : polylinePaths) {
                     polyline.remove();
                 }
-                if (chosenMarker != null){
+                if (chosenMarker != null) {
                     chosenMarker.hideInfoWindow();
                     btnBuilding.setVisibility(View.INVISIBLE);
                     btnDirect.setVisibility(View.INVISIBLE);
@@ -1141,11 +1131,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
         for (Polyline polyline : polylinePaths) {
             polyline.remove();
         }
-        if(string_ToPlace == ""){
+        if (string_ToPlace == "") {
             Toast.makeText(getApplicationContext(),
-                   "Generating route", Toast.LENGTH_LONG).show();
+                    "Generating route", Toast.LENGTH_LONG).show();
         }
-        String string_FromPlace = fromlat+","+fromlng;
+        String string_FromPlace = fromlat + "," + fromlng;
         StringRequest strRequest1 = new StringRequest(Request.Method.GET,
                 getString(R.string.apiURL) + "getLatLng/" + chosenBldgID,
                 new Response.Listener<String>() {
@@ -1192,7 +1182,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
     @Override
     public void onDirectionFinderStart() {
         if (polylinePaths != null) {
-            for (Polyline polyline:polylinePaths ) {
+            for (Polyline polyline : polylinePaths) {
                 polyline.remove();
             }
         }
@@ -1215,13 +1205,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                     toPlace.latitude, toPlace.longitude,
                     results);
 
-            if(results[0] <= 50 && haveArrived == false){
+            if (results[0] <= 1000 && haveArrived == false) {
                 //Toast.makeText(getApplicationContext(),"You have arrived at your destionation",Toast.LENGTH_SHORT).show();
                 haveArrived = true;
-                if(onClickBuilding!=null){
+                if (onClickBuilding != null) {
                     getBuildingFloorRouters(onClickBuilding);
                 }
-            }else if(haveArrived == false){
+            } else if (haveArrived == false) {
 
                 PolylineOptions polylineOptions = new PolylineOptions().
                         geodesic(true).
@@ -1234,26 +1224,45 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback , Dire
                 polylinePaths.add(gMap.addPolyline(polylineOptions));
             }
             int temp = Math.round(results[0]);
-            Double doubleTemp = temp/1000d;
-            if(temp>=1000){
-                temp = Math.round(temp/1000);
-                if(temp < 10) {
-                    if((doubleTemp%1)==0){
+            Double doubleTemp = temp / 1000d;
+            if (temp >= 1000) {
+                temp = Math.round(temp / 1000);
+                if (temp < 10) {
+                    if ((doubleTemp % 1) == 0) {
                         txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
-                    }else{
-                        txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+                    } else {
+                        txtdistanceFromChosenBldg.setText(String.format("%.1fkm", doubleTemp));
                     }
                 } else {
                     txtdistanceFromChosenBldg.setText(String.valueOf(temp) + "km");
                 }
-            }else{
-                if(temp<=100){
-                    txtdistanceFromChosenBldg.setText(Integer.toString(temp)+"m");
-                }else{
-                    doubleTemp=temp/1000d;
-                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm",doubleTemp));
+            } else {
+                if (temp <= 100) {
+                    txtdistanceFromChosenBldg.setText(Integer.toString(temp) + "m");
+                } else {
+                    doubleTemp = temp / 1000d;
+                    txtdistanceFromChosenBldg.setText(String.format("%.1fkm", doubleTemp));
                 }
             }
         }
+    }
+
+    public void showErrorMessage(String title, String body, String positiveButtonText, char action) {
+        new android.app.AlertDialog.Builder(Home.this)
+                .setTitle(title)
+                .setMessage(body)
+                .setPositiveButton(positiveButtonText, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        switch(action) {
+                            case GO_TO_CAR_LIST:
+                                Intent gotoCarList = new Intent(getApplicationContext(), CarList.class);
+                                startActivity(gotoCarList);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null).show();
     }
 }

@@ -189,6 +189,7 @@ public class NotifyDriverConsequenceDialog extends AppCompatDialogFragment {
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("vehicle_owner_profile_id", sharedPreferences.getString(PROFID_KEY, ""));
                 parameters.put("section_slot_id", slotId);
+                parameters.put("log_type", "slot");
                 return parameters;
             }
         };

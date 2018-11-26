@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -136,6 +137,7 @@ public class FloorMap extends AppCompatActivity {
         buildingFloorTitle = new String[0];
 
         buildingFloorHierarchy = new ArrayList<>();
+        sharedPreferences = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
 
         if(intent.equals("park") || intent.equals("view_parked")){
            // Toast.makeText(getApplicationContext(),"Park",Toast.LENGTH_SHORT).show();
@@ -163,8 +165,38 @@ public class FloorMap extends AppCompatActivity {
             getBuildingFloors(intent);
             initFloorMap();
         }
+    }
 
-        sharedPreferences = getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
+    private void saveVehicleEntranceLog() {
+        StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.createVehicleLogURL), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, response);
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parameters = new HashMap<String, String>();
+                parameters.put("vehicle_owner_profile_id", sharedPreferences.getString(PROFID_KEY, ""));
+                parameters.put("client_building_id", buildingID);
+                parameters.put("log_type", "building");
+                return parameters;
+            }
+        };
+        strRequest.setRetryPolicy(new DefaultRetryPolicy(
+                0,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+        AppController.getInstance().addToRequestQueue(strRequest);
     }
 
     private void getBuildingFloors(final String intent) {
@@ -319,7 +351,7 @@ public class FloorMap extends AppCompatActivity {
                     findViewById(R.id.FloorMap_floorMapView).setVisibility(View.VISIBLE);
                     findViewById(R.id.FloorMap_floorSpinner).setVisibility(View.VISIBLE);
                     getBuildingFloors("park");
-
+                    saveVehicleEntranceLog();
 
 
 

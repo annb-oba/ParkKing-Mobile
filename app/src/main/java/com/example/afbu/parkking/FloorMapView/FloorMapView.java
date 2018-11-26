@@ -626,6 +626,7 @@ public class FloorMapView extends View {
                 Map<String, String> parameters = new HashMap<String, String>();
                 parameters.put("vehicle_owner_profile_id", sharedPreferences.getString(PROFID_KEY, ""));
                 parameters.put("section_slot_id", String.valueOf(slotObject.getSlotID()));
+                parameters.put("log_type", "slot");
                 return parameters;
             }
         };
