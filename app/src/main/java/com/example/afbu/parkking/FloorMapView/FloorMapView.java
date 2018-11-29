@@ -11,6 +11,7 @@ import android.graphics.CornerPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
@@ -132,7 +133,7 @@ public class FloorMapView extends View {
     private static final int INVALID_POINTER_ID = -1;
     private int mActivePointerID = INVALID_POINTER_ID;
 
-    private float mRotationDegrees;
+    private Bitmap entranceSign, exitSign, nextFloorSign, prevFloorSign;
 
     private float floorMapGridSize;
     private android.support.v4.app.FragmentManager supportFragmentManager;
@@ -183,7 +184,6 @@ public class FloorMapView extends View {
         availableSlotsTextView = null;
         selectedSlotTextView = null;
 
-        mRotationDegrees = 0.f;
         userBitmap = null;
         path_grids = null;
         blocked_grids = new ArrayList<>();
@@ -214,6 +214,11 @@ public class FloorMapView extends View {
         slotEventListener = new ArrayList<>();
         sharedPreferences = mContext.getSharedPreferences(PreferenceName, Context.MODE_PRIVATE);
         floorIDSharedPreference = mContext.getSharedPreferences(CURRENT_FLOOR_ID, mContext.MODE_PRIVATE);
+
+        entranceSign = null;
+        exitSign = null;
+        nextFloorSign = null;
+        prevFloorSign = null;
     }
 
     private void getPath(int startX, int startY, int endX, int endY) {
@@ -331,6 +336,32 @@ public class FloorMapView extends View {
             if (isCurrentFloor) {
                 canvas.drawBitmap(userBitmap, (userPositionX - (getWidth() / 10f) / 2) + floorImagePosX, (userPositionY - (getWidth() / 10f) / 2) + floorImagePosY, null);
             }
+
+            float signX, signY;
+            if(entranceSign != null) {
+                signX = ((entrance_y / (float) x_line_count) * floorImageWidth - 75) + floorImagePosX;
+                signY = ((entrance_x / (float) y_line_count)* floorImageHeight - 40.540540f) + floorImagePosY;
+                canvas.drawBitmap(entranceSign, signX, signY, null);
+            }
+
+            if(exitSign != null) {
+                signX = ((exit_y / (float) x_line_count) * floorImageWidth - 75) + floorImagePosX;
+                signY = ((exit_x / (float) y_line_count) * floorImageHeight - 40.540540f) + floorImagePosY;
+                canvas.drawBitmap(exitSign, signX, signY, null);
+            }
+
+            if(nextFloorSign != null) {
+                signX = ((next_floor_y / (float) x_line_count) * floorImageWidth - 75) + floorImagePosX;
+                signY = ((next_floor_x / (float) y_line_count) * floorImageHeight - 40.540540f) + floorImagePosY;
+                canvas.drawBitmap(nextFloorSign, signX, signY, null);
+            }
+
+            if(prevFloorSign != null) {
+                signX = ((next_floor_y / (float) x_line_count) * floorImageWidth - 75) + floorImagePosX;
+                signY = ((next_floor_x / (float) y_line_count) * floorImageHeight - 40.540540f) + floorImagePosY;
+                canvas.drawBitmap(prevFloorSign, signX, signY, null);
+            }
+
             canvas.restore();
         }
     }
@@ -397,6 +428,11 @@ public class FloorMapView extends View {
                 }
             });
         }
+
+        entranceSign = null;
+        exitSign = null;
+        nextFloorSign = null;
+        prevFloorSign = null;
         // reset values
 
         // floor iD
@@ -473,15 +509,19 @@ public class FloorMapView extends View {
             // block grids
             entrance_x = floorObj.getInt("entrance_x");
             entrance_y = floorObj.getInt("entrance_y");
+            entranceSign = resizeSign(BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("sign_entrance", "drawable", mContext.getPackageName())));
             exit_x = floorObj.getInt("exit_x");
             exit_y = floorObj.getInt("exit_y");
+            exitSign = resizeSign(BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("sign_exit", "drawable", mContext.getPackageName())));
 
             if ((floorObj.getInt("next_floor_x") != -1 && floorObj.getInt("next_floor_y") != -1) &&
                     (floorObj.getInt("previous_floor_x") != -1 && floorObj.getInt("previous_floor_y") != -1)) {
                 next_floor_x = floorObj.getInt("next_floor_x");
                 next_floor_y = floorObj.getInt("next_floor_y");
+                nextFloorSign = resizeSign(BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("sign_next_floor", "drawable", mContext.getPackageName())));
                 previous_floor_x = floorObj.getInt("previous_floor_y");
                 previous_floor_y = floorObj.getInt("previous_floor_y");
+                prevFloorSign = resizeSign(BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("sign_prev_floor", "drawable", mContext.getPackageName())));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -501,6 +541,18 @@ public class FloorMapView extends View {
 
         setSlotStatusListeners();
         postInvalidate();
+    }
+
+    private Bitmap resizeSign(Bitmap signBitmap) {
+        Matrix matrix = new Matrix();
+
+        RectF src = new RectF(0, 0, signBitmap.getWidth(), signBitmap.getHeight());
+        RectF dest;
+        dest = new RectF(0, 0, 150, 81.08108f);
+
+        matrix.setRectToRect(src, dest, Matrix.ScaleToFit.FILL);
+
+        return Bitmap.createBitmap(signBitmap, 0, 0, signBitmap.getWidth(), signBitmap.getHeight(), matrix, true);
     }
 
     private void setSlotStatusListeners() {
@@ -810,6 +862,42 @@ public class FloorMapView extends View {
                 mLastTouchX = x;
                 mLastTouchY = y;
 
+                float signX, signY;
+                if(entranceSign != null) {
+                    signX = ((entrance_y / (float) x_line_count) * floorImageWidth - 75) + floorImagePosX;
+                    signY = ((entrance_x / (float) y_line_count)* floorImageHeight - 40.540540f) + floorImagePosY;
+                    if (x > (signX) * mScaleFactor && x < (signX + entranceSign.getWidth()) * mScaleFactor && y > (signY) * mScaleFactor && y < (signY + entranceSign.getHeight()) * mScaleFactor) {
+                        setSignAsDestination("entrance");
+                        break;
+                    }
+                }
+
+                if(exitSign != null) {
+                    signX = ((exit_y / (float) x_line_count) * floorImageWidth - 75) + floorImagePosX;
+                    signY = ((exit_x / (float) y_line_count) * floorImageHeight - 40.540540f) + floorImagePosY;
+                    if (x > (signX) * mScaleFactor && x < (signX + exitSign.getWidth()) * mScaleFactor && y > (signY) * mScaleFactor && y < (signY + exitSign.getHeight()) * mScaleFactor) {
+                        setSignAsDestination("exit");
+                        break;
+                    }
+                }
+
+                if(nextFloorSign != null) {
+                    signX = ((next_floor_y / (float) x_line_count) * floorImageWidth - 75) + floorImagePosX;
+                    signY = ((next_floor_x / (float) y_line_count) * floorImageHeight - 40.540540f) + floorImagePosY;
+                    if (x > (signX) * mScaleFactor && x < (signX + nextFloorSign.getWidth()) * mScaleFactor && y > (signY) * mScaleFactor && y < (signY + nextFloorSign.getHeight()) * mScaleFactor) {
+                        setSignAsDestination("next_floor");
+                        break;
+                    }
+                }
+
+                if(prevFloorSign != null) {
+                    signX = ((next_floor_y / (float) x_line_count) * floorImageWidth - 75) + floorImagePosX;
+                    signY = ((next_floor_x / (float) y_line_count) * floorImageHeight - 40.540540f) + floorImagePosY;
+                    if (x > (signX) * mScaleFactor && x < (signX + prevFloorSign.getWidth()) * mScaleFactor && y > (signY) * mScaleFactor && y < (signY + prevFloorSign.getHeight()) * mScaleFactor) {
+                        setSignAsDestination("prev_floor");
+                        break;
+                    }                                }
+
                 for (int i = 0; i < sectionSlotListArray.size(); i++) {
                     float bitmapXPosition = ((float) sectionSlotListArray.get(i).getIndicatorCoordinate().latitude * floorImageWidth - 50) + floorImagePosX;
                     float bitmapYPosition = ((float) sectionSlotListArray.get(i).getIndicatorCoordinate().longitude * floorImageHeight - 150) + floorImagePosY;
@@ -867,6 +955,62 @@ public class FloorMapView extends View {
         }
 
         return true;
+    }
+
+    private void setSignAsDestination(String sign) {
+        int selectedSignX, selectedSignY;
+        switch(sign) {
+            case "entrance":
+                selectedSignX = entrance_x;
+                selectedSignY = entrance_y;
+                break;
+            case "exit":
+                selectedSignX = exit_x;
+                selectedSignY = exit_y;
+                break;
+            case "next_floor":
+                selectedSignX = next_floor_x;
+                selectedSignY = next_floor_y;
+                break;
+            case "prev_floor":
+                selectedSignX = previous_floor_x;
+                selectedSignY = previous_floor_y;
+                break;
+            default:
+                selectedSignX = -1;
+                selectedSignY = -1;
+                break;
+        }
+
+        if(sectionSlotFinder.getInt(SLOT_FIND_X_KEY, -1) != selectedSignX || sectionSlotFinder.getInt(SLOT_FIND_Y_KEY, -1) != selectedSignY) {
+            sectionSlotFinderEditor.putInt(SLOT_FIND_X_KEY, selectedSignX);
+            sectionSlotFinderEditor.putInt(SLOT_FIND_Y_KEY, selectedSignY);
+            sectionSlotFinderEditor.putString(SLOT_FIND_FLOOR_ID_KEY, floorID);
+        } else if(selectedSignX == sectionSlotFinder.getInt(SLOT_FIND_X_KEY, -1) && selectedSignY == sectionSlotFinder.getInt(SLOT_FIND_Y_KEY, -1)) {
+            sectionSlotFinderEditor.remove(SLOT_FIND_X_KEY);
+            sectionSlotFinderEditor.remove(SLOT_FIND_Y_KEY);
+            sectionSlotFinderEditor.remove(SLOT_FIND_FLOOR_ID_KEY);
+        }
+        sectionSlotFinderEditor.commit();
+
+        destination_x = sectionSlotFinder.getInt(SLOT_FIND_X_KEY, -1);
+        destination_y = sectionSlotFinder.getInt(SLOT_FIND_Y_KEY, -1);
+        selectedSlotFloorID = sectionSlotFinder.getString(SLOT_FIND_FLOOR_ID_KEY, "-1");
+
+        if (blocked_grids.size() > 0 && destination_x >= 0 && destination_y >= 0) {
+            assessPathToTake();
+        } else {
+            routePaint = null;
+            routeStrokePaint = null;
+            routePath = null;
+            path_grids = null;
+
+            sectionSlotFinderEditor.remove(SLOT_FIND_X_KEY);
+            sectionSlotFinderEditor.remove(SLOT_FIND_Y_KEY);
+            sectionSlotFinderEditor.remove(SLOT_FIND_FLOOR_ID_KEY);
+            sectionSlotFinderEditor.commit();
+            postInvalidate();
+        }
     }
 
     private void getSlotInformation(int i) {
@@ -1043,18 +1187,6 @@ public class FloorMapView extends View {
         DPC = getTriangleArea(pointD, userPosition, pointC);
         CPB = getTriangleArea(pointC, userPosition, pointB);
         PBA = getTriangleArea(userPosition, pointB, pointA);
-        Log.d("slot_computation", "Point A: " + Double.toString(pointA.latitude) + ", " + pointA.longitude);
-        Log.d("slot_computation", "Point B: " + Double.toString(pointB.latitude) + ", " + pointB.longitude);
-        Log.d("slot_computation", "Point C: " + Double.toString(pointC.latitude) + ", " + pointC.longitude);
-        Log.d("slot_computation", "Point D: " + Double.toString(pointD.latitude) + ", " + pointD.longitude);
-
-        Log.d("slot_computation", "Rectangle area: " + Double.toString(Math.round(rectangleArea * 10000.0) / 10000.0));
-        Log.d("slot_computation", "APD: " + Double.toString(APD));
-        Log.d("slot_computation", "DPC: " + Double.toString(DPC));
-        Log.d("slot_computation", "CPB: " + Double.toString(CPB));
-        Log.d("slot_computation", "PBA: " + Double.toString(PBA));
-        Log.d("slot_computation", "Total area: " + Double.toString((Math.round((APD + DPC + CPB + PBA) * 10000.0) / 10000.0)));
-
 
         if ((Math.round((APD + DPC + CPB + PBA) * 10000.0) / 10000.0) == (Math.round(rectangleArea * 10000.0) / 10000.0)) {
             return true;
