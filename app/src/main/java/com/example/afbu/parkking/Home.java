@@ -2,6 +2,8 @@ package com.example.afbu.parkking;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,11 +18,14 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
@@ -152,7 +157,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Direc
     private Boolean onCreateCalled = false;
     private String has_active_car;
     private String active_car_available;
-
+    private NotificationCompat.Builder notificationBuilder;
+    private static final int notificationID = 886698;
+    private Boolean activityStart=true;
+    private ValueEventListener valueEventListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,6 +172,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Direc
         initEvents();
         if (ProfileID != "") {
             getVehicleOwnerInformation();
+            initFirebase();
             Log.d("TAG", "ONCREATE");
         }
     }
@@ -173,6 +182,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Direc
         super.onResume();
 //        initResources();
 //        initEvents();
+        notificationBuilder = new NotificationCompat.Builder(this);
+        notificationBuilder.setAutoCancel(true);
         if (ProfileID != "") {
             if (onCreateCalled) {
                 getVehicleOwnerInformation();
@@ -208,6 +219,65 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Direc
             finish();
         }
 
+    }
+    public void makePushNotification(String ticker, String title, String content){
+        notificationBuilder.setSmallIcon(R.drawable.logo_non_transparent);
+        notificationBuilder.setTicker(ticker);
+        notificationBuilder.setWhen(System.currentTimeMillis());
+        notificationBuilder.setContentTitle(title);
+        notificationBuilder.setContentText(content);
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        notificationBuilder.setSound(alarmSound);
+//        Intent notificationIntent = new Intent(this, StartUp.class);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 , notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        notificationBuilder.setContentIntent(pendingIntent);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(notificationID, notificationBuilder.build());
+
+
+
+    }
+    private void initFirebase(){
+        notif_ref = database.getReference().child("notif_individual").child(ProfileID).orderByChild("timestamp");
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChildren()) {
+                    for (DataSnapshot notifData:dataSnapshot.getChildren()){
+                        String tempId = notifData.getKey();
+                        String tempModule = notifData.child("module").getValue().toString();
+                        String tempTitle = notifData.child("title").getValue().toString();
+                        String tempMessage = notifData.child("message").getValue().toString();
+                        String tempDate = notifData.child("notification_date").getValue().toString();
+                        String tempIs_read = notifData.child("is_read").getValue().toString();
+                        String tempTimestamp = notifData.child("timestamp").getValue().toString();
+                        String tempClickable = notifData.child("clickable").getValue().toString();
+                        String tempTicker;
+                        if(tempMessage.length() > 50){
+                            tempTicker = tempMessage.substring(0,47) + "...";
+                        }else{
+                            tempTicker = tempMessage;
+                        }
+                        if(activityStart==false) {
+                            if(tempIs_read.equals("false")){
+                                makePushNotification(tempTicker, tempTitle, tempMessage);
+                            }
+                        }
+                    }
+                }
+                activityStart=false;
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        };
+        notif_ref.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        notif_ref.removeEventListener(valueEventListener);
     }
 
     public void setNotificationListener() {
@@ -1247,7 +1317,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Direc
         }
     }
 
-    public void showErrorMessage(String title, String body, String positiveButtonText, char action) {
+    public void showErrorMessage(String title, String body, String positiveButtonText, final char action) {
         new android.app.AlertDialog.Builder(Home.this)
                 .setTitle(title)
                 .setMessage(body)
